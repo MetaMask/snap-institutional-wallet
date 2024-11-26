@@ -1,0 +1,83 @@
+import type { Common } from '@ethereumjs/common';
+import { TransactionFactory } from '@ethereumjs/tx';
+
+import logger from '../../logger';
+import { formatTransactionData } from '../../util';
+import { hexlify } from '../../util/hexlify';
+import type { ITransactionDetails } from '../types/ITransactionDetails';
+import type { IEIP1559TxParams, ILegacyTXParams } from '../types/ITXParams';
+
+export const TRANSACTION_TYPES = {
+  LEGACY: '0',
+  EIP1559: '2',
+} as const;
+
+export class TransactionHandler {
+  createTransactionPayload(tx: any): IEIP1559TxParams | ILegacyTXParams {
+    const isEIP1559 = tx.maxFeePerGas !== undefined;
+    const basePayload = {
+      ...tx,
+      type: isEIP1559 ? TRANSACTION_TYPES.EIP1559 : TRANSACTION_TYPES.LEGACY,
+      data: formatTransactionData(tx.data),
+    };
+
+    if (isEIP1559) {
+      return {
+        ...basePayload,
+        maxFeePerGas: tx.maxFeePerGas
+          ? BigInt(tx.maxFeePerGas).toString()
+          : '0',
+        maxPriorityFeePerGas: tx.maxPriorityFeePerGas
+          ? BigInt(tx.maxPriorityFeePerGas).toString()
+          : '0',
+      };
+    }
+
+    return {
+      ...basePayload,
+      gasPrice: tx.gasPrice ? BigInt(tx.gasPrice).toString() : '0',
+    };
+  }
+
+  async getTransactionSignature(
+    common: Common,
+    pendingRequest: ITransactionDetails,
+  ): Promise<{ v: string; r: string; s: string }> {
+    if (pendingRequest.signedRawTransaction) {
+      const signedRawTransaction = Buffer.from(
+        pendingRequest.signedRawTransaction.substring(2),
+        'hex',
+      );
+
+      const tx = TransactionFactory.fromSerializedData(signedRawTransaction, {
+        common,
+      });
+
+      return {
+        v: hexlify(tx.v?.toString() ?? '0'),
+        r: hexlify(tx.r?.toString() ?? '0'),
+        s: hexlify(tx.s?.toString() ?? '0'),
+      };
+    }
+    // Get the signature from the global ethereum provider
+
+    logger.debug(
+      'Fetching signature from the network',
+      pendingRequest.transactionHash,
+    );
+    // Use the global ethereum provider to get the transaction hash
+
+    const tx = (await ethereum.request({
+      method: 'eth_getTransactionByHash',
+      params: [pendingRequest.transactionHash],
+    })) as { v: string; r: string; s: string };
+
+    logger.debug('Got signature from the network', tx);
+
+    return {
+      v: tx.v,
+      r: tx.r,
+      s: tx.s,
+    };
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "version": "1.1.6",
+  "description": "Custodial accounts in MetaMask.",
+  "proposedName": "MetaMask Custodial Wallet",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MetaMask/snap-custodial-wallet.git"
+  },
+  "source": {
+    "shasum": "90xj9FOq6b4W4HbVMUnPM7NPEqyc+vpYXrPdrmuhXTM=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "iconPath": "images/icon.svg",
+        "packageName": "@metamask/snap-custodial-wallet-snap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "endowment:network-access": {},
+    "endowment:ethereum-provider": {},
+    "endowment:keyring": {
+      "allowedOrigins": [
+        "https://metamask.github.io",
+        "metamask.github.io",
+        "localhost:8000"
+      ]
+    },
+    "endowment:rpc": {
+      "dapps": true
+    },
+    "endowment:cronjob": {
+      "jobs": [
+        {
+          "expression": "* * * * *",
+          "request": {
+            "method": "execute"
+          }
+        }
+      ]
+    },
+    "snap_manageAccounts": {},
+    "snap_manageState": {},
+    "snap_dialog": {}
+  },
+  "manifestVersion": "0.1"
+}

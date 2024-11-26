@@ -1,0 +1,1571 @@
+{
+  "openrpc": "1.2.4",
+  "info": {
+    "title": "Ethereum Custodian API",
+    "version": "3.0.0",
+    "description": "API for Ethereum Custodians"
+  },
+  "methods": [
+    {
+      "name": "custodian_listAccounts",
+      "summary": "Returns accounts with metadata",
+      "params": [],
+      "result": {
+        "name": "Accounts",
+        "schema": {
+          "title": "Accounts",
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Account"
+          }
+        }
+      },
+      "examples": [
+        {
+          "name": "Returning one account",
+          "params": [],
+          "result": {
+            "name": "custodianAccountsExampleResult",
+            "value": [
+              {
+                "name": "Account 1",
+                "address": "0x0000000000000000000000000000000000000000",
+                "tags": [
+                  {
+                    "name": "account-name",
+                    "value": "Account 1"
+                  },
+                  {
+                    "name": "wallet-name",
+                    "value": "My Ethereum Wallet"
+                  }
+                ],
+                "metadata": {
+                  "active": true,
+                  "deleted": false,
+                  "isContract": false
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_listAccountsSigned",
+      "summary": "Returns a signed message containing the list of accounts",
+      "params": [],
+      "result": {
+        "name": "jwt",
+        "schema": {
+          "title": "jwt",
+          "type": "string",
+          "items": {
+            "$ref": "#/components/schemas/jwt"
+          }
+        }
+      },
+      "examples": [
+        {
+          "name": "Returning an account",
+          "params": [],
+          "result": {
+            "name": "custodianListAccountsSignedExampleResult",
+            "value": {
+              "jwt": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJuZXB0dW5lLWN1c3RvZHkuZGV2Lm1ldGFtYXNrLWluc3RpdHV0aW9uYWwuaW8iLCJleHAiOjE2OTk1NDg0NTg4MjQsInN1YiI6IjEyMzQ1Njc4LTEyMzQtNTY3OC0xMjM0LTU2NzgxMjM0NTY3OCIsInBheWxvYWQiOnsiY3VzdG9tZXJJZCI6InRlc3QtY3VzdG9tZXIiLCJjdXN0b21lck5hbWUiOiJ0ZXN0LWN1c3RvbWVyLW5hbWUiLCJhY2NvdW50cyI6W3siYWRkcmVzcyI6IjB4YjJjNzc5NzMyNzliYWFhZjQ4YzI5NTE0NTgwMjY5NTYzMWQ1MGMwMSIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgQSJ9LHsiYWRkcmVzcyI6IjB4MDMzZTI3MGMwOGMzZjI5N2Y5OTY2MGY5NThkNWY2MTUyMDdjMWFkZiIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgQiJ9LHsiYWRkcmVzcyI6IjB4MTg0ZDZlODExY2U3NjVlNjQ0YTY0OGM4NjhmOWU0N2RlOWZmMDdkMCIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgQyJ9LHsiYWRkcmVzcyI6IjB4MzY3ZGFjYWYyNmNjMTM4MWYzMTkxMTY3NmJhNDAwODg5MzhhYTY3NyIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgRCJ9LHsiYWRkcmVzcyI6IjB4OGIyZDgyMjBlM2NmZGU5YmU2ODFhNWYwYjNmNmIzMjRjMDAzYjNhZCIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgRSJ9LHsiYWRkcmVzcyI6IjB4NTgxODNkNTIwY2Y1M2EyYWFjMWIwMmFhMTFkMWMyMjY0NTNlMTc0NSIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgRiJ9LHsiYWRkcmVzcyI6IjB4ZTdiNzY0YWY5ODVlOWQ3MzkwYWEyMTYyOWY2M2MwZjgwYWY2ZGJjOSIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgRyJ9LHsiYWRkcmVzcyI6IjB4YmY1OWNiZmIzYTRkZjk5MzgwYjI3M2E2ODVkYjVmMzI0ODMzM2JhYiIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgSCJ9LHsiYWRkcmVzcyI6IjB4YzQzZjY2MjAxNWFjM2JkZWY2NzM0NDc2OTQ1MWU1ZTE3NDQ2OGEyZiIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgSSJ9LHsiYWRkcmVzcyI6IjB4ODQ1N2YzY2FhZmMyOTVkZDlhMzU0MTE3NmU2NjI4MzNjZjRkODZlYSIsIm5hbWUiOiJDdXN0b2R5IEFjY291bnQgSiJ9XX0sImlhdCI6MTY5OTQ2MjA1OH0.ELFCFU2ZQUlBeeKxn3drKwBqzZX4KJXy_t-XjyLjgJeKCyrgPleNBmd1-S6nMyUR2LolWL7cTZN0DUhyZAbd054zraXiWWwIJfM58bjo6ZFidm3RtUJ8VEfk59kw9g4dK8efr_oKta9ItksanqIJkTx2LykokcQ46jE9GWnFfc1NVvnuxvMq3oGI3czOxOhq6HrzIG5Dx7rylJKbpXdNXlrLpuw-1hNC3AHY3EB3hT_5ToPZ8X5omlru8pr0Fy6g-cnbUKt3k-37MNZ_vvTeeVEFpKxUb52uEM2g2tJd6oRGmJp1jzto23ysfpJEyb3MX0EJrQ2dUFNJoNKojzRsX"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_listAccountChainIds",
+      "summary": "Returns the chain IDs supported for a specific account",
+      "params": [
+        {
+          "name": "address",
+          "schema": {
+            "title": "address",
+            "$ref": "#/components/schemas/address"
+          }
+        }
+      ],
+      "result": {
+        "name": "chainIds",
+        "schema": {
+          "title": "chainIds",
+          "type": "array",
+          "items": {
+            "title": "chainId",
+            "$ref": "#/components/schemas/uint"
+          }
+        }
+      },
+      "examples": [
+        {
+          "name": "This address supports mainnet and ropsten",
+          "params": [
+            {
+              "name": "address",
+              "value": "0x0000000000000000000000000000000000000000"
+            }
+          ],
+          "result": {
+            "name": "chainIdsExampleResult",
+            "value": ["0x1", "0x3"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_createTransaction",
+      "summary": "Requests that the custodian signs and submits a transaction",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TransactionParameters"
+          }
+        },
+        {
+          "name": "TransactionMetadata",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TransactionMetadata"
+          }
+        }
+      ],
+      "result": {
+        "name": "Transaction ID",
+        "schema": {
+          "title": "Transaction ID",
+          "type": "string"
+        }
+      },
+      "examples": [
+        {
+          "name": "Simple Transfer",
+          "params": [
+            {
+              "name": "custodianCreateTransactionExampleTransaction",
+              "value": {
+                "from": "0xb2c77973279baaaf48c295145802695631d50c01",
+                "to": "0x57f36031E223FabC1DaF93B401eD9F4F1Acc6904",
+                "type": "0x2",
+                "value": "0x1",
+                "gas": "0x5208",
+                "maxFeePerGas": "0x59682f0e",
+                "maxPriorityFeePerGas": "0x59682f0e"
+              }
+            },
+            {
+              "name": "custodianCreateTransactionExampleTransactionMetadata",
+              "value": {
+                "chainId": "0x4",
+                "originUrl": "https://www.example.com",
+                "note": "This is a note to trader",
+                "transactionCategory": "simpleTransfer",
+                "custodianPublishesTransaction": true,
+                "rpcUrl": "https://mainnet.infura.io/v3/12345"
+              }
+            }
+          ],
+          "result": {
+            "name": "custodianCreateTransactionExampleResult",
+            "value": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54"
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_sign",
+      "summary": "Requests that the custodian calculate Ethereum specific signature prefixed with \"\\x19Ethereum Signed Message:\\n\" + len(message)",
+      "params": [
+        {
+          "name": "SignedMessageParameters",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SignedMessageParameters"
+          }
+        },
+        {
+          "name": "SignedMessageMetadata",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SignedMessageMetadata"
+          }
+        }
+      ],
+      "result": {
+        "name": "SignedMessage ID",
+        "schema": {
+          "title": "signedMessageId",
+          "type": "string"
+        }
+      },
+      "examples": [
+        {
+          "name": "Signing the string 'hello world'",
+          "params": [
+            {
+              "name": "custodianSignExampleAddressAndPayload",
+              "value": {
+                "address": "0xb2c77973279baaaf48c295145802695631d50c01",
+                "payload": "0x48656c6c6f20776f726c64"
+              }
+            },
+            {
+              "name": "custodianSignExampleMetadata",
+              "value": {
+                "chainId": "0x4",
+                "originUrl": "https://www.example.com",
+                "note": "personal_sign message"
+              }
+            }
+          ],
+          "result": {
+            "name": "custodianPersonalSignExampleResult",
+            "value": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54"
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_signTypedData",
+      "summary": "Requests that the custodian perform a signature according to EIP-712",
+      "params": [
+        {
+          "name": "SignedTypedDataParameters",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SignedTypedDataParameters"
+          }
+        },
+        {
+          "name": "SignedTypedDataMetadata",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SignedTypedDataMetadata"
+          }
+        }
+      ],
+      "result": {
+        "name": "Signed Message ID",
+        "schema": {
+          "title": "Signed Message ID",
+          "type": "string"
+        }
+      },
+      "examples": [
+        {
+          "name": "custodianSignTypedDataExample",
+          "params": [
+            {
+              "name": "custodianSignTypedDataExampleAddress",
+              "value": {
+                "address": "0xb2c77973279baaaf48c295145802695631d50c01",
+                "data": {
+                  "types": {
+                    "EIP712Domain": [
+                      {
+                        "name": "name",
+                        "type": "string"
+                      },
+                      {
+                        "name": "version",
+                        "type": "string"
+                      },
+                      {
+                        "name": "chainId",
+                        "type": "uint256"
+                      },
+                      {
+                        "name": "verifyingContract",
+                        "type": "address"
+                      }
+                    ],
+                    "Person": [
+                      {
+                        "name": "name",
+                        "type": "string"
+                      },
+                      {
+                        "name": "wallet",
+                        "type": "address"
+                      }
+                    ],
+                    "Mail": [
+                      {
+                        "name": "from",
+                        "type": "Person"
+                      },
+                      {
+                        "name": "to",
+                        "type": "Person"
+                      },
+                      {
+                        "name": "contents",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "primaryType": "Mail",
+                  "domain": {
+                    "name": "Ether Mail",
+                    "version": "1",
+                    "chainId": 1,
+                    "verifyingContract": "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+                  },
+                  "message": {
+                    "from": {
+                      "name": "Cow",
+                      "wallet": "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
+                    },
+                    "to": {
+                      "name": "Bob",
+                      "wallet": "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
+                    },
+                    "contents": "Hello, Bob!"
+                  }
+                },
+                "version": "v4"
+              }
+            },
+            {
+              "name": "custodianSignTypedDataExampleMetadata",
+              "value": {
+                "chainId": "0x4",
+                "originUrl": "https://www.example.com",
+                "note": "Signed typed data"
+              }
+            }
+          ],
+          "result": {
+            "name": "custodianSignTypedDataExampleResult",
+            "value": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54"
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_getSignedMessageById",
+      "summary": "Returns a signed message or signed typed data which was previously created",
+      "params": [
+        {
+          "name": "Signed Message ID",
+          "required": true,
+          "schema": {
+            "title": "Signed Message ID",
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "SignedMessage",
+        "schema": {
+          "$ref": "#/components/schemas/SignedMessageResult"
+        }
+      },
+      "examples": [
+        {
+          "name": "custodianGetSignedMessageByIdExample",
+          "params": [
+            {
+              "name": "custodianGetSignedMessageByIdExampleParam",
+              "value": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54"
+            }
+          ],
+          "result": {
+            "name": "custodianGetSignedMessageByIdExampleResult",
+            "value": {
+              "address": "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+              "signature": "0x7b0c239343c09c6db176f6ac17448de5e214215d7c0673577bb70a9a8721dfcb2b7095c46439070cc600a03ba9c32c42d10cf9a50d537e9ec9b9745aeb0603ae1b",
+              "status": {
+                "finished": true,
+                "signed": true,
+                "success": true,
+                "displayText": "Signed"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_getTransactionById",
+      "summary": "Returns a transaction which was previously created",
+      "params": [
+        {
+          "name": "Transaction ID",
+          "required": true,
+          "schema": {
+            "title": "Transaction ID",
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "Transaction",
+        "schema": {
+          "$ref": "#/components/schemas/TransactionResult"
+        }
+      },
+      "examples": [
+        {
+          "name": "Successful transaction",
+          "params": [
+            {
+              "name": "custodianGetTransactionByIdExampleParam",
+              "value": ["ef8cb7af-1a00-4687-9f82-1f1c82fbef54"]
+            }
+          ],
+          "result": {
+            "name": "custodianGetTransactionByIdExampleResult",
+            "value": {
+              "transaction": {
+                "id": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+                "type": "0x2",
+                "from": "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+                "to": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+                "value": "0x0",
+                "gas": "0x5208",
+                "gasPrice": "0x4A817C800",
+                "nonce": "0x1",
+                "data": "0x",
+                "hash": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "status": {
+                  "finished": true,
+                  "submitted": true,
+                  "signed": true,
+                  "success": true,
+                  "displayText": "Mined"
+                },
+                "signedRawTransaction": "0xf86b018504a817c80082520894b8c77482e45f1f44de1745f52c74426c631bdd5280b844a9059cbb000000000000000000000000cd2a3d9f938e13cd947ec05abc7fe734df8dd826"
+              },
+              "metadata": {
+                "chainId": "0x4",
+                "custodianPublishesTransaction": true,
+                "note": "This is a note to trader",
+                "rpcUrl": "https://mainnet.infura.io/v3/12345"
+              }
+            }
+          }
+        },
+        {
+          "name": "Failed transaction",
+          "params": [
+            {
+              "name": "custodianGetTransactionByIdExampleParam",
+              "value": ["ef8cb7af-1a00-4687-9f82-1f1c82fbef54"]
+            }
+          ],
+          "result": {
+            "name": "custodianGetTransactionByIdExampleResult",
+            "value": {
+              "transaction": {
+                "id": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+                "type": "0x2",
+                "from": "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+                "to": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+                "value": "0x0",
+                "gas": "0x5208",
+                "gasPrice": "0x4A817C800",
+                "nonce": "0x1",
+                "data": "0x",
+                "hash": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "status": {
+                  "finished": true,
+                  "signed": true,
+                  "success": false,
+                  "submitted": true,
+                  "displayText": "Failed",
+                  "reason": "Transaction reverted"
+                },
+                "signedRawTransaction": "0xf86b018504a817c80082520894b8c77482e45f1f44de1745f52c74426c631bdd5280b844a9059cbb000000000000000000000000cd2a3d9f938e13cd947ec05abc7fe734df8dd826"
+              },
+              "metadata": {
+                "chainId": "0x4",
+                "custodianPublishesTransaction": true,
+                "note": "This is a note to trader",
+                "rpcUrl": "https://mainnet.infura.io/v3/12345"
+              }
+            }
+          }
+        },
+        {
+          "name": "Rejected transaction",
+          "params": [
+            {
+              "name": "custodianGetTransactionByIdExampleParam",
+              "value": ["ef8cb7af-1a00-4687-9f82-1f1c82fbef54"]
+            }
+          ],
+          "result": {
+            "name": "custodianGetTransactionByIdExampleResult",
+            "value": {
+              "transaction": {
+                "id": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+                "type": "0x2",
+                "from": "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+                "to": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+                "value": "0x0",
+                "gas": "0x5208",
+                "gasPrice": "0x4A817C800",
+                "nonce": "0x1",
+                "data": "0x",
+                "hash": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "status": {
+                  "finished": true,
+                  "signed": false,
+                  "success": false,
+                  "submitted": false,
+                  "displayText": "Rejected",
+                  "reason": "Transaction was rejected by user"
+                },
+                "signedRawTransaction": "0xf86b018504a817c80082520894b8c77482e45f1f44de1745f52c74426c631bdd5280b844a9059cbb000000000000000000000000cd2a3d9f938e13cd947ec05abc7fe734df8dd826"
+              },
+              "metadata": {
+                "chainId": "0x4",
+                "custodianPublishesTransaction": true,
+                "note": "This is a note to trader",
+                "rpcUrl": "https://mainnet.infura.io/v3/12345"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_getCustomerProof",
+      "summary": "Returns a proof that the user is a customer of the custodian",
+      "params": [],
+      "result": {
+        "name": "Proof",
+        "schema": {
+          "$ref": "#/components/schemas/CustomerProof"
+        }
+      },
+      "examples": [
+        {
+          "name": "custodianCustomerProofExample",
+          "params": [],
+          "result": {
+            "name": "custodianCustomerProofExampleResult",
+            "description": "Issued by example.com and with a subject of 123456",
+            "value": {
+              "jwt": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTYiLCJpc3MiOiJleGFtcGxlLmNvbSJ9.IlBfD4xmjpQiQCrkiIwIztEHrEH7e7RuswWPbIlJwUI"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_replaceTransaction",
+      "summary": "Replaces a transaction that has not been mined yet.",
+      "params": [
+        {
+          "name": "ReplaceTransactionParameters",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ReplaceTransactionParameters"
+          }
+        },
+        {
+          "name": "ReplaceTransactionMetadata",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ReplaceTransactionMetadata"
+          }
+        }
+      ],
+      "result": {
+        "name": "ReplaceTransaction",
+        "schema": {
+          "$ref": "#/components/schemas/ReplaceTransaction"
+        }
+      },
+      "examples": [
+        {
+          "name": "custodianReplaceTransactionExample",
+          "params": [
+            {
+              "name": "custodianReplaceTransactionExampleParam",
+              "value": {
+                "transactionId": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+                "action": "speedUp"
+              }
+            },
+            {
+              "name": "custodianReplaceTransactionExampleMetadata",
+              "value": {
+                "gas": "0x5208",
+                "maxPriorityFeePerGas": "0x59682f0e",
+                "maxFeePerGas": "0x59682f0e"
+              }
+            }
+          ],
+          "result": {
+            "name": "custodianReplaceTransactionExampleResult",
+            "description": "",
+            "value": {
+              "transactionId": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_getTransactionLink",
+      "summary": "Returns metadata about a transaction which can be used to link users somewhere they can affect its lifecycle",
+      "params": [
+        {
+          "name": "Transaction ID",
+          "required": true,
+          "schema": {
+            "title": "Transaction ID",
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "TransactionLink",
+        "schema": {
+          "$ref": "#/components/schemas/TransactionLink"
+        }
+      },
+      "examples": [
+        {
+          "name": "custodianGetTransactionLinkExample",
+          "params": [
+            {
+              "name": "custodianGetTransactionLinkExampleParam",
+              "value": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54"
+            }
+          ],
+          "result": {
+            "name": "custodianGetTransactionLinkExampleResult",
+            "description": "",
+            "value": {
+              "transactionId": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+              "url": "https://example.com/transaction/ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+              "text": "Approve your transaction in the custodian interface",
+              "showLink": true,
+              "action": "Approve",
+              "ethereum": {
+                "accounts": ["0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"],
+                "chainId": ["0x1"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "custodian_getSignedMessageLink",
+      "summary": "Returns metadata about a signed message which can be used to link users somewhere they can affect its lifecycle",
+      "params": [
+        {
+          "name": "SignedMessage ID",
+          "required": true,
+          "schema": {
+            "title": "SignedMessage ID",
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "SignedMessageLink",
+        "schema": {
+          "$ref": "#/components/schemas/SignedMessageLink"
+        }
+      },
+      "examples": [
+        {
+          "name": "custodianGetSignedMessageLinkExample",
+          "params": [
+            {
+              "name": "custodianGetSignedMessageLinkExampleeParam",
+              "value": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54"
+            }
+          ],
+          "result": {
+            "name": "custodianGetSignedMessageLinkExampleResult",
+            "description": "",
+            "value": {
+              "signedMessageId": "ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+              "url": "https://example.com/signature/ef8cb7af-1a00-4687-9f82-1f1c82fbef54",
+              "text": "Approve your signature in the custodian interface",
+              "showLink": true,
+              "action": "Approve",
+              "ethereum": {
+                "accounts": ["0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"],
+                "chainId": ["0x1"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "components": {
+    "schemas": {
+      "SignedMessageParameters": {
+        "title": "Signed Message object",
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["address", "message"],
+            "properties": {
+              "address": {
+                "title": "From address",
+                "$ref": "#/components/schemas/address"
+              },
+              "message": {
+                "title": "Message message",
+                "$ref": "#/components/schemas/bytes"
+              }
+            }
+          }
+        ]
+      },
+      "SignedMessageMetadata": {
+        "title": "Signed Message Metadata",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "chainId": {
+                "title": "Chain ID",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/uint"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              },
+              "originUrl": {
+                "title": "Origin URL",
+                "description": "The web page/dapp where the transaction originated",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/uri"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              },
+              "note": {
+                "title": "Note",
+                "description": "A note to be attached to the transaction which can be specified by the user",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/String"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "SignedTypedDataParameters": {
+        "title": "Signed Typed Data object",
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["address", "data", "version"],
+            "properties": {
+              "address": {
+                "title": "From address",
+                "$ref": "#/components/schemas/address"
+              },
+              "data": {
+                "title": "Message data",
+                "$ref": "#/components/schemas/TypedData"
+              },
+              "version": {
+                "title": "Message version",
+                "$ref": "#/components/schemas/EIP712EncodingVersion"
+              }
+            }
+          }
+        ]
+      },
+      "SignedTypedDataMetadata": {
+        "title": "Signed Typed Data Metadata",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "chainId": {
+                "title": "Chain ID",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/uint"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              },
+              "originUrl": {
+                "title": "Origin URL",
+                "description": "The web page/dapp where the transaction originated",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/uri"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              },
+              "note": {
+                "title": "Note",
+                "description": "A note to be attached to the transaction which can be specified by the user",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/String"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "action": {
+        "title": "the replacement action",
+        "type": "string",
+        "oneOf": [
+          {
+            "properties": {
+              "cancel": {
+                "title": "cancel",
+                "type": "string"
+              },
+              "speedUp": {
+                "title": "speedUp",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "address": {
+        "title": "hex encoded address",
+        "type": "string",
+        "pattern": "^0x[0-9a-fA-F]{40}$"
+      },
+      "byte": {
+        "title": "hex encoded byte",
+        "type": "string",
+        "pattern": "^0x([a-fA-F0-9]?){1,2}$"
+      },
+      "bytes": {
+        "title": "hex encoded bytes",
+        "type": "string",
+        "pattern": "^0x[0-9a-f]+$"
+      },
+      "jwt": {
+        "title": "JSON Web Token",
+        "type": "string",
+        "pattern": "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"
+      },
+      "uint": {
+        "title": "hex encoded unsigned integer",
+        "type": "string",
+        "pattern": "^0x[0-9a-f]+$"
+      },
+      "uri": {
+        "title": "URI",
+        "type": "string",
+        "pattern": "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+      },
+      "Account": {
+        "type": "object",
+        "title": "Custodial account object",
+        "allOf": [
+          {
+            "required": ["address", "tags", "name"],
+            "properties": {
+              "address": {
+                "title": "address",
+                "$ref": "#/components/schemas/address"
+              },
+              "tags": {
+                "title": "tags",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Label"
+                }
+              },
+              "metadata": {
+                "title": "metadata",
+                "type": "object",
+                "items": {
+                  "active": "boolean",
+                  "deleted": "boolean",
+                  "isContract": "boolean"
+                }
+              },
+              "name": {
+                "title": "name",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Label": {
+        "type": "object",
+        "title": "Label",
+        "allOf": [
+          {
+            "required": ["name", "value"],
+            "properties": {
+              "name": {
+                "title": "name",
+                "type": "string"
+              },
+              "value": {
+                "title": "value",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "TypedData": {
+        "type": "object",
+        "properties": {
+          "types": {
+            "type": "object",
+            "properties": {
+              "EIP712Domain": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["name", "type"]
+                }
+              }
+            },
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "type"]
+              }
+            },
+            "required": ["EIP712Domain"]
+          },
+          "primaryType": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "object"
+          },
+          "message": {
+            "type": "object"
+          }
+        },
+        "required": ["types", "primaryType", "domain", "message"]
+      },
+      "CreatedTransaction": {
+        "title": "Custodian transaction",
+        "description": "A transaction which has previously been created",
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["id", "status"],
+            "properties": {
+              "id": {
+                "title": "Transaction ID",
+                "description": "The transaction ID",
+                "type": "string"
+              },
+              "chainId": {
+                "title": "Chain ID",
+                "$ref": "#/components/schemas/uint"
+              },
+              "nonce": {
+                "title": "Nonce",
+                "description": "The nonce of the transaction",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/uint"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              },
+              "hash": {
+                "title": "transactionHash",
+                "description": "The transaction hash",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TransactionHash"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Null"
+                  }
+                ]
+              },
+              "status": {
+                "title": "transactionStatus",
+                "description": "The status of the transaction",
+                "$ref": "#/components/schemas/TransactionStatus"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/TransactionParameters"
+          },
+          {
+            "$ref": "#/components/schemas/TransactionMetadata"
+          }
+        ]
+      },
+      "ReplaceTransaction": {
+        "type": "string",
+        "title": "replaceTransactionResult",
+        "description": "The result of a replaced transaction",
+        "allOf": [
+          {
+            "properties": {
+              "transactionId": {
+                "title": "Transaction ID",
+                "description": "The transaction ID",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "CustomerProof": {
+        "type": "object",
+        "title": "Customer proof object",
+        "description": "A JWT that proves the bearer is a customer of the custodian, whose `sub` claim is an identifier for the customer",
+        "allOf": [
+          {
+            "required": ["jwt"],
+            "properties": {
+              "jwt": {
+                "title": "jwt",
+                "$ref": "#/components/schemas/jwt"
+              }
+            }
+          }
+        ]
+      },
+      "Keccak": {
+        "title": "keccak",
+        "type": "string",
+        "description": "Hex representation of a Keccak 256 hash",
+        "pattern": "^0x[a-fA-F\\d]{64}$"
+      },
+      "Null": {
+        "title": "null",
+        "type": "null",
+        "description": "Null"
+      },
+      "String": {
+        "title": "string",
+        "type": "string",
+        "description": "string"
+      },
+      "EIP712EncodingVersion": {
+        "title": "EIP712EncodingVersion",
+        "description": "The EIP712 encoding version",
+        "type": "string",
+        "enum": ["v3", "v4"]
+      },
+      "SignatureVersion": {
+        "title": "Signature Version",
+        "type": "string",
+        "enum": [["eip_712_v3", "eip_712_v4", "personal_sign"]]
+      },
+      "SignedMessage": {
+        "title": "SignedMessage",
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["status", "address", "signatureVersion"],
+            "properties": {
+              "address": {
+                "title": "address",
+                "description": "The address of the signer",
+                "$ref": "#/components/schemas/address"
+              },
+              "signatureVersion": {
+                "title": "signatureVersion",
+                "description": "The version of the signature",
+                "$ref": "#/components/schemas/SignatureVersion"
+              },
+              "status": {
+                "title": "The status of the message",
+                "$ref": "#/components/schemas/SignedMessageStatus"
+              },
+              "signature": {
+                "title": "The signature of the message",
+                "$ref": "#/components/schemas/bytes"
+              }
+            }
+          }
+        ]
+      },
+      "SignedMessageResult": {
+        "name": "signedMessageResult",
+        "description": "A signed message or null",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SignedMessage"
+          },
+          {
+            "$ref": "#/components/schemas/Null"
+          }
+        ]
+      },
+      "SignedMessageStatus": {
+        "name": "signedMessageStatus",
+        "description": "The status of a signed message",
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["finished", "signed", "success", "displayText"],
+            "properties": {
+              "finished": {
+                "type": "boolean",
+                "description": "Whether the signed message has finished, e.g. it is completed, failed or cancelled"
+              },
+              "signed": {
+                "type": "boolean"
+              },
+              "success": {
+                "type": "boolean",
+                "description": "Whether the transaction was successful, i.e. it was included in a block and not reverted"
+              },
+              "displayText": {
+                "type": "string",
+                "description": "Short text to display to the user",
+                "examples": [
+                  "Signed",
+                  "Failed",
+                  "Cancelled",
+                  "Pending",
+                  "Rejected"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "description": "The reason for the signed message status",
+                "examples": [
+                  "Signed message was rejected by the user",
+                  "Signed message was cancelled by the user"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "SignedMessageLink": {
+        "name": "SignedMessageLink",
+        "description": "Metadata about a signed message that can be used to link to it on the web",
+        "type": "object",
+        "properties": {
+          "signedMessageId": {
+            "title": "SignedMessage ID",
+            "description": "The SignedMessage ID",
+            "type": "string"
+          },
+          "url": {
+            "title": "URL",
+            "type": "string",
+            "description": "The URL where the signature can be found"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string",
+            "description": "Some text about what actions users can take"
+          },
+          "action": {
+            "title": "Action",
+            "type": "string",
+            "description": "The short text (verb) that should be used to describe the action"
+          },
+          "showLink": {
+            "title": "Show link",
+            "type": "boolean",
+            "description": "Whether the link should be shown to the user"
+          },
+          "ethereum": {
+            "title": "Ethereum Metadata",
+            "type": "object",
+            "description": "Ethereum specific metadata",
+            "properties": {
+              "accounts": {
+                "title": "Accounts",
+                "description": "Any accounts (other than the wallet itself) that are involved in the transaction",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/address"
+                }
+              },
+              "chainIds": {
+                "title": "Chain IDs",
+                "description": "The chain IDs that are involved in the transaction",
+                "type": "array",
+                "items": {
+                  "title": "Chain ID",
+                  "$ref": "#/components/schemas/uint"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TransactionLink": {
+        "name": "transactionLink",
+        "description": "Metadata about a transaction that can be used to link to it on the web",
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "title": "Transaction ID",
+            "description": "The transaction ID",
+            "type": "string"
+          },
+          "url": {
+            "title": "URL",
+            "type": "string",
+            "description": "The URL where the transaction can be found"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string",
+            "description": "Some text about what actions users can take"
+          },
+          "action": {
+            "title": "Action",
+            "type": "string",
+            "description": "The short text (verb) that should be used to describe the action"
+          },
+          "showLink": {
+            "title": "Show link",
+            "type": "boolean",
+            "description": "Whether the link should be shown to the user"
+          },
+          "ethereum": {
+            "title": "Ethereum Metadata",
+            "type": "object",
+            "description": "Ethereum specific metadata",
+            "properties": {
+              "accounts": {
+                "title": "Accounts",
+                "description": "Any accounts (other than the wallet itself) that are involved in the transaction",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/address"
+                }
+              },
+              "chainIds": {
+                "title": "Chain IDs",
+                "description": "The chain IDs that are involved in the transaction",
+                "type": "array",
+                "items": {
+                  "title": "Chain ID",
+                  "$ref": "#/components/schemas/uint"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TransactionResult": {
+        "name": "transactionResult",
+        "description": "Returns a transaction or null",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CreatedTransaction"
+          },
+          {
+            "$ref": "#/components/schemas/Null"
+          }
+        ]
+      },
+      "TransactionStatus": {
+        "name": "transactionStatus",
+        "description": "The status of a transaction",
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["finished", "signed", "success", "displayText"],
+            "properties": {
+              "finished": {
+                "type": "boolean",
+                "description": "Whether the transaction has finished, e.g. it is completed, failed or cancelled"
+              },
+              "signed": {
+                "type": "boolean",
+                "description": "Whether the transaction has been signed"
+              },
+              "submitted": {
+                "type": "boolean",
+                "description": "Whether the transaction was submitted to the blockchain"
+              },
+              "success": {
+                "type": "boolean",
+                "description": "Whether the transaction was successful, i.e. it was included in a block and not reverted"
+              },
+              "displayText": {
+                "type": "string",
+                "description": "Short text to display to the user",
+                "examples": [
+                  "Mined",
+                  "Failed",
+                  "Cancelled",
+                  "Pending",
+                  "Rejected"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "description": "The reason for the transaction status",
+                "examples": [
+                  "Transaction was rejected by the user",
+                  "Transaction was cancelled by the user",
+                  "Transaction did not meet the gas limit",
+                  "Transaction was reverted on chain"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "TransactionParameters": {
+        "type": "object",
+        "title": "Transaction object",
+        "allOf": [
+          {
+            "required": ["gas", "from", "type"],
+            "properties": {
+              "type": {
+                "title": "Type or hardfork. 0x0 for Istanbul, 0x1 for Berlin, 0x2 for London",
+                "$ref": "#/components/schemas/byte"
+              },
+              "from": {
+                "title": "from",
+                "$ref": "#/components/schemas/address"
+              },
+              "to": {
+                "title": "To address (recipient or contract)",
+                "$ref": "#/components/schemas/address"
+              },
+              "gas": {
+                "title": "Gas Limit",
+                "$ref": "#/components/schemas/uint"
+              },
+              "value": {
+                "title": "Value",
+                "$ref": "#/components/schemas/uint"
+              },
+              "data": {
+                "title": "Input data",
+                "$ref": "#/components/schemas/bytes"
+              }
+            }
+          },
+          {
+            "oneOf": [
+              {
+                "title": "EIP-1559 fee market parameters",
+                "type": "object",
+                "description": "EIP-1559 dynamic fee transactions have two fee parameters.",
+                "required": ["maxFeePerGas", "maxPriorityFeePerGas"],
+                "properties": {
+                  "maxPriorityFeePerGas": {
+                    "title": "max priority fee per gas",
+                    "description": "Maximum fee per gas the sender is willing to pay to miners in wei",
+                    "$ref": "#/components/schemas/uint"
+                  },
+                  "maxFeePerGas": {
+                    "title": "max fee per gas",
+                    "description": "The maximum total fee per gas the sender is willing to pay (includes the network / base fee and miner / priority fee) in wei",
+                    "$ref": "#/components/schemas/uint"
+                  }
+                }
+              },
+              {
+                "title": "Legacy fee market parameters",
+                "type": "object",
+                "description": "Legacy transactions and EIP-2930 access list transaction include this parameter.",
+                "required": ["gasPrice"],
+                "properties": {
+                  "gasPrice": {
+                    "title": "gas price",
+                    "description": "The gas price willing to be paid by the sender in wei",
+                    "$ref": "#/components/schemas/uint"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "TransactionMetadata": {
+        "title": "Transaction Metadata",
+        "type": "object",
+        "allOf": [
+          {
+            "required": ["chainId"],
+            "properties": {
+              "chainId": {
+                "title": "Chain ID",
+                "$ref": "#/components/schemas/uint"
+              },
+              "originUrl": {
+                "title": "Origin URL",
+                "description": "The web page/dapp where the transaction originated",
+                "$ref": "#/components/schemas/uri"
+              },
+              "transactionCategory": {
+                "title": "Transaction Category",
+                "description": "The category of transaction, as best can be determined by the wallet",
+                "$ref": "#/components/schemas/TransactionCategory"
+              },
+              "note": {
+                "title": "Note",
+                "description": "A note to be attached to the transaction which can be specified by the user",
+                "type": "string"
+              },
+              "custodianPublishesTransaction": {
+                "title": "Custodian Publishes Transaction",
+                "description": "If the custodian should publish the transaction",
+                "type": "boolean"
+              },
+              "rpcUrl": {
+                "title": "RPC URL",
+                "description": "Wser's preferred RPC URL, and it should be the same as the RPC URL for the network corresponding to the Chain ID",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "TransactionCategory": {
+        "title": "Transaction category",
+        "type": "string",
+        "enum": [
+          "transfer",
+          "transferfrom",
+          "approve",
+          "incoming",
+          "simpleSend",
+          "contractInteraction",
+          "contractDeployment",
+          "swap",
+          "swapApproval",
+          "cancel",
+          "retry"
+        ]
+      },
+      "TransactionHash": {
+        "title": "transactionHash",
+        "type": "string",
+        "description": "Keccak 256 Hash of the RLP encoding of a transaction",
+        "$ref": "#/components/schemas/Keccak"
+      },
+      "ReplaceTransactionParameters": {
+        "type": "object",
+        "title": "Transaction object",
+        "allOf": [
+          {
+            "required": ["transactionId", "action"],
+            "properties": {
+              "transactionId": {
+                "title": "Transaction ID",
+                "description": "The transaction ID",
+                "type": "string"
+              },
+              "action": {
+                "title": "action",
+                "$ref": "#/components/schemas/action"
+              }
+            }
+          }
+        ]
+      },
+      "ReplaceTransactionMetadata": {
+        "title": "Replace Transaction Metadata",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "gas": {
+                "title": "Gas",
+                "$ref": "#/components/schemas/uint"
+              }
+            }
+          },
+          {
+            "oneOf": [
+              {
+                "title": "EIP-1559 fee market parameters",
+                "type": "object",
+                "description": "EIP-1559 dynamic fee transactions have two fee parameters.",
+                "properties": {
+                  "maxPriorityFeePerGas": {
+                    "title": "max priority fee per gas",
+                    "description": "Maximum fee per gas the sender is willing to pay to miners in wei",
+                    "$ref": "#/components/schemas/uint"
+                  },
+                  "maxFeePerGas": {
+                    "title": "max fee per gas",
+                    "description": "The maximum total fee per gas the sender is willing to pay (includes the network / base fee and miner / priority fee) in wei",
+                    "$ref": "#/components/schemas/uint"
+                  }
+                }
+              },
+              {
+                "title": "Legacy fee market parameters",
+                "type": "object",
+                "description": "Legacy transactions and EIP-2930 access list transaction include this parameter.",
+                "properties": {
+                  "gasPrice": {
+                    "title": "gas price",
+                    "description": "The gas price willing to be paid by the sender in wei",
+                    "$ref": "#/components/schemas/uint"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
