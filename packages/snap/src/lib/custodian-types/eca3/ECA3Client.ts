@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-shadow
 import crypto from 'crypto';
 import { EventEmitter } from 'events';
 
@@ -26,33 +27,42 @@ import factory from '../../../util/json-rpc-call';
 import type { IRefreshTokenChangeEvent } from '../../types';
 import type { JsonRpcResult } from '../../types/JsonRpcResult';
 import {
-  API_REQUEST_LOG_EVENT,
   INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT,
   REFRESH_TOKEN_CHANGE_EVENT,
 } from '../constants';
 
 export class ECA3Client extends EventEmitter {
-  private readonly call: <T1, T2>(
+  #call: <Params, Result>(
     method: string,
-    params: T1,
+    params: Params,
     accessToken: string,
-  ) => Promise<JsonRpcResult<T2>>;
+  ) => Promise<Result>;
 
-  private readonly cache: SimpleCache;
+  #cache: SimpleCache;
+
+  #apiBaseUrl: string;
+
+  #refreshToken: string;
+
+  #refreshTokenUrl: string;
 
   // At the start, we don't know how long the token will be valid for
-  private cacheAge = null;
+  #cacheAge = null;
 
   constructor(
-    private readonly apiBaseUrl: string,
-    private refreshToken: string,
-    private readonly refreshTokenUrl: string,
+    apiBaseUrl: string,
+    refreshToken: string,
+    refreshTokenUrl: string,
   ) {
     super();
 
-    this.call = factory(`${this.apiBaseUrl}/v3/json-rpc`, this.emit.bind(this));
+    this.#apiBaseUrl = apiBaseUrl;
+    this.#refreshToken = refreshToken;
+    this.#refreshTokenUrl = refreshTokenUrl;
 
-    this.cache = new SimpleCache();
+    this.#call = factory(`${apiBaseUrl}/v3/json-rpc`);
+
+    this.#cache = new SimpleCache();
   }
 
   // This could be from a "top down" refresh token change
@@ -60,26 +70,31 @@ export class ECA3Client extends EventEmitter {
 
   setRefreshToken(refreshToken: string) {
     const payload: IRefreshTokenChangeEvent = {
-      oldRefreshToken: this.refreshToken,
+      oldRefreshToken: this.#refreshToken,
       newRefreshToken: refreshToken,
     };
     this.emit(REFRESH_TOKEN_CHANGE_EVENT, payload);
-    this.refreshToken = refreshToken;
+    this.#refreshToken = refreshToken;
   }
 
   async getAccessToken(): Promise<string> {
-    if (this.cacheAge) {
-      const cacheExists = this.cache.cacheExists('accessToken');
+    if (this.#cacheAge) {
+      const cacheExists = this.#cache.cacheExists('accessToken');
 
-      if (cacheExists && this.cache.cacheValid('accessToken', this.cacheAge)) {
-        return this.cache.getCache<string>('accessToken');
+      if (
+        cacheExists &&
+        this.#cache.cacheValid('accessToken', this.#cacheAge)
+      ) {
+        return this.#cache.getCache<string>('accessToken');
       }
     }
 
     try {
       const data = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         grant_type: 'refresh_token',
-        refresh_token: this.refreshToken,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        refresh_token: this.#refreshToken,
       };
 
       const options = {
@@ -88,7 +103,7 @@ export class ECA3Client extends EventEmitter {
         },
       };
 
-      const response = await fetch(this.refreshTokenUrl, {
+      const response = await fetch(this.#refreshTokenUrl, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: options.headers,
@@ -102,9 +117,9 @@ export class ECA3Client extends EventEmitter {
        * it means the refresh token provided is no longer valid.
        * This could be due to the token being expired, revoked, or the token not being recognized by the server.
        */
-      if (response?.status === 401 && responseJson?.url) {
-        const url = responseJson?.url;
-        const oldRefreshToken = this.refreshToken;
+      if (response?.status === 401 && responseJson.url) {
+        const url = responseJson.url as string;
+        const oldRefreshToken = this.#refreshToken;
         const hashedToken = crypto
           .createHash('sha256')
           .update(oldRefreshToken + url)
@@ -119,29 +134,29 @@ export class ECA3Client extends EventEmitter {
       }
 
       if (!response.ok) {
+        const message = responseJson.message as string;
         throw new Error(
-          `Request failed with status ${response.status}: ${responseJson.message}`,
+          `Request failed with status ${response.status}: ${message}`,
         );
       }
 
-      this.cacheAge = responseJson.expires_in;
-      this.cache.setCache<string>('accessToken', responseJson.access_token);
+      this.#cacheAge = responseJson.expires_in;
+      this.#cache.setCache<string>('accessToken', responseJson.access_token);
 
       if (
         responseJson.refresh_token &&
-        responseJson.refresh_token !== this.refreshToken
+        responseJson.refresh_token !== this.#refreshToken
       ) {
+        const newRefreshToken = responseJson.refresh_token as string;
         console.log(
-          `ECA3Client: Refresh token changed to ${responseJson.refresh_token.substring(
+          `ECA3Client: Refresh token changed to ${newRefreshToken.substring(
             0,
             5,
-          )}...${responseJson.refresh_token.substring(
-            responseJson.refresh_token.length - 5,
-          )}`,
+          )}...${newRefreshToken.substring(newRefreshToken.length - 5)}`,
         );
 
-        const oldRefreshToken = this.refreshToken;
-        this.setRefreshToken(responseJson.refresh_token);
+        const oldRefreshToken = this.#refreshToken;
+        this.setRefreshToken(newRefreshToken);
 
         // This is a "bottom up" refresh token change, from the custodian
         const payload: IRefreshTokenChangeEvent = {
@@ -151,31 +166,17 @@ export class ECA3Client extends EventEmitter {
         this.emit(REFRESH_TOKEN_CHANGE_EVENT, payload);
       }
 
-      this.emit(API_REQUEST_LOG_EVENT, {
-        method: 'POST',
-        endpoint: this.refreshTokenUrl,
-        success: response.ok,
-        timestamp: new Date().toISOString(),
-        errorMessage: response.ok ? undefined : responseJson.message,
-      });
-
       return responseJson.access_token;
     } catch (error) {
-      this.emit(API_REQUEST_LOG_EVENT, {
-        method: 'POST',
-        endpoint: this.refreshTokenUrl,
-        success: false,
-        timestamp: new Date().toISOString(),
-        errorMessage: error instanceof Error ? error.message : String(error),
-      });
-      throw new Error(`Error getting the Access Token: ${error}`);
+      const { message } = error as Error;
+      throw new Error(`Error getting the Access Token: ${message}`);
     }
   }
 
   async listAccounts(): Promise<JsonRpcResult<ECA3ListAccountsResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call('custodian_listAccounts', {}, accessToken);
+    return this.#call('custodian_listAccounts', {}, accessToken);
   }
 
   async listAccountsSigned(): Promise<
@@ -183,7 +184,7 @@ export class ECA3Client extends EventEmitter {
   > {
     const accessToken = await this.getAccessToken();
 
-    return this.call('custodian_listAccountsSigned', {}, accessToken);
+    return this.#call('custodian_listAccountsSigned', {}, accessToken);
   }
 
   async replaceTransaction(
@@ -191,7 +192,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3ReplaceTransactionResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call(
+    return this.#call(
       'custodian_replaceTransaction',
       replaceTransactionPayload,
       accessToken,
@@ -203,7 +204,7 @@ export class ECA3Client extends EventEmitter {
   > {
     const accessToken = await this.getAccessToken();
 
-    return this.call('custodian_getCustomerProof', {}, accessToken);
+    return this.#call('custodian_getCustomerProof', {}, accessToken);
   }
 
   async createTransaction(
@@ -211,7 +212,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3CreateTransactionResult>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call(
+    return this.#call(
       'custodian_createTransaction',
       createTransactionPayload,
       accessToken,
@@ -223,7 +224,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<string[]>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call(
+    return this.#call(
       'custodian_listAccountChainIds',
       listAccountChainIdPayload,
       accessToken,
@@ -235,7 +236,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3SignResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call('custodian_sign', signPayload, accessToken);
+    return this.#call('custodian_sign', signPayload, accessToken);
   }
 
   async signTypedData(
@@ -243,7 +244,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3SignTypedDataResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call('custodian_signTypedData', signPayload, accessToken);
+    return this.#call('custodian_signTypedData', signPayload, accessToken);
   }
 
   async getTransaction(
@@ -251,7 +252,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3GetTransactionByIdResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call(
+    return this.#call(
       'custodian_getTransactionById',
       getTransactionPayload,
       accessToken,
@@ -263,7 +264,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3GetSignedMessageByIdResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call(
+    return this.#call(
       'custodian_getSignedMessageById',
       getSignedMessagePayload,
       accessToken,
@@ -275,7 +276,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3GetTransactionLinkResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call(
+    return this.#call(
       'custodian_getTransactionLink',
       getTransactionLinkPayload,
       accessToken,
@@ -287,7 +288,7 @@ export class ECA3Client extends EventEmitter {
   ): Promise<JsonRpcResult<ECA3GetSignedMessageLinkResponse>> {
     const accessToken = await this.getAccessToken();
 
-    return this.call(
+    return this.#call(
       'custodian_getSignedMessageLink',
       getSignedMessageLinkPayload,
       accessToken,

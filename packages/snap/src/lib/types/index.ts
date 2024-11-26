@@ -10,10 +10,7 @@ export type { ILegacyTXParams } from './ITXParams';
 export type { IEIP1559TxParams } from './ITXParams';
 export type { ITransactionStatus } from './ITransactionStatus';
 export type { ITransactionStatusMap } from './ITransactionStatusMap';
-export type {
-  ICustodianAccount,
-  IExtensionCustodianAccount,
-} from './ICustodianAccount';
+export type { ICustodianAccount } from './ICustodianAccount';
 export type { IRefreshTokenChangeEvent } from './IRefreshTokenChangeEvent';
 export type { IInteractiveRefreshTokenChangeEvent } from './IInteractiveRefreshTokenChangeEvent';
 export type { IApiCallLogEntry } from './IApiCallLogEntry';
@@ -23,7 +20,6 @@ export type { ICustodianApi } from './ICustodianApi';
 
 // Enums
 export { AuthTypes } from './enum/AuthTypes';
-export { AddressType } from './enum/AddressType';
 export { MetaMaskTransactionStatuses } from './enum/MetaMaskTransactionStatuses';
 
 // Types

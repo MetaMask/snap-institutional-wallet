@@ -1,7 +1,7 @@
 export type ICactusEthereumAccount = {
   name: string;
   address: string;
-  labels: string[];
+  labels: string[] | null;
   balance: string;
   chainId: number;
   custodianDetails: {

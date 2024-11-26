@@ -7,8 +7,6 @@ import {
   Heading,
   Container,
   Footer,
-  Copyable,
-  Address,
   Link,
 } from '@metamask/snaps-sdk/jsx';
 
@@ -20,16 +18,20 @@ type AddressSelectorProps = {
 };
 
 /**
+ * Description: Get the etherscan link for the address
  *
- * @param address
+ * @param address - The address to get the etherscan link for
+ * @returns string the etherscan link for the address
  */
 function getAccountLink(address: string) {
   return `https://etherscan.io/address/${address}`;
 }
 
 /**
+ * Description: Truncate the address to the first 6 and last 4 characters
  *
- * @param address
+ * @param address - The address to truncate
+ * @returns string the truncated address
  */
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;

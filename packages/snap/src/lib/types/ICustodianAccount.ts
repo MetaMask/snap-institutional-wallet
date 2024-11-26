@@ -22,12 +22,10 @@ type ICustodianAccountProto = {
 
 // The type actually used in CustodyKeyring
 
-export type ICustodianAccount<T extends AuthDetails = AuthDetails> = {
-  authDetails: T;
+export type ICustodianAccount<
+  AuthDetailsType extends AuthDetails = AuthDetails,
+> = {
+  authDetails: AuthDetailsType;
 } & ICustodianAccountProto;
 
 // The type that's used in the extension, which is agnostic to authType
-
-export type IExtensionCustodianAccount = {
-  token: string; // TODO
-} & ICustodianAccountProto;

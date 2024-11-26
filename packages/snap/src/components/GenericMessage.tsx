@@ -1,13 +1,6 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
-import {
-  Heading,
-  Button,
-  Box,
-  Text,
-  Copyable,
-  Footer,
-  Container,
-} from '@metamask/snaps-sdk/jsx';
+// eslint-disable-next-line @typescript-eslint/no-shadow
+import { Heading, Box, Text, Container } from '@metamask/snaps-sdk/jsx';
 
 type GenericMessageProps = {
   title: string;

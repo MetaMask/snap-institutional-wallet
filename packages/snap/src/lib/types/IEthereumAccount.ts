@@ -3,10 +3,10 @@ type Label = {
   value: string;
 };
 
-export type IEthereumAccount<T> = {
+export type IEthereumAccount<CustodianType> = {
   name: string;
   address: string;
-  custodianDetails: T | null;
+  custodianDetails: CustodianType | null;
   labels?: Label[];
   balance?: string;
 };

@@ -1,5 +1,5 @@
 export enum AuthTypes {
-  TOKEN,
-  REFRESH_TOKEN,
-  AUTHORIZATION_CODE_FLOW,
+  Token = 'token',
+  RefreshToken = 'refresh_token',
+  AuthorizationCodeFlow = 'authorization_code_flow',
 }

@@ -1,27 +1,24 @@
-import type { IApiCallLogEntry } from '../lib/types';
 import type { JsonRpcError } from '../lib/types/JsonRpcError';
 import type { JsonRpcResult } from '../lib/types/JsonRpcResult';
 
 /**
- *
- * @param jsonRpcEndpoint
- * @param emit
+ * Factory function to create a JSON-RPC call function.
+ * @param jsonRpcEndpoint - The JSON-RPC endpoint.
+ * @returns The JSON-RPC call function.
  */
-export default function (
-  jsonRpcEndpoint: string,
-  emit: (eventName: string, eventData: IApiCallLogEntry) => void,
-) {
+// eslint-disable-next-line import/no-anonymous-default-export
+export default function (jsonRpcEndpoint: string) {
   let requestId = 0;
 
-  return async function jsonRpcCall<T1, T2>(
+  return async function jsonRpcCall<Params, Result>(
     method: string,
-    params: T1,
+    params: Params,
     accessToken: string,
-  ): Promise<T2> {
+  ): Promise<Result> {
     let response: Response;
     let responseJson;
 
-    requestId++;
+    requestId += 1;
 
     console.debug('JSON-RPC >', method, requestId, params, jsonRpcEndpoint);
 
@@ -62,14 +59,14 @@ export default function (
         (responseJson as JsonRpcResult<any>).result,
         jsonRpcEndpoint,
       );
-    } catch (e) {
+    } catch (error) {
       // FIXME: Handle the various error types
       // TODO: How do we handle an expired token?
 
-      console.log('JSON-RPC <', method, requestId, e, jsonRpcEndpoint);
-      console.error(e);
+      console.log('JSON-RPC <', method, requestId, error, jsonRpcEndpoint);
+      console.error(error);
 
-      throw e;
+      throw error;
     }
 
     return responseJson;

@@ -6,13 +6,12 @@ export type ICactusSignatureResponse = {
     | 'rejected'
     | 'failed'
     | 'completed';
-  transactionHash: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   custodian_transactionId: string;
-  gasPrice: string;
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
-  gasLimit: string;
-  nonce: string;
-  from: string;
-  signature: string;
+  gasPrice: string | null;
+  maxFeePerGas: string | null;
+  maxPriorityFeePerGas: string | null;
+  gasLimit: string | null;
+  from: string | null;
+  signature: string | null;
 };

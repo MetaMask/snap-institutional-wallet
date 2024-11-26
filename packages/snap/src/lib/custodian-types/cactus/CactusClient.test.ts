@@ -35,7 +35,9 @@ describe('CactusClient', () => {
 
     it('should fail if no access token is returned', async () => {
       fetchMock.mockResponseOnce(JSON.stringify({}));
-      expect(cactusClient.getAccessToken()).rejects.toThrow('No access token');
+      await expect(cactusClient.getAccessToken()).rejects.toThrow(
+        'No access token',
+      );
     });
 
     it('should call the Cactus API and get an access token', async () => {
@@ -78,7 +80,7 @@ describe('CactusClient', () => {
         },
       });
 
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual([]);
     });
 
     it('should fail if an exception is thrown by the HTTP client', async () => {
@@ -93,6 +95,7 @@ describe('CactusClient', () => {
     it('should POST the transactions endpoint', async () => {
       fetchMock.mockResponseOnce(
         JSON.stringify({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           access_token: '123',
         }),
       );
@@ -128,6 +131,7 @@ describe('CactusClient', () => {
     it('should POST the /custodian/transaction endpoint with EIP-1559 params', async () => {
       fetchMock.mockResponseOnce(
         JSON.stringify({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           access_token: '123',
         }),
       );
@@ -195,7 +199,7 @@ describe('CactusClient', () => {
         },
       );
 
-      expect(result).toEqual({});
+      expect(result).toStrictEqual({});
     });
 
     it('should return null if the signature does not exist', async () => {
@@ -230,7 +234,7 @@ describe('CactusClient', () => {
         },
       );
 
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual([]);
     });
 
     it('should fail if an exception is thrown by the HTTP client', async () => {
@@ -260,7 +264,7 @@ describe('CactusClient', () => {
         },
       );
 
-      expect(result).toEqual({});
+      expect(result).toStrictEqual({});
     });
 
     it('should return null if the transaction does not exist', async () => {

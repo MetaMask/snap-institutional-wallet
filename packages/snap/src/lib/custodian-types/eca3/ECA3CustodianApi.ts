@@ -5,7 +5,6 @@ import { hexlify } from '../../../util/hexlify';
 import { mapTransactionStatus } from '../../../util/map-status';
 import { SimpleCache } from '../../simple-cache';
 import type {
-  AuthTypes,
   IApiCallLogEntry,
   ICustodianApi,
   CustodianDeepLink,
@@ -37,36 +36,39 @@ import {
 } from '../constants';
 
 export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
-  private readonly client: ECA3Client;
+  #client: ECA3Client;
 
-  private readonly cache = new SimpleCache();
+  #cache = new SimpleCache();
+
+  #cacheAge: number;
 
   constructor(
     authDetails: IRefreshTokenAuthDetails,
-    _authType: AuthTypes,
     apiUrl: string,
-    private readonly cacheAge: number,
+    cacheAge: number,
   ) {
     super();
     const { refreshToken } = authDetails;
-    this.client = new ECA3Client(
+    this.#client = new ECA3Client(
       apiUrl,
       refreshToken,
       authDetails.refreshTokenUrl,
     );
 
+    this.#cacheAge = cacheAge;
+
     // This event is "bottom up" - from the custodian via the client.
     // Just bubble it up to MMISDK
 
-    this.client.on(REFRESH_TOKEN_CHANGE_EVENT, (event) => {
+    this.#client.on(REFRESH_TOKEN_CHANGE_EVENT, (event) => {
       this.emit(REFRESH_TOKEN_CHANGE_EVENT, event);
     });
 
-    this.client.on(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, (event) => {
+    this.#client.on(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, (event) => {
       this.emit(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, event);
     });
 
-    this.client.on(API_REQUEST_LOG_EVENT, (event: IApiCallLogEntry) => {
+    this.#client.on(API_REQUEST_LOG_EVENT, (event: IApiCallLogEntry) => {
       this.emit(API_REQUEST_LOG_EVENT, event);
     });
   }
@@ -74,7 +76,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   async getEthereumAccounts(): Promise<
     IEthereumAccount<IEthereumAccountCustodianDetails>[]
   > {
-    const accounts = await this.client.listAccounts();
+    const accounts = await this.#client.listAccounts();
 
     const mappedAccounts = accounts.result.map((account) => ({
       name: account.name,
@@ -99,7 +101,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
 
   // MMI Legacy feature that is not used in the custodial snap
   async getListAccountsSigned(): Promise<string> {
-    const { result } = await this.client.listAccountsSigned();
+    const { result } = await this.#client.listAccountsSigned();
 
     return result.jwt;
   }
@@ -156,7 +158,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       ...(txMeta.rpcUrl && { rpcUrl: txMeta.rpcUrl }), // MMI Legacy feature that is not used in the custodial snap
     };
 
-    const { result } = await this.client.createTransaction([
+    const { result } = await this.#client.createTransaction([
       payload as ECA3TransactionParams,
       meta,
     ]);
@@ -171,10 +173,10 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
 
   async getTransaction(
     _from: string,
-    custodian_transactionId: string,
+    custodianTransactionId: string,
   ): Promise<ITransactionDetails | null> {
-    const { result } = await this.client.getTransaction([
-      custodian_transactionId,
+    const { result } = await this.#client.getTransaction([
+      custodianTransactionId,
     ]);
 
     if (!result) {
@@ -195,10 +197,10 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       reason: result.transaction.status.reason,
       to: result.transaction.to,
       signedRawTransaction: result.transaction.signedRawTransaction ?? null,
-      chainId: result.metadata?.chainId || null,
+      chainId: result.metadata?.chainId ?? null,
       custodianPublishesTransaction:
-        result.metadata?.custodianPublishesTransaction || true,
-      rpcUrl: result.metadata?.rpcUrl || null,
+        result.metadata?.custodianPublishesTransaction ?? true,
+      rpcUrl: result.metadata?.rpcUrl ?? null,
     };
   }
 
@@ -225,7 +227,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       gasParams.maxFeePerGas = hexlify(txParams.maxFeePerGas);
     }
 
-    const { result } = await this.client.replaceTransaction([
+    const { result } = await this.#client.replaceTransaction([
       payload as ECA3ReplaceTransactionParams,
       gasParams as ECA3ReplaceTransactionGasParams,
     ]);
@@ -238,10 +240,10 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   // Gets a Signed Message by Id and returns relevant data
   async getSignedMessage(
     _address: string,
-    custodian_signedMessageId: string,
+    custodianSignedMessageId: string,
   ): Promise<ISignedMessageDetails | null> {
-    const { result } = await this.client.getSignedMessage([
-      custodian_signedMessageId,
+    const { result } = await this.#client.getSignedMessage([
+      custodianSignedMessageId,
     ]);
 
     if (!result) {
@@ -249,7 +251,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
     }
 
     return {
-      id: custodian_signedMessageId,
+      id: custodianSignedMessageId,
       signature: result.signature,
       status: result.status,
     };
@@ -258,7 +260,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   async getTransactionLink(
     transactionId: string,
   ): Promise<Partial<CustodianDeepLink> | null> {
-    const { result } = await this.client.getTransactionLink([transactionId]);
+    const { result } = await this.#client.getTransactionLink([transactionId]);
 
     if (!result) {
       return null;
@@ -279,7 +281,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   async getSignedMessageLink(
     signedMessageId: string,
   ): Promise<Partial<CustodianDeepLink> | null> {
-    const { result } = await this.client.getSignedMessageLink([
+    const { result } = await this.#client.getSignedMessageLink([
       signedMessageId,
     ]);
 
@@ -300,10 +302,11 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
 
   // MMI Legacy feature that is not used in the custodial snap
   public async getCustomerProof(): Promise<string> {
-    const { result } = await this.client.getCustomerProof();
+    const { result } = await this.#client.getCustomerProof();
     return result.jwt;
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   async signTypedData_v4(
     address: string,
     data: TypedMessage<MessageTypes>,
@@ -316,13 +319,13 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       throw new Error('No such ethereum account!');
     }
 
-    version = version.toLowerCase();
+    const normalizedVersion = version.toLowerCase();
 
-    const { result } = await this.client.signTypedData([
+    const { result } = await this.#client.signTypedData([
       {
         address,
         data,
-        version,
+        version: normalizedVersion,
       },
       signedTypedMessageMetadata,
     ]);
@@ -346,7 +349,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       throw new Error('No such ethereum account!');
     }
 
-    const { result } = await this.client.signPersonalMessage([
+    const { result } = await this.#client.signPersonalMessage([
       {
         address,
         message,
@@ -363,17 +366,17 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   }
 
   async getSupportedChains(address: string): Promise<string[]> {
-    return this.cache.tryCaching<string[]>(
+    return this.#cache.tryCaching<string[]>(
       `getSupportedChains-${address}`,
-      this.cacheAge,
+      this.#cacheAge,
       async () => {
-        const { result } = await this.client.getAccountChainIds([address]);
+        const { result } = await this.#client.getAccountChainIds([address]);
         return result;
       },
     );
   }
 
   changeRefreshTokenAuthDetails(authDetails: IRefreshTokenAuthDetails): void {
-    this.client.setRefreshToken(authDetails.refreshToken);
+    this.#client.setRefreshToken(authDetails.refreshToken);
   }
 }

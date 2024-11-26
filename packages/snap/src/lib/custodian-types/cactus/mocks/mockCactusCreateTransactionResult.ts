@@ -6,6 +6,7 @@ export const mockCactusCreateTransactionResult: ICactusTransaction = {
   signature: null,
   transactionStatus: 'created',
   transactionHash: null,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   custodian_transactionId: '51UGRQZFZJD777888000055',
   gasPrice: '200000000000',
   maxFeePerGas: null,

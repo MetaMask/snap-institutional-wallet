@@ -23,7 +23,7 @@ describe('BitgoClient', () => {
     it('should return headers with the JWT in the authorization field', () => {
       const result = bitgoClient.getHeaders();
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         Authorization: `Bearer ${mockJwt}`,
         'Content-Type': 'application/json',
       });
@@ -43,7 +43,7 @@ describe('BitgoClient', () => {
         },
       });
 
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual([]);
     });
 
     it('should fail if an exception is thrown by the HTTP client', async () => {
@@ -202,7 +202,7 @@ describe('BitgoClient', () => {
         },
       );
 
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual([]);
     });
 
     it('should fail if an exception is thrown by the HTTP client', async () => {
@@ -232,7 +232,7 @@ describe('BitgoClient', () => {
         },
       );
 
-      expect(result).toEqual({});
+      expect(result).toStrictEqual([]);
     });
 
     it('should fail if an exception is thrown by the HTTP client', async () => {

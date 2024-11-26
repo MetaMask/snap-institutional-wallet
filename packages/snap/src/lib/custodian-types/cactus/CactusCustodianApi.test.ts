@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { CactusClient } from './CactusClient';
 import { CactusCustodianApi } from './CactusCustodianApi';
 import type { ICactusEthereumAccount } from './interfaces/ICactusEthereumAccount';
@@ -7,10 +8,9 @@ import { mockCactusGetChainIdsResponse } from './mocks/mockCactusGetChainIdsResp
 import { mockCactusGetCustomerProofResponse } from './mocks/mockCactusGetCustomerProofResponse';
 import { mockCactusGetEthereumAccountsResponse } from './mocks/mockCactusGetEthereumAccountsResponse';
 import { mockCactusGetSignedMessageResponse } from './mocks/mockCactusGetSignedMessageResponse';
-import { mockCactusGetTransactionsResult } from './mocks/mockCactusGetTransactionsResult';
 import type { ISignedMessageDetails, ITransactionDetails } from '../../types';
-import { AuthTypes } from '../../types';
 import type { ICactusTransaction } from './interfaces/ICactusTransaction';
+import { mockCactusGetTransactionsResult } from './mocks/mockCactusGetTransactionsResult';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 jest.mock('./CactusClient');
@@ -31,7 +31,6 @@ describe('CactusCustodianApi', () => {
   beforeEach(() => {
     cactusCustodianApi = new CactusCustodianApi(
       { refreshToken: mockRefreshToken, refreshTokenUrl: mockUrl },
-      AuthTypes.TOKEN,
       mockUrl,
       0,
     );
@@ -40,48 +39,50 @@ describe('CactusCustodianApi', () => {
       .instances[0] as CactusClient;
     jest
       .spyOn(mockedCactusClientInstance, 'getEthereumAccounts')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusGetEthereumAccountsResponse);
-
-    jest
-      .spyOn(mockedCactusClientInstance, 'getTransactions')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusGetTransactionsResult);
+      .mockImplementation(async () =>
+        Promise.resolve(mockCactusGetEthereumAccountsResponse),
+      );
 
     jest
       .spyOn(mockedCactusClientInstance, 'getTransaction')
       .mockImplementation()
-      .mockImplementation(() => firstTransaction);
+      .mockImplementation(async () => firstTransaction);
 
     jest
       .spyOn(mockedCactusClientInstance, 'createTransaction')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusCreateTransactionResult);
+      .mockImplementation(async () =>
+        Promise.resolve(mockCactusCreateTransactionResult),
+      );
 
     jest
       .spyOn(mockedCactusClientInstance, 'getCustomerProof')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusGetCustomerProofResponse);
+      .mockImplementation(async () =>
+        Promise.resolve(mockCactusGetCustomerProofResponse),
+      );
 
     jest
       .spyOn(mockedCactusClientInstance, 'signTypedData_v4')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusCreateSignatureResponse);
+      .mockImplementation(async () =>
+        Promise.resolve(mockCactusCreateSignatureResponse),
+      );
 
     jest
       .spyOn(mockedCactusClientInstance, 'signPersonalMessage')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusCreateSignatureResponse);
+      .mockImplementation(async () =>
+        Promise.resolve(mockCactusCreateSignatureResponse),
+      );
 
     jest
       .spyOn(mockedCactusClientInstance, 'getChainIds')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusGetChainIdsResponse);
+      .mockImplementation(async () =>
+        Promise.resolve(mockCactusGetChainIdsResponse),
+      );
 
     jest
       .spyOn(mockedCactusClientInstance, 'getSignedMessage')
-      .mockImplementation()
-      .mockImplementation(() => mockCactusGetSignedMessageResponse);
+      .mockImplementation(async () =>
+        Promise.resolve(mockCactusGetSignedMessageResponse),
+      );
 
     mockedCactusClient.mockClear();
   });
@@ -91,7 +92,7 @@ describe('CactusCustodianApi', () => {
       const result = await cactusCustodianApi.getEthereumAccounts();
       expect(mockedCactusClientInstance.getEthereumAccounts).toHaveBeenCalled();
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         mockCactusGetEthereumAccountsResponse.map((account) => ({
           name: account.name || 'Cactus wallet',
           address: account.address,
@@ -156,7 +157,10 @@ describe('CactusCustodianApi', () => {
         note: 'note',
       };
 
-      await cactusCustodianApi.createTransaction(txParams, { chainId: '4' });
+      await cactusCustodianApi.createTransaction(txParams, {
+        chainId: '4',
+        custodianPublishesTransaction: true,
+      });
 
       expect(mockedCactusClientInstance.createTransaction).toHaveBeenCalledWith(
         {
@@ -175,9 +179,10 @@ describe('CactusCustodianApi', () => {
           firstTransaction.custodian_transactionId,
         )) as ITransactionDetails;
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         transactionHash: firstTransaction.transactionHash,
         transactionStatus: firstTransaction.transactionStatus,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         custodian_transactionId: firstTransaction.custodian_transactionId,
         from: firstTransaction.from,
         gasPrice: firstTransaction.gasPrice,
@@ -218,9 +223,10 @@ describe('CactusCustodianApi', () => {
         buffer,
       );
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         from: fromAddress,
         transactionStatus: mockCactusCreateSignatureResponse.transactionStatus,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         custodian_transactionId:
           mockCactusCreateSignatureResponse.custodian_transactionId,
       });
@@ -253,9 +259,10 @@ describe('CactusCustodianApi', () => {
         'V4',
       );
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         from: fromAddress,
         transactionStatus: mockCactusCreateSignatureResponse.transactionStatus,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         custodian_transactionId:
           mockCactusCreateSignatureResponse.custodian_transactionId,
       });
@@ -273,7 +280,7 @@ describe('CactusCustodianApi', () => {
     it('calls getCustomerProof on the client and returns the token', async () => {
       const result = await cactusCustodianApi.getCustomerProof();
 
-      expect(result).toEqual(mockCactusGetCustomerProofResponse.jwt);
+      expect(result).toStrictEqual(mockCactusGetCustomerProofResponse.jwt);
 
       expect(mockedCactusClientInstance.getCustomerProof).toHaveBeenCalled();
     });
@@ -283,7 +290,7 @@ describe('CactusCustodianApi', () => {
     it('returns an empty object', async () => {
       const result = await cactusCustodianApi.getErc20Tokens();
 
-      expect(result).toEqual({});
+      expect(result).toStrictEqual({});
     });
   });
 
@@ -301,7 +308,7 @@ describe('CactusCustodianApi', () => {
 
       expect(mockedCactusClientInstance.getChainIds).toHaveBeenCalled();
 
-      expect(result).toEqual(['42', '97', '80001', '10001']);
+      expect(result).toStrictEqual(['42', '97', '80001', '10001']);
     });
   });
 
@@ -313,7 +320,7 @@ describe('CactusCustodianApi', () => {
           mockCactusGetSignedMessageResponse.custodian_transactionId,
         )) as ISignedMessageDetails;
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         id: result.id,
         signature: result.signature,
         status: result.status,

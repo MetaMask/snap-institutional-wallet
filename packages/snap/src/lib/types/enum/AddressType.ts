@@ -1,4 +1,4 @@
 export enum AddressType {
-  MONOCHAIN,
-  POLYCHAIN,
+  Monochain = 'monochain',
+  Polychain = 'polychain',
 }

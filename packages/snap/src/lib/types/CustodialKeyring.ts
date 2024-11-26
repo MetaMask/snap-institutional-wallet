@@ -1,6 +1,5 @@
 import type { MessageTypes, TypedMessage } from '@metamask/eth-sig-util';
 import type { KeyringRequest } from '@metamask/keyring-api';
-import type { Json } from '@metamask/utils';
 
 import type { CustodialKeyringAccount } from './CustodialKeyringAccount';
 import type { ITransactionDetails } from './ITransactionDetails';
