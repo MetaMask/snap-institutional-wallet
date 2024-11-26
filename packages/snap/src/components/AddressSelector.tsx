@@ -18,20 +18,20 @@ type AddressSelectorProps = {
 };
 
 /**
- * Description: Get the etherscan link for the address
+ * Gets the Etherscan link for an Ethereum address.
  *
- * @param address - The address to get the etherscan link for
- * @returns string the etherscan link for the address
+ * @param address - The Ethereum address to get the Etherscan link for.
+ * @returns The Etherscan URL for viewing the address details.
  */
 function getAccountLink(address: string) {
   return `https://etherscan.io/address/${address}`;
 }
 
 /**
- * Description: Truncate the address to the first 6 and last 4 characters
+ * Truncates the address to show only the first 6 and last 4 characters.
  *
- * @param address - The address to truncate
- * @returns string the truncated address
+ * @param address - The address to truncate.
+ * @returns The truncated address.
  */
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;

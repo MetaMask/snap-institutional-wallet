@@ -15,5 +15,9 @@ module.exports = {
     },
   ],
 
-  ignorePatterns: ['!.eslintrc.js', 'dist/'],
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+  },
+
+  ignorePatterns: ['**/snap.manifest.json', '!.eslintrc.js', 'dist/'],
 };
