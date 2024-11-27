@@ -61,7 +61,7 @@ const CopyableContainer = styled.div`
   margin: 0px 2.5% 8px 8px;
 `;
 
-export type MethodProps = {
+type MethodProps = {
   description: string;
   inputs: {
     id: string;

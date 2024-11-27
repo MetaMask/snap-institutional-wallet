@@ -1,31 +1,7 @@
 import { Common, Hardfork } from '@ethereumjs/common';
-import type { JsonTx } from '@ethereumjs/tx';
-import type { Json } from '@metamask/utils';
 
+import type { ITransactionDetails } from './lib/types';
 import type { Wallet } from './lib/types/CustodialKeyring';
-
-/**
- * Serializes a transaction by removing undefined properties and converting them to null.
- *
- * @param tx - The transaction object.
- * @param type - The type of the transaction.
- * @returns The serialized transaction.
- */
-export function serializeTransaction(tx: JsonTx, type: number): Json {
-  const serializableSignedTx: Record<string, any> = {
-    ...tx,
-    type,
-  };
-  // Make tx serializable
-  // toJSON does not remove undefined or convert undefined to null
-  Object.entries(serializableSignedTx).forEach(([key, _]) => {
-    if (serializableSignedTx[key] === undefined) {
-      delete serializableSignedTx[key];
-    }
-  });
-
-  return serializableSignedTx;
-}
 
 /**
  * Validates whether there are no duplicate addresses in the provided array of wallets.
@@ -36,16 +12,6 @@ export function serializeTransaction(tx: JsonTx, type: number): Json {
  */
 export function isUniqueAddress(address: string, wallets: Wallet[]): boolean {
   return !wallets.find((wallet) => wallet.account.address === address);
-}
-
-/**
- * Determines whether the given CAIP-2 chain ID represents an EVM-based chain.
- *
- * @param chain - The CAIP-2 chain ID to check.
- * @returns Returns true if the chain is EVM-based, otherwise false.
- */
-export function isEvmChain(chain: string): boolean {
-  return chain.startsWith('eip155:');
 }
 
 /**
@@ -102,7 +68,7 @@ export const formatTransactionData = (
   return `0x${Buffer.from(data).toString('hex')}`;
 };
 
-export const createCommon = (transaction: any): Common => {
+export const createCommon = (transaction: ITransactionDetails): Common => {
   return Common.custom(
     { chainId: transaction.chainId },
     {

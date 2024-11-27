@@ -398,6 +398,7 @@ describe('ECA1CustodianApi', () => {
       );
 
       expect(result).toStrictEqual({
+        id: mockECA1GetTransactionLinkResponse.result.transactionId,
         url: mockECA1GetTransactionLinkResponse.result.url,
         action: mockECA1GetTransactionLinkResponse.result.action,
         text: mockECA1GetTransactionLinkResponse.result.text,

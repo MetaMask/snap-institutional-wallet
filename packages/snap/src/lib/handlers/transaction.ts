@@ -4,13 +4,9 @@ import { TransactionFactory } from '@ethereumjs/tx';
 import logger from '../../logger';
 import { formatTransactionData } from '../../util';
 import { hexlify } from '../../util/hexlify';
+import { TRANSACTION_TYPES } from '../constants';
 import type { ITransactionDetails } from '../types/ITransactionDetails';
 import type { IEIP1559TxParams, ILegacyTXParams } from '../types/ITXParams';
-
-export const TRANSACTION_TYPES = {
-  LEGACY: '0',
-  EIP1559: '2',
-} as const;
 
 export class TransactionHandler {
   createTransactionPayload(tx: any): IEIP1559TxParams | ILegacyTXParams {

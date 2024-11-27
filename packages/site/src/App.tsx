@@ -20,7 +20,7 @@ const BannerWrapper = styled.div`
   padding-right: 5%;
 `;
 
-export type AppProps = {
+type AppProps = {
   children: ReactNode;
 };
 

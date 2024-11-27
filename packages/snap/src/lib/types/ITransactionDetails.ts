@@ -22,7 +22,7 @@ export type ITransactionDetails = {
 
   transactionId?: string;
 
-  chainId?: number | null;
+  chainId?: string; // Optional because early custodian APIs did not return this
   custodianPublishesTransaction: boolean;
   signedRawTransaction?: string | null;
   rpcUrl?: string | null;

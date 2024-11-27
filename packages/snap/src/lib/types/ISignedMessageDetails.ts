@@ -5,7 +5,7 @@ export type ISignedMessageDetails = {
   from?: string;
 };
 
-export type SignedMessageStatus = {
+type SignedMessageStatus = {
   finished: boolean;
   signed: boolean;
   success: boolean;

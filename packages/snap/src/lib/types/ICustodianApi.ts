@@ -1,7 +1,6 @@
 import type { EventEmitter } from 'events';
 
 import type {
-  AuthDetails,
   IEIP1559TxParams,
   ILegacyTXParams,
   IRefreshTokenAuthDetails,
@@ -17,11 +16,6 @@ import type {
 import type { MessageTypes, TypedMessage } from './ITypedMessage';
 import type { ReplaceTransactionParams } from './ReplaceTransactionParams';
 
-export type CustodianApiConstructor = new (
-  authDetails: AuthDetails,
-  apiUrl: string,
-  cacheAge: number,
-) => ICustodianApi;
 export type ICustodianApi = {
   getListAccountsSigned?(): Promise<string>;
 
