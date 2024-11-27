@@ -68,9 +68,13 @@ export const formatTransactionData = (
   return `0x${Buffer.from(data).toString('hex')}`;
 };
 
-export const createCommon = (transaction: ITransactionDetails): Common => {
+export const createCommon = (
+  transaction: ITransactionDetails,
+  chainId: string,
+): Common => {
   return Common.custom(
-    { chainId: transaction.chainId },
+    // eslint-disable-next-line radix
+    { chainId: parseInt(chainId) },
     {
       hardfork:
         transaction.maxPriorityFeePerGas || transaction.maxFeePerGas

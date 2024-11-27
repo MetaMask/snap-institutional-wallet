@@ -28,8 +28,5 @@ export type ITransactionDetails = {
   rpcUrl?: string | null;
   note?: string;
 
-  v?: string | null;
-  r?: string | null;
-  s?: string | null;
   type?: string | null;
 };

@@ -33,6 +33,13 @@ export async function getState(): Promise<KeyringState> {
 }
 
 /**
+ * Clears the keyring state.
+ */
+export async function clearState(): Promise<void> {
+  await saveState(defaultState);
+}
+
+/**
  * Persists the given snap state.
  *
  * @param state - New snap state.

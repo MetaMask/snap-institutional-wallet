@@ -5,7 +5,6 @@ import { hexlify } from '../../../util/hexlify';
 import { mapTransactionStatus } from '../../../util/map-status';
 import { SimpleCache } from '../../simple-cache';
 import type {
-  IApiCallLogEntry,
   ICustodianApi,
   CustodianDeepLink,
   IEIP1559TxParams,
