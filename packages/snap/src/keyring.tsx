@@ -26,7 +26,7 @@ import type {
   CreateAccountOptions,
 } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
-import { AuthTypeMap, CustodianApiMap } from './lib/types/CustodianType';
+import { CustodianApiMap } from './lib/types/CustodianType';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
 import type { ITransactionDetails } from './lib/types/ITransactionDetails';
 import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
@@ -275,11 +275,9 @@ export class CustodialKeyring implements Keyring {
 
   #getCustodianApi(details: OnBoardingRpcRequest): ICustodianApi {
     const CustodianApiClass = CustodianApiMap[details.custodianType];
-    const authType = AuthTypeMap[details.custodianType];
 
     const custodianApi = new CustodianApiClass(
       { refreshToken: details.token, refreshTokenUrl: details.refreshTokenUrl },
-      authType,
       details.custodianApiUrl,
       1000,
     );

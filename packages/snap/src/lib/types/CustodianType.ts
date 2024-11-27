@@ -1,4 +1,3 @@
-import { AuthTypes } from './enum/AuthTypes';
 import { ECA1CustodianApi } from '../custodian-types/eca1/ECA1CustodianApi';
 import { ECA3CustodianApi } from '../custodian-types/eca3/ECA3CustodianApi';
 
@@ -19,11 +18,4 @@ export const CustodianApiMap = {
   [CustodianType.ECA1]: ECA1CustodianApi,
   // [CustodianType.BitGo]: BitgoCustodianApi,
   // [CustodianType.Cactus]: CactusCustodianApi,
-};
-
-export const AuthTypeMap = {
-  [CustodianType.ECA3]: AuthTypes.REFRESH_TOKEN,
-  [CustodianType.ECA1]: AuthTypes.REFRESH_TOKEN,
-  // [CustodianType.BitGo]: AuthTypes.TOKEN,
-  // [CustodianType.Cactus]: AuthTypes.REFRESH_TOKEN,
 };

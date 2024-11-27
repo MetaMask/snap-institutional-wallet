@@ -1,6 +1,6 @@
-import type { JsonRpcCreateTransactionPayload } from '../rpc-payloads/ECA3CreateTransactionPayload';
+import type { ECA3CreateTransactionPayload } from '../rpc-payloads/ECA3CreateTransactionPayload';
 
-export const mockJsonRpcCreateTransactionPayload: JsonRpcCreateTransactionPayload =
+export const mockJsonRpcCreateTransactionPayload: ECA3CreateTransactionPayload =
   [
     {
       from: '0xb2c77973279baaaf48c295145802695631d50c01',
@@ -10,7 +10,6 @@ export const mockJsonRpcCreateTransactionPayload: JsonRpcCreateTransactionPayloa
       gas: '0x5208',
       maxFeePerGas: '0x59682f0e',
       maxPriorityFeePerGas: '0x59682f0e',
-      data: null,
     },
     {
       chainId: '0x4',

@@ -1,7 +1,7 @@
 import type { JsonRpcResult } from '../../../types/JsonRpcResult';
-import type { JsonRpcGetTransactionByIdResponse } from '../rpc-responses/ECA3GetTransactionByIdResponse';
+import type { ECA3GetTransactionByIdResponse } from '../rpc-responses/ECA3GetTransactionByIdResponse';
 
-export const mockJsonRpcGetTransactionByIdResponse: JsonRpcResult<JsonRpcGetTransactionByIdResponse> =
+export const mockJsonRpcGetTransactionByIdResponse: JsonRpcResult<ECA3GetTransactionByIdResponse> =
   {
     id: 1,
     jsonrpc: '2.0',
@@ -23,7 +23,7 @@ export const mockJsonRpcGetTransactionByIdResponse: JsonRpcResult<JsonRpcGetTran
           signed: true,
           success: true,
           displayText: 'Mined',
-          reason: null,
+          reason: '',
         },
       },
     },

@@ -19,7 +19,6 @@ export type { IEthereumAccountCustodianDetails } from './IEthereumAccountCustodi
 export type { ICustodianApi } from './ICustodianApi';
 
 // Enums
-export { AuthTypes } from './enum/AuthTypes';
 export { MetaMaskTransactionStatuses } from './enum/MetaMaskTransactionStatuses';
 
 // Types
