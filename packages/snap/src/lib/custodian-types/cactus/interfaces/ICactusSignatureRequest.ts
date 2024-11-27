@@ -1,7 +1,4 @@
-import type {
-  MessageTypes,
-  TypedMessage,
-} from '../../../interfaces/ITypedMessage';
+import type { MessageTypes, TypedMessage } from '../../../types/ITypedMessage';
 
 export type ICactusSignatureRequest = {
   address: string;

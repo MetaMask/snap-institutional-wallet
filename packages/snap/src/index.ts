@@ -16,11 +16,7 @@ import type {
 import { CustodialKeyring } from './keyring';
 import type { ITransactionDetails } from './lib/types';
 import type { CustodialSnapContext } from './lib/types/Context';
-import {
-  AuthTypeMap,
-  CustodianApiMap,
-  CustodianType,
-} from './lib/types/CustodianType';
+import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
 import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
 import logger from './logger';
@@ -57,7 +53,6 @@ function hasPermission(origin: string, method: string): boolean {
 
 const handleOnboarding = async (request: OnBoardingRpcRequest) => {
   const CustodianApiClass = CustodianApiMap[request.custodianType];
-  const authType = AuthTypeMap[request.custodianType];
   keyring = await getKeyring();
 
   if (!Object.values(CustodianType).includes(request.custodianType)) {
@@ -69,7 +64,6 @@ const handleOnboarding = async (request: OnBoardingRpcRequest) => {
       refreshToken: request.token,
       refreshTokenUrl: request.refreshTokenUrl,
     },
-    authType,
     request.custodianApiUrl,
     1000,
   );
