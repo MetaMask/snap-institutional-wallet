@@ -1,3 +1,7 @@
 {
-  "ignores": ["@metamask/auto-changelog", "@lavamoat/allow-scripts"]
+  "ignores": [
+    "@metamask/auto-changelog",
+    "@lavamoat/allow-scripts",
+    "@types/jest"
+  ]
 }
