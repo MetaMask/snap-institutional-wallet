@@ -1,5 +1,4 @@
 import type { UserInputEvent } from '@metamask/snaps-sdk';
-import { ComponentOrElement } from '@metamask/snaps-sdk';
 
 import { AddressSelector } from './components/AddressSelector';
 import { GenericMessage } from './components/GenericMessage';
@@ -22,6 +21,32 @@ const onboardingState: {
 } = {
   selectedAccounts: [],
   interfaceId: null,
+};
+
+export const setInterfaceId = (interfaceId: string) => {
+  console.log('Setting interface ID', interfaceId);
+  onboardingState.interfaceId = interfaceId;
+};
+
+export const getInterfaceState = async () => {
+  const state = await snap.request({
+    method: 'snap_getInterfaceState',
+    params: {
+      id: onboardingState.interfaceId as string,
+    },
+  });
+
+  return state;
+};
+
+const resolveInterface = async (value: OnboardingAccount[]) => {
+  await snap.request({
+    method: 'snap_resolveInterface',
+    params: {
+      id: onboardingState.interfaceId as string,
+      value,
+    },
+  });
 };
 
 export const chooseAccountDialog = async (
@@ -51,15 +76,14 @@ export const chooseAccountDialog = async (
 
   return result;
 };
+
 export const onboardingInterfaceHandler = async ({
-  id,
   event,
   context,
 }: {
-  id: string;
   event: UserInputEvent;
   context: OnboardingContext;
-}) => {
+}): Promise<void | null> => {
   try {
     if (
       event.type === 'ButtonClickEvent' &&
@@ -104,30 +128,6 @@ export const onboardingInterfaceHandler = async ({
   } catch (error) {
     console.error('Error in interface handler', error);
   }
-};
 
-export const setInterfaceId = (interfaceId: string) => {
-  console.log('Setting interface ID', interfaceId);
-  onboardingState.interfaceId = interfaceId;
-};
-
-export const getInterfaceState = async () => {
-  const state = await snap.request({
-    method: 'snap_getInterfaceState',
-    params: {
-      id: onboardingState.interfaceId as string,
-    },
-  });
-
-  return state;
-};
-
-const resolveInterface = async (value: OnboardingAccount[]) => {
-  await snap.request({
-    method: 'snap_resolveInterface',
-    params: {
-      id: onboardingState.interfaceId as string,
-      value,
-    },
-  });
+  return null;
 };

@@ -1,7 +1,9 @@
 /**
+ * Convert a number to a hex string.
  *
- * @param num
+ * @param numberToHexlify - The number to convert.
+ * @returns The hex string.
  */
-export function hexlify(num: string | number): string {
-  return `0x${BigInt(num).toString(16)}`;
+export function hexlify(numberToHexlify: string | number): string {
+  return `0x${BigInt(numberToHexlify).toString(16)}`;
 }

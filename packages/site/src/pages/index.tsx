@@ -11,7 +11,11 @@ import {
   DividerTitle,
   StyledBox,
 } from '../components/styledComponents';
-import { defaultSnapOrigin, custodianApiUrl, refreshTokenUrl } from '../config';
+import {
+  defaultSnapOrigin,
+  defaultCustodianApiUrl,
+  defaultRefreshTokenUrl,
+} from '../config';
 import { MetaMaskContext, MetamaskActions } from '../hooks';
 import { InputType } from '../types';
 import type { KeyringState } from '../utils';
@@ -99,7 +103,6 @@ const Index = () => {
     await window.ethereum.request(params);
   };
 
-
   const deleteAccount = async () => {
     await client.deleteAccount(accountId as string);
     await syncAccounts();
@@ -136,7 +139,7 @@ const Index = () => {
       inputs: [],
       action: {
         callback: async () =>
-          await injectToken(custodianApiUrl, refreshTokenUrl),
+          await injectToken(defaultCustodianApiUrl, defaultRefreshTokenUrl),
         label: 'Inject Token',
       },
       successMessage: 'Import successful',

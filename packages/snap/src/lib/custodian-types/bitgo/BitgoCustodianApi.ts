@@ -3,7 +3,6 @@ import { EventEmitter } from 'events';
 import { BitgoClient } from './BitgoClient';
 import { DefaultBitgoCustodianDetails } from './DefaultBitgoCustodianDetails';
 import type {
-  AuthTypes,
   CustodianDeepLink,
   IEIP1559TxParams,
   IEthereumAccount,
@@ -20,30 +19,27 @@ import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 const BITGO_ADDITIONAL_GAS = 100000;
 
 export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
-  private readonly client: BitgoClient;
-
-  private readonly jwt; // Used to extract the issuer from the used token
+  #client: BitgoClient;
 
   constructor(
     authDetails: ITokenAuthDetails,
-    _authType: AuthTypes,
+    // eslint-disable-next-line @typescript-eslint/default-param-last
     apiUrl = DefaultBitgoCustodianDetails.apiUrl,
-    private readonly _cacheAge: number,
+    _cacheAge: number,
   ) {
     super();
     const { jwt } = authDetails;
-    this.client = new BitgoClient(apiUrl, jwt);
-    this.jwt = jwt;
+    this.#client = new BitgoClient(apiUrl, jwt);
   }
 
   async getEthereumAccounts(
     chainId?: number,
   ): Promise<IEthereumAccount<IBitgoEthereumAccountCustodianDetails>[]> {
-    const accounts = await this.client.getEthereumAccounts();
+    const accounts = await this.#client.getEthereumAccounts();
 
     const mappedAccounts = accounts.map((account) => ({
       name:
-        account.labels.find((label) => label.key === 'Wallet Name')?.value ||
+        account.labels.find((label) => label.key === 'Wallet Name')?.value ??
         'Unnamed Bitgo Wallet',
       address: account.address,
       balance: account.balance,
@@ -95,7 +91,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
       Number(txParams.gasLimit) + BITGO_ADDITIONAL_GAS
     ).toString();
 
-    const result = await this.client.createTransaction(
+    const result = await this.#client.createTransaction(
       { walletId, coinId },
       txParams,
     );
@@ -116,9 +112,9 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
 
   async getTransaction(
     _from: string,
-    custodian_transactionId: string,
+    custodianTransactionId: string,
   ): Promise<ITransactionDetails | null> {
-    const result = await this.client.getTransaction(custodian_transactionId);
+    const result = await this.#client.getTransaction(custodianTransactionId);
 
     if (!result) {
       return null;
@@ -140,12 +136,12 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
 
   // Obtain a JWT from the custodian that we can use to authenticate to
   public async getCustomerProof(): Promise<string> {
-    const { data } = await this.client.getCustomerProof();
+    const { data } = await this.#client.getCustomerProof();
     return data;
   }
 
   async getSupportedChains(address: string): Promise<string[]> {
-    const account = await this.client.getEthereumAccountByAddress(address);
+    const account = await this.#client.getEthereumAccountByAddress(address);
     if (!account) {
       return [];
     }
@@ -165,13 +161,13 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
     return null;
   }
 
-  changeRefreshTokenAuthDetails(authDetails: any): void {
+  changeRefreshTokenAuthDetails(_authDetails: any): void {
     throw new Error('BitGo does not support refresh tokens');
   }
 
   async getSignedMessage(
     address: string,
-    custodian_signedMessageId: string,
+    custodianSignedMessageId: string,
   ): Promise<ISignedMessageDetails | null> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
@@ -186,8 +182,8 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
     const walletId = accounts[0].custodianDetails.accountId;
     const { coinId } = accounts[0].custodianDetails;
 
-    const result = await this.client.getSignedMessage(
-      custodian_signedMessageId,
+    const result = await this.#client.getSignedMessage(
+      custodianSignedMessageId,
       coinId,
       walletId,
     );
@@ -203,6 +199,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   async signTypedData_v4(
     address: string,
     message: TypedMessage<MessageTypes>,
@@ -217,7 +214,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
     const walletId = accounts[0].custodianDetails.accountId;
     const { coinId } = accounts[0].custodianDetails;
 
-    const result = await this.client.signTypedData_v4(
+    const result = await this.#client.signTypedData_v4(
       address,
       message,
       coinId,
@@ -246,7 +243,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
     const walletId = accounts[0].custodianDetails.accountId;
     const { coinId } = accounts[0].custodianDetails;
 
-    const result = await this.client.signPersonalMessage(
+    const result = await this.#client.signPersonalMessage(
       address,
       message,
       coinId,

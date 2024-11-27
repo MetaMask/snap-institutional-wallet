@@ -3,7 +3,7 @@ import { mapTransactionStatus } from './map-status';
 describe('mapTransactionStatus', () => {
   it('should map created', () => {
     const result = mapTransactionStatus('created', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: false,
       submitted: false,
       signed: false,
@@ -15,7 +15,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map signed', () => {
     const result = mapTransactionStatus('signed', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: false,
       submitted: false,
       signed: true,
@@ -27,7 +27,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map submitted', () => {
     const result = mapTransactionStatus('submitted', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: false,
       submitted: true,
       signed: true,
@@ -39,7 +39,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map completed', () => {
     const result = mapTransactionStatus('completed', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: true,
       submitted: true,
       signed: true,
@@ -51,7 +51,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map mined', () => {
     const result = mapTransactionStatus('mined', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: true,
       submitted: true,
       signed: true,
@@ -63,7 +63,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map failed', () => {
     const result = mapTransactionStatus('failed', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: true,
       submitted: true,
       signed: true,
@@ -75,7 +75,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map aborted', () => {
     const result = mapTransactionStatus('aborted', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: true,
       submitted: false,
       signed: false,
@@ -87,7 +87,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map rejected', () => {
     const result = mapTransactionStatus('rejected', 'some reason');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: true,
       submitted: false,
       signed: false,
@@ -99,7 +99,7 @@ describe('mapTransactionStatus', () => {
 
   it('should map unknown', () => {
     const result = mapTransactionStatus('unknown');
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       finished: false,
       submitted: false,
       signed: false,

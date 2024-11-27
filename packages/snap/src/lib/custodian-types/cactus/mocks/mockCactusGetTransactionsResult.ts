@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { ICactusTransaction } from '../interfaces/ICactusTransaction';
 
 export const mockCactusGetTransactionsResult: ICactusTransaction[] = [

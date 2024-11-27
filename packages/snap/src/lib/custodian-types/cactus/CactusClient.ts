@@ -14,15 +14,19 @@ import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 const CACTUS_CACHE_AGE = 120 * 60;
 
 export class CactusClient {
-  private readonly cache = new SimpleCache();
+  #cache = new SimpleCache();
 
-  constructor(
-    private readonly apiUrl: string,
-    private readonly refreshToken: string,
-  ) {}
+  #apiUrl: string;
+
+  #refreshToken: string;
+
+  constructor(apiUrl: string, refreshToken: string) {
+    this.#apiUrl = apiUrl;
+    this.#refreshToken = refreshToken;
+  }
 
   async getHeaders(): Promise<any['headers']> {
-    const accessToken = await this.cache.tryCaching<string>(
+    const accessToken = await this.#cache.tryCaching<string>(
       'accessToken',
       CACTUS_CACHE_AGE,
       async () => {
@@ -37,14 +41,14 @@ export class CactusClient {
   }
 
   async getAccessToken(): Promise<string> {
-    const response = await fetch(`${this.apiUrl}/tokens`, {
+    const response = await fetch(`${this.#apiUrl}/tokens`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         grantType: 'refresh_token',
-        refreshToken: this.refreshToken,
+        refreshToken: this.#refreshToken,
       }),
     });
 
@@ -64,7 +68,7 @@ export class CactusClient {
   async getEthereumAccounts(): Promise<ICactusEthereumAccount[]> {
     const headers = await this.getHeaders();
 
-    const response = await fetch(`${this.apiUrl}/eth-accounts`, {
+    const response = await fetch(`${this.#apiUrl}/eth-accounts`, {
       headers,
     });
 
@@ -100,7 +104,7 @@ export class CactusClient {
     }
 
     const response = await fetch(
-      `${this.apiUrl}/transactions?chainId=${cactusTxDetails.chainId}`,
+      `${this.#apiUrl}/transactions?chainId=${cactusTxDetails.chainId}`,
       {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -116,18 +120,18 @@ export class CactusClient {
   }
 
   async getSignedMessage(
-    custodian_signedMessageId: string,
+    custodianSignedMessageId: string,
   ): Promise<ICactusSignatureResponse | null> {
     const headers = await this.getHeaders();
 
     const response = await fetch(
-      `${this.apiUrl}/signatures?transactionId=${custodian_signedMessageId}`,
+      `${this.#apiUrl}/signatures?transactionId=${custodianSignedMessageId}`,
       {
         headers,
       },
     );
 
-    const contextErrorMessage = `Error getting signed message with id ${custodian_signedMessageId}`;
+    const contextErrorMessage = `Error getting signed message with id ${custodianSignedMessageId}`;
     const data = await handleResponse<ICactusSignatureResponse[]>(
       response,
       contextErrorMessage,
@@ -141,18 +145,18 @@ export class CactusClient {
   }
 
   async getTransaction(
-    custodian_transactionId: string,
+    custodianTransactionId: string,
   ): Promise<ICactusTransaction | null> {
     const headers = await this.getHeaders();
 
     const response = await fetch(
-      `${this.apiUrl}/transactions?transactionId=${custodian_transactionId}`,
+      `${this.#apiUrl}/transactions?transactionId=${custodianTransactionId}`,
       {
         headers,
       },
     );
 
-    const contextErrorMessage = `Error getting transaction with id ${custodian_transactionId}`;
+    const contextErrorMessage = `Error getting transaction with id ${custodianTransactionId}`;
     const data = await handleResponse<ICactusTransaction[]>(
       response,
       contextErrorMessage,
@@ -169,7 +173,7 @@ export class CactusClient {
     const headers = await this.getHeaders();
 
     const response = await fetch(
-      `${this.apiUrl}/transactions?chainId=${chainId}`,
+      `${this.#apiUrl}/transactions?chainId=${chainId}`,
       {
         headers,
       },
@@ -185,7 +189,7 @@ export class CactusClient {
   async getCustomerProof(): Promise<ICactusCustomerProof> {
     const headers = await this.getHeaders();
 
-    const response = await fetch(`${this.apiUrl}/customer-proof`, {
+    const response = await fetch(`${this.#apiUrl}/customer-proof`, {
       method: 'POST',
       headers,
       body: JSON.stringify({}),
@@ -198,6 +202,7 @@ export class CactusClient {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   async signTypedData_v4(
     fromAddress: string,
     message: TypedMessage<MessageTypes>,
@@ -212,7 +217,7 @@ export class CactusClient {
       signatureVersion,
     };
 
-    let url = `${this.apiUrl}/signatures`;
+    let url = `${this.#apiUrl}/signatures`;
 
     if (chainId) {
       url += `?chainId=${chainId}`;
@@ -242,7 +247,7 @@ export class CactusClient {
       signatureVersion: 'personalSign',
     };
 
-    const response = await fetch(`${this.apiUrl}/signatures`, {
+    const response = await fetch(`${this.#apiUrl}/signatures`, {
       method: 'POST',
       body: JSON.stringify(payload),
       headers,
@@ -255,7 +260,7 @@ export class CactusClient {
   async getChainIds(): Promise<ICactusChainIdsResponse> {
     const headers = await this.getHeaders();
 
-    const response = await fetch(`${this.apiUrl}/chainIds`, {
+    const response = await fetch(`${this.#apiUrl}/chainIds`, {
       headers,
     });
 

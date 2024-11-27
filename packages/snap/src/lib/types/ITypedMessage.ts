@@ -6,13 +6,14 @@ type MessageTypeProperty = {
 };
 
 export type MessageTypes = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   EIP712Domain: MessageTypeProperty[];
   [additionalProperties: string]: MessageTypeProperty[];
 };
 
-export type TypedMessage<T extends MessageTypes> = {
-  types: T;
-  primaryType: keyof T;
+export type TypedMessage<MessageType extends MessageTypes> = {
+  types: MessageType;
+  primaryType: keyof MessageType;
   domain: {
     name?: string;
     version?: string;

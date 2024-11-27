@@ -1,5 +1,5 @@
-export type JsonRpcResult<T> = {
+export type JsonRpcResult<ResultType> = {
   id: number;
   jsonrpc: string;
-  result: T;
+  result: ResultType;
 };

@@ -1,6 +1,7 @@
 import { SimpleCache } from './SimpleCache';
 
-const sleep = require('util').promisify(setTimeout);
+const sleep = async (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('SimpleCache', () => {
   it('should cache the results of a function', async () => {
@@ -12,14 +13,14 @@ describe('SimpleCache', () => {
 
     const result = await cache.tryCaching('test', 10, sampleFunction);
 
-    expect(result).toEqual(data);
+    expect(result).toStrictEqual(data);
 
-    expect(cache.cacheExists('test'));
+    expect(cache.cacheExists('test')).toBe(true);
     // Then go again
 
     const result2 = await cache.tryCaching('test', 10, sampleFunction);
 
-    expect(result2).toEqual(data);
+    expect(result2).toStrictEqual(data);
 
     expect(sampleFunction).toHaveBeenCalledTimes(1);
   });
@@ -33,7 +34,7 @@ describe('SimpleCache', () => {
 
     const result = await cache.tryCaching('test', -1, sampleFunction);
 
-    expect(result).toEqual(array);
+    expect(result).toStrictEqual(array);
 
     await sleep(2000); // sleep for two seconds
 
@@ -67,7 +68,7 @@ describe('SimpleCache', () => {
 
     cache.setCache('test', value);
 
-    expect(cache.getCache('test')).toEqual(value);
+    expect(cache.getCache('test')).toStrictEqual(value);
   });
 
   it('should allow you to manually check if a cache is still valid', async () => {

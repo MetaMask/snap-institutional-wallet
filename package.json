@@ -1,7 +1,6 @@
 {
   "name": "@metamask/snap-custodial-wallet",
   "version": "0.0.1",
-  "private": false,
   "description": "Custodial accounts in MetaMask",
   "keywords": [
     "metamask",

@@ -85,7 +85,7 @@ export class CustodialKeyring implements Keyring {
   ): Promise<CustodialKeyringAccount> {
     // Try to get the options from the custodian metadata
     const custodian = custodianMetadata.find(
-      (custodian) => custodian.apiBaseUrl === options.details.custodianApiUrl,
+      (item) => item.apiBaseUrl === options.details.custodianApiUrl,
     );
 
     const { address, name } = options;
@@ -328,7 +328,13 @@ export class CustodialKeyring implements Keyring {
     await snap.request({
       method: 'snap_dialog',
       params: {
-        content: <DeepLink custodianDeepLink={deepLink} options={options} />,
+        content: (
+          <DeepLink
+            custodianDeepLink={deepLink}
+            options={options}
+            requestTypeDisplayName={requestTypeDisplayName}
+          />
+        ),
       },
     });
 

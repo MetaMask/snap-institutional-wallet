@@ -1,3 +1,5 @@
+import type { Json } from '@metamask/snaps-sdk';
+
 import type { KeyringState } from './lib/types/CustodialKeyring';
 import logger from './logger';
 
@@ -40,6 +42,9 @@ export async function saveState(state: KeyringState) {
 
   await snap.request({
     method: 'snap_manageState',
-    params: { operation: 'update', newState: state },
+    params: {
+      operation: 'update',
+      newState: state as unknown as Record<string, Json>,
+    },
   });
 }

@@ -55,6 +55,71 @@ function hasPermission(origin: string, method: string): boolean {
   return originPermissions.get(origin)?.includes(method) ?? false;
 }
 
+const handleOnboarding = async (request: OnBoardingRpcRequest) => {
+  const CustodianApiClass = CustodianApiMap[request.custodianType];
+  const authType = AuthTypeMap[request.custodianType];
+  keyring = await getKeyring();
+
+  if (!Object.values(CustodianType).includes(request.custodianType)) {
+    throw new Error(`Custodian type ${request.custodianType} not supported`);
+  }
+
+  const custodianApi = new CustodianApiClass(
+    {
+      refreshToken: request.token,
+      refreshTokenUrl: request.refreshTokenUrl,
+    },
+    authType,
+    request.custodianApiUrl,
+    1000,
+  );
+
+  let accounts = await custodianApi.getEthereumAccounts();
+
+  // Filter out accounts that already exist in the keyring
+  const existingAccounts = await keyring.listAccounts();
+
+  for (const existingAccount of existingAccounts) {
+    accounts = accounts.filter(
+      (account) => account.address !== existingAccount.address,
+    );
+  }
+
+  let result: OnboardingAccount[];
+
+  try {
+    result = await chooseAccountDialog({
+      request,
+      accounts,
+      activity: 'onboarding',
+    });
+  } catch (error) {
+    logger.error('Error choosing account', error);
+    throw error;
+  }
+
+  if (result === null) {
+    // No accounts selected, show error dialog
+    return [];
+  }
+
+  const accountsToAdd = result.map((account) => ({
+    address: account.address,
+    name: account.name,
+    details: { ...request },
+  }));
+
+  for (const account of accountsToAdd) {
+    try {
+      await keyring.createAccount(account);
+    } catch (error) {
+      logger.error('Error creating account', error);
+    }
+  }
+
+  return accountsToAdd;
+};
+
 export const onRpcRequest: OnRpcRequestHandler = async ({
   origin,
   request,
@@ -274,73 +339,6 @@ export const onCronjob: OnCronjobHandler = async ({ request }) => {
   }
 };
 
-// Maybe there should be a better place to map the custodian types to the actual custodian APIs
-
-const handleOnboarding = async (request: OnBoardingRpcRequest) => {
-  const CustodianApiClass = CustodianApiMap[request.custodianType];
-  const authType = AuthTypeMap[request.custodianType];
-  keyring = await getKeyring();
-
-  if (!Object.values(CustodianType).includes(request.custodianType)) {
-    throw new Error(`Custodian type ${request.custodianType} not supported`);
-  }
-
-  const custodianApi = new CustodianApiClass(
-    {
-      refreshToken: request.token,
-      refreshTokenUrl: request.refreshTokenUrl,
-    },
-    authType,
-    request.custodianApiUrl,
-    1000,
-  );
-
-  let accounts = await custodianApi.getEthereumAccounts();
-
-  // Filter out accounts that already exist in the keyring
-  const existingAccounts = await keyring.listAccounts();
-
-  for (const existingAccount of existingAccounts) {
-    accounts = accounts.filter(
-      (account) => account.address !== existingAccount.address,
-    );
-  }
-
-  let result: OnboardingAccount[];
-
-  try {
-    result = await chooseAccountDialog({
-      request,
-      accounts,
-      activity: 'onboarding',
-    });
-  } catch (error) {
-    logger.error('Error choosing account', error);
-    throw error;
-  }
-
-  if (result === null) {
-    // No accounts selected, show error dialog
-    return [];
-  }
-
-  const accountsToAdd = result.map((account) => ({
-    address: account.address,
-    name: account.name,
-    details: { ...request },
-  }));
-
-  for (const account of accountsToAdd) {
-    try {
-      await keyring.createAccount(account);
-    } catch (error) {
-      logger.error('Error creating account', error);
-    }
-  }
-
-  return accountsToAdd;
-};
-
 export const onUserInput: OnUserInputHandler = async ({
   id,
   event,
@@ -361,7 +359,7 @@ export const onUserInput: OnUserInputHandler = async ({
     );
 
     if (ourContext?.activity === 'onboarding') {
-      await onboardingInterfaceHandler({ id, event, context: ourContext });
+      await onboardingInterfaceHandler({ event, context: ourContext });
     }
   } catch (error) {
     logger.error('onUserInput error', error);

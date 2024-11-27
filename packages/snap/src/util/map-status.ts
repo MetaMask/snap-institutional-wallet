@@ -10,9 +10,10 @@ type TransactionStatus = {
 } & Status;
 
 /**
- *
- * @param status
- * @param reason
+ * Map a status string to a transaction status object.
+ * @param status - The status string.
+ * @param reason - The reason for the status.
+ * @returns The transaction status object.
  */
 export function mapTransactionStatus(
   status: string,

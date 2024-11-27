@@ -13,26 +13,26 @@ import type { IBitgoTxDetails } from './interfaces/IBitgoTxDetails';
 import type { TypedMessage, MessageTypes } from '../../types/ITypedMessage';
 
 export class BitgoClient {
-  private readonly bitgoApiurl: string;
+  #bitgoApiUrl: string;
 
-  private readonly jwt: string;
+  #token: string;
 
-  constructor(apiUrl: string, jwt: string) {
-    this.bitgoApiurl = apiUrl;
-    this.jwt = jwt;
+  constructor(apiUrl: string, token: string) {
+    this.#bitgoApiUrl = apiUrl;
+    this.#token = token;
   }
 
   getHeaders(): any['headers'] {
     return {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.jwt}`,
+      Authorization: `Bearer ${this.#token}`,
     };
   }
 
   async getEthereumAccounts(): Promise<IBitgoEthereumAccount[]> {
     const headers = this.getHeaders();
 
-    const response = await fetch(`${this.bitgoApiurl}/wallets`, {
+    const response = await fetch(`${this.#bitgoApiUrl}/wallets`, {
       headers,
     });
 
@@ -50,7 +50,7 @@ export class BitgoClient {
     const headers = this.getHeaders();
 
     const response = await fetch(
-      `${this.bitgoApiurl}/mmi/wallets/address/${address}`,
+      `${this.#bitgoApiUrl}/mmi/wallets/address/${address}`,
       {
         headers,
       },
@@ -73,15 +73,10 @@ export class BitgoClient {
   ): Promise<IBitgoTransaction> {
     const headers = this.getHeaders();
 
-    if (txParams.type === '0' || txParams.type === '1') {
-      txParams.gasPrice = txParams.gasPrice;
-    } else if (txParams.type === '2') {
-      txParams.maxPriorityFeePerGas = txParams.maxPriorityFeePerGas;
-      txParams.maxFeePerGas = txParams.maxFeePerGas;
-    }
-
     const response = await fetch(
-      `${this.bitgoApiurl}/mmi/${bitgoTxDetails.coinId}/wallet/${bitgoTxDetails.walletId}/tx/build`,
+      `${this.#bitgoApiUrl}/mmi/${bitgoTxDetails.coinId}/wallet/${
+        bitgoTxDetails.walletId
+      }/tx/build`,
       {
         method: 'POST',
         headers,
@@ -100,18 +95,18 @@ export class BitgoClient {
   }
 
   async getTransaction(
-    custodian_transactionId: string,
+    custodianTransactionId: string,
   ): Promise<IBitgoTransaction | null> {
     const headers = this.getHeaders();
 
     const response = await fetch(
-      `${this.bitgoApiurl}/mmi/wallets/transactions/${custodian_transactionId}`,
+      `${this.#bitgoApiUrl}/mmi/wallets/transactions/${custodianTransactionId}`,
       {
         headers,
       },
     );
 
-    const contextErrorMessage = `Error getting transaction with id ${custodian_transactionId}`;
+    const contextErrorMessage = `Error getting transaction with id ${custodianTransactionId}`;
     const transaction = await handleResponse<{ data: IBitgoTransaction[] }>(
       response,
       contextErrorMessage,
@@ -126,7 +121,7 @@ export class BitgoClient {
   async getTransactions(): Promise<IBitgoTransaction[]> {
     const headers = this.getHeaders();
 
-    const response = await fetch(`${this.bitgoApiurl}/custodian/transaction`, {
+    const response = await fetch(`${this.#bitgoApiUrl}/custodian/transaction`, {
       headers,
     });
 
@@ -141,7 +136,7 @@ export class BitgoClient {
   async getCustomerProof(): Promise<IBitgoCustomerProof> {
     const headers = this.getHeaders();
 
-    const response = await fetch(`${this.bitgoApiurl}/mmi/customer-proof`, {
+    const response = await fetch(`${this.#bitgoApiUrl}/mmi/customer-proof`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -157,6 +152,7 @@ export class BitgoClient {
     return customerProof;
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   async signTypedData_v4(
     fromAddress: string,
     message: TypedMessage<MessageTypes>,
@@ -173,7 +169,7 @@ export class BitgoClient {
     };
 
     const response = await fetch(
-      `${this.bitgoApiurl}/mmi/${coinId}/wallet/${walletId}/messages/typed`,
+      `${this.#bitgoApiUrl}/mmi/${coinId}/wallet/${walletId}/messages/typed`,
       {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -203,7 +199,7 @@ export class BitgoClient {
     };
 
     const response = await fetch(
-      `${this.bitgoApiurl}/mmi/${coinId}/wallet/${walletId}/messages/personal`,
+      `${this.#bitgoApiUrl}/mmi/${coinId}/wallet/${walletId}/messages/personal`,
       {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -220,20 +216,22 @@ export class BitgoClient {
   }
 
   async getSignedMessage(
-    custodian_signedMessageId: string,
+    custodianSignedMessageId: string,
     coinId: string,
     walletId: string,
   ): Promise<IBitgoPersonalSignResponse> {
     const headers = await this.getHeaders();
 
     const response = await fetch(
-      `${this.bitgoApiurl}/mmi/${coinId}/wallet/${walletId}/messages/${custodian_signedMessageId}`,
+      `${
+        this.#bitgoApiUrl
+      }/mmi/${coinId}/wallet/${walletId}/messages/${custodianSignedMessageId}`,
       {
         headers,
       },
     );
 
-    const contextErrorMessage = `Error getting signed message with id ${custodian_signedMessageId}`;
+    const contextErrorMessage = `Error getting signed message with id ${custodianSignedMessageId}`;
     const data = await handleResponse(response, contextErrorMessage);
     return data as IBitgoPersonalSignResponse;
   }

@@ -7,7 +7,6 @@ import { mapTransactionStatus } from '../../../util/map-status';
 import { SimpleCache } from '../../simple-cache';
 import type {
   ICustodianApi,
-  AuthTypes,
   CustodianDeepLink,
   IEIP1559TxParams,
   IEthereumAccount,
@@ -21,24 +20,27 @@ import type { CreateTransactionMetadata } from '../../types/CreateTransactionMet
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
-  private readonly client: CactusClient;
+  #client: CactusClient;
 
-  private readonly cache = new SimpleCache();
+  #cache = new SimpleCache();
+
+  #cacheAge: number;
 
   constructor(
     authDetails: IRefreshTokenAuthDetails,
-    _authType: AuthTypes,
+    // eslint-disable-next-line @typescript-eslint/default-param-last
     apiUrl = DefaultCactusCustodianDetails.apiUrl,
-    private readonly cacheAge: number,
+    cacheAge: number,
   ) {
     super();
-    this.client = new CactusClient(apiUrl, authDetails.refreshToken);
+    this.#cacheAge = cacheAge;
+    this.#client = new CactusClient(apiUrl, authDetails.refreshToken);
   }
 
   async getEthereumAccounts(): Promise<
     IEthereumAccount<ICactusEthereumAccountCustodianDetails>[]
   > {
-    const accounts = await this.client.getEthereumAccounts();
+    const accounts = await this.#client.getEthereumAccounts();
 
     const mappedAccounts = accounts.map((account) => ({
       name: account.name || 'Cactus wallet',
@@ -75,14 +77,16 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
       return accounts;
     }
 
-    return accounts.filter((account) => new RegExp(name).test(account.name));
+    return accounts.filter((account) =>
+      new RegExp(name, 'u').test(account.name),
+    );
   }
 
   async createTransaction(
     txParams: IEIP1559TxParams | ILegacyTXParams,
     txMeta: CreateTransactionMetadata,
   ): Promise<ITransactionDetails> {
-    const result = await this.client.createTransaction(
+    const result = await this.#client.createTransaction(
       { chainId: Number(txMeta.chainId), note: txMeta.note ?? '' },
       txParams,
     );
@@ -103,9 +107,9 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
 
   async getTransaction(
     _from: string,
-    custodian_transactionId: string,
+    custodianTransactionId: string,
   ): Promise<ITransactionDetails | null> {
-    const result = await this.client.getTransaction(custodian_transactionId);
+    const result = await this.#client.getTransaction(custodianTransactionId);
 
     // Cactus API sometimes returns 200 but gives us nothing
     if (!result) {
@@ -128,17 +132,17 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
 
   async getSignedMessage(
     address: string,
-    custodian_signedMessageId: string,
+    custodianSignedMessageId: string,
   ): Promise<ISignedMessageDetails | null> {
-    const result = await this.client.getSignedMessage(
-      custodian_signedMessageId,
+    const result = await this.#client.getSignedMessage(
+      custodianSignedMessageId,
     );
 
-    if (!result || !(result.signature && result.signature.length)) {
+    if (!result?.signature?.length) {
       return null;
     }
     return {
-      id: result.custodian_transactionId,
+      id: result.custodian_transactionId ?? '',
       signature: result.signature,
       status: mapTransactionStatus(result.transactionStatus),
       from: address,
@@ -147,16 +151,17 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
 
   // Obtain a JWT from the custodian that we can use to authenticate to
   public async getCustomerProof(): Promise<string> {
-    const { jwt } = await this.client.getCustomerProof();
+    const { jwt } = await this.#client.getCustomerProof();
     return jwt;
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   async signTypedData_v4(
     address: string,
     message: TypedMessage<MessageTypes>,
     version: string,
   ): Promise<ISignedMessageDetails> {
-    const result = await this.client.signTypedData_v4(
+    const result = await this.#client.signTypedData_v4(
       address,
       message,
       version,
@@ -175,7 +180,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
     address: string,
     message: string,
   ): Promise<ISignedMessageDetails> {
-    const result = await this.client.signPersonalMessage(address, message);
+    const result = await this.#client.signPersonalMessage(address, message);
 
     return {
       id: result.custodian_transactionId,
@@ -190,10 +195,10 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
   }
 
   async getSupportedChains(): Promise<string[]> {
-    const { networks } = await this.client.getChainIds();
-    return this.cache.tryCaching<string[]>(
+    const { networks } = await this.#client.getChainIds();
+    return this.#cache.tryCaching<string[]>(
       'getSupportedChains',
-      this.cacheAge,
+      this.#cacheAge,
       async () => {
         return networks.map((network) => network.chainID);
       },
@@ -212,7 +217,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
     return null;
   }
 
-  changeRefreshTokenAuthDetails(authDetails: IRefreshTokenAuthDetails): void {
+  changeRefreshTokenAuthDetails(_authDetails: IRefreshTokenAuthDetails): void {
     throw new Error('Not implemented yet');
   }
 }

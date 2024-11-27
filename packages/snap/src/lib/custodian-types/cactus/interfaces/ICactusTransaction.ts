@@ -1,7 +1,7 @@
 export type ICactusTransaction = {
-  nonce: string;
+  nonce: string | null;
   from: string;
-  signature: null;
+  signature: string | null;
   transactionStatus:
     | 'created'
     | 'approved'
@@ -10,9 +10,10 @@ export type ICactusTransaction = {
     | 'failed'
     | 'completed';
   transactionHash: string | null;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   custodian_transactionId: string;
-  gasPrice: string;
+  gasPrice: string | null;
   maxFeePerGas: string | null;
   maxPriorityFeePerGas: string | null;
-  gasLimit: string;
+  gasLimit: string | null;
 };

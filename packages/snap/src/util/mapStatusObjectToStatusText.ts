@@ -7,8 +7,10 @@ type StatusDictionary = {
 };
 
 /**
+ * Map a status object to a status text.
  *
- * @param status
+ * @param status - The status object.
+ * @returns The status text.
  */
 export function mapStatusObjectToStatusText(status: StatusDictionary): string {
   if (status.finished && status.submitted && status.signed && status.success) {

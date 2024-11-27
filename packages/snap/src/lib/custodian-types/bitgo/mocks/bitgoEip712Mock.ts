@@ -16,5 +16,6 @@ export const bitgoMockEip712Response: IBitgoEIP712Response = {
     message: '\x19Ethereum Signed Message:\n13test_personal',
     signature: '0xtest',
   },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   _meta: { reqId: 'a3672f35-36c5-461c-a71d-adc46e48835a' },
 };

@@ -1,4 +1,3 @@
-import { IEthereumAccount, IEthereumAccountCustodianDetails } from '.';
 import type { OnBoardingRpcRequest } from './OnBoardingRpcRequest';
 
 export type OnboardingContext = {

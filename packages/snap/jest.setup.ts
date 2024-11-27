@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import  logger from './src/logger';
+import logger from './src/logger';
 
 // Mock the console methods
 jest.spyOn(logger, 'log').mockImplementation(() => {

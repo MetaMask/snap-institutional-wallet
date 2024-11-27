@@ -1,9 +1,7 @@
 import type { EventEmitter } from 'events';
 
-import { IMetamaskContractMetadata } from '.';
 import type {
   AuthDetails,
-  AuthTypes,
   IEIP1559TxParams,
   ILegacyTXParams,
   IRefreshTokenAuthDetails,
@@ -21,7 +19,6 @@ import type { ReplaceTransactionParams } from './ReplaceTransactionParams';
 
 export type CustodianApiConstructor = new (
   authDetails: AuthDetails,
-  authType: AuthTypes,
   apiUrl: string,
   cacheAge: number,
 ) => ICustodianApi;
@@ -59,6 +56,7 @@ export type ICustodianApi = {
   // Obtain a JWT from the custodian that we can use to authenticate to
   getCustomerProof(): Promise<string>;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   signTypedData_v4(
     address: string,
     data: TypedMessage<MessageTypes>,

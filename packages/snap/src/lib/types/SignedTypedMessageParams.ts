@@ -1,4 +1,4 @@
-import type { MessageTypes, TypedMessage } from 'src/interfaces/ITypedMessage';
+import type { MessageTypes, TypedMessage } from './ITypedMessage';
 
 export type SignedTypedMessageParams = {
   address: string;

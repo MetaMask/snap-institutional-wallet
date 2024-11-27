@@ -1,14 +1,16 @@
+/* eslint-disable jest/no-conditional-expect */
+/* eslint-disable @typescript-eslint/naming-convention */
 import fetchMock from 'jest-fetch-mock';
 
-import { JsonRpcClient } from './ECA1Client';
+import { ECA1Client } from './ECA1Client';
 import { SimpleCache } from '../../simple-cache';
 import { INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT } from '../constants';
-import { mockJsonRpcCreateTransactionPayload } from './mocks/mockJsonRpcCreateTransactionPayload';
-import { mockJsonRpcGetSignedMessageByIdPayload } from './mocks/mockJsonRpcGetSignedMessageByIdPayload';
-import { mockJsonRpcGetTransactionByIdPayload } from './mocks/mockJsonRpcGetTransactionByIdPayload';
-import { mockJsonRpcGetTransactionLinkPayload } from './mocks/mockJsonRpcGetTransactionLinkPayload';
-import { mockJsonRpcSignPayload } from './mocks/mockJsonRpcSignPayload';
-import { mockJsonRpcSignTypedDataPayload } from './mocks/mockJsonRpcSignTypedDataPayload';
+import { mockECA1CreateTransactionPayload } from './mocks/mockECA1CreateTransactionPayload';
+import { mockECA1GetSignedMessageByIdPayload } from './mocks/mockECA1GetSignedMessageByIdPayload';
+import { mockECA1GetTransactionByIdPayload } from './mocks/mockECA1GetTransactionByIdPayload';
+import { mockECA1GetTransactionLinkPayload } from './mocks/mockECA1GetTransactionLinkPayload';
+import { mockECA1SignPayload } from './mocks/mockECA1SignPayload';
+import { mockECA1SignTypedDataPayload } from './mocks/mockECA1SignTypedDataPayload';
 
 // So that we can access the method returned by the call factory
 const jsonRpcCall = jest
@@ -31,8 +33,8 @@ jest.mock('@metamask-institutional/simplecache');
 
 fetchMock.enableMocks();
 
-describe('JsonRpcClient', () => {
-  let client: JsonRpcClient;
+describe('ECA1Client', () => {
+  let client: ECA1Client;
 
   const mockedSimpleCache = jest.mocked(SimpleCache);
   let mockedSimpleCacheInstance: SimpleCache;
@@ -44,7 +46,7 @@ describe('JsonRpcClient', () => {
     mockedSimpleCache.mockClear();
     fetchMock.resetMocks();
 
-    client = new JsonRpcClient(
+    client = new ECA1Client(
       'http://test/json-rpc',
       'refresh_token',
       'http://refresh-token-url',
@@ -124,10 +126,10 @@ describe('JsonRpcClient', () => {
       expect(result).toBe('cached');
     });
 
-    it('throws an error if there is a HTTP error', () => {
+    it('throws an error if there is a HTTP error', async () => {
       fetchMock.mockRejectedValue(new Error('HTTP error'));
 
-      expect(client.getAccessToken()).rejects.toThrow('HTTP error');
+      await expect(client.getAccessToken()).rejects.toThrow('HTTP error');
     });
 
     it('emit an ITR event if there is a HTTP 401 error status', async () => {
@@ -145,7 +147,7 @@ describe('JsonRpcClient', () => {
 
       try {
         await client.getAccessToken();
-      } catch (e) {
+      } catch (error) {
         await new Promise((resolve, _reject) => {
           setTimeout(() => {
             expect(messageHandler).toHaveBeenCalledWith({
@@ -156,7 +158,7 @@ describe('JsonRpcClient', () => {
           }, 100);
         });
 
-        expect(client.getAccessToken()).rejects.toThrow(
+        await expect(client.getAccessToken()).rejects.toThrow(
           'Refresh token provided is no longer valid.',
         );
       }
@@ -187,11 +189,11 @@ describe('JsonRpcClient', () => {
 
   describe('createTransaction', () => {
     it('should call the custodian_createTransaction method on the json rpc caller', async () => {
-      await client.createTransaction(mockJsonRpcCreateTransactionPayload);
+      await client.createTransaction(mockECA1CreateTransactionPayload);
 
       expect(jsonRpcCall).toHaveBeenCalledWith(
         'custodian_createTransaction',
-        mockJsonRpcCreateTransactionPayload,
+        mockECA1CreateTransactionPayload,
         'accesstoken',
       );
     });
@@ -210,10 +212,10 @@ describe('JsonRpcClient', () => {
 
   describe('signPersonalMessage', () => {
     it('should call the custodian_sign method on the json rpc caller', async () => {
-      await client.signPersonalMessage(mockJsonRpcSignPayload);
+      await client.signPersonalMessage(mockECA1SignPayload);
       expect(jsonRpcCall).toHaveBeenCalledWith(
         'custodian_sign',
-        mockJsonRpcSignPayload,
+        mockECA1SignPayload,
         'accesstoken',
       );
     });
@@ -221,10 +223,10 @@ describe('JsonRpcClient', () => {
 
   describe('signTypedData', () => {
     it('should call the custodian_signTypedData method on the json rpc caller', async () => {
-      await client.signTypedData(mockJsonRpcSignTypedDataPayload);
+      await client.signTypedData(mockECA1SignTypedDataPayload);
       expect(jsonRpcCall).toHaveBeenCalledWith(
         'custodian_signTypedData',
-        mockJsonRpcSignTypedDataPayload,
+        mockECA1SignTypedDataPayload,
         'accesstoken',
       );
     });
@@ -232,10 +234,10 @@ describe('JsonRpcClient', () => {
 
   describe('getSignedMessageBy', () => {
     it('should call the custodian_getSignedMessageById method on the json rpc caller', async () => {
-      await client.getSignedMessage(mockJsonRpcGetSignedMessageByIdPayload);
+      await client.getSignedMessage(mockECA1GetSignedMessageByIdPayload);
       expect(jsonRpcCall).toHaveBeenCalledWith(
         'custodian_getSignedMessageById',
-        mockJsonRpcGetSignedMessageByIdPayload,
+        mockECA1GetSignedMessageByIdPayload,
         'accesstoken',
       );
     });
@@ -243,10 +245,10 @@ describe('JsonRpcClient', () => {
 
   describe('getTransaction', () => {
     it('should call the custodian_getTransactionById method on the json rpc caller', async () => {
-      await client.getTransaction(mockJsonRpcGetTransactionByIdPayload);
+      await client.getTransaction(mockECA1GetTransactionByIdPayload);
       expect(jsonRpcCall).toHaveBeenCalledWith(
         'custodian_getTransactionById',
-        mockJsonRpcGetTransactionByIdPayload,
+        mockECA1GetTransactionByIdPayload,
         'accesstoken',
       );
     });
@@ -254,10 +256,10 @@ describe('JsonRpcClient', () => {
 
   describe('getTransactionLink', () => {
     it('should call the custodian_getTransactionLink method on the json rpc caller', async () => {
-      await client.getTransactionLink(mockJsonRpcGetTransactionLinkPayload);
+      await client.getTransactionLink(mockECA1GetTransactionLinkPayload);
       expect(jsonRpcCall).toHaveBeenCalledWith(
         'custodian_getTransactionLink',
-        mockJsonRpcGetTransactionLinkPayload,
+        mockECA1GetTransactionLinkPayload,
         'accesstoken',
       );
     });
