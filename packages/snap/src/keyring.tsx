@@ -14,7 +14,6 @@ import { KeyringEvent } from '@metamask/keyring-api/dist/events';
 import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 
-import { DeepLink } from './components/DeepLink';
 import { ERROR_MESSAGES } from './lib/constants';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
 import { SignatureHandler } from './lib/handlers/signature';
@@ -103,6 +102,7 @@ export class CustodialKeyring implements Keyring {
             displayName: options.details.custodianDisplayName,
             deferPublication: custodian?.custodianPublishesTransaction ?? true,
           },
+          accountName: name,
         },
         address,
         methods: [
@@ -167,6 +167,11 @@ export class CustodialKeyring implements Keyring {
     } catch (error) {
       throwError((error as Error).message);
     }
+  }
+
+  async removeAccounts(ids: string[]): Promise<void> {
+    await Promise.all(ids.map((id) => delete this.#state.wallets[id]));
+    await this.#saveState();
   }
 
   listPendingRequests(): KeyringRequest[] {
@@ -304,41 +309,28 @@ export class CustodialKeyring implements Keyring {
       request.id,
     );
 
-    const { address, options } = await this.getAccount(request.account);
+    const { address } = await this.getAccount(request.account);
 
     // Distinguish between a transaction link and a message link
 
     let deepLink: CustodianDeepLink | null = null;
 
-    let requestTypeDisplayName: string | null = null;
-
     if (request.request.method === EthMethod.SignTransaction) {
       deepLink = (await this.getCustodianApiForAddress(
         address,
       ).getTransactionLink(result as string)) as CustodianDeepLink;
-      requestTypeDisplayName = 'transaction';
     } else {
       deepLink = (await this.getCustodianApiForAddress(
         address,
       ).getSignedMessageLink(result as string)) as CustodianDeepLink;
-      requestTypeDisplayName = 'signed message';
     }
-
-    await snap.request({
-      method: 'snap_dialog',
-      params: {
-        content: (
-          <DeepLink
-            custodianDeepLink={deepLink}
-            options={options}
-            requestTypeDisplayName={requestTypeDisplayName}
-          />
-        ),
-      },
-    });
 
     return {
       pending: true,
+      redirect: {
+        message: deepLink.text,
+        url: deepLink.url,
+      },
     };
   }
 
@@ -450,8 +442,6 @@ export class CustodialKeyring implements Keyring {
       common,
       pendingRequest,
     );
-
-    console.log('Transaction signature', signature);
 
     return signature;
   }

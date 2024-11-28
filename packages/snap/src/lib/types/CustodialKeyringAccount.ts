@@ -5,6 +5,7 @@ export type CustodialKeyringAccountOptions = {
     displayName: string;
     deferPublication: boolean;
   };
+  accountName?: string;
 };
 
 export type CustodialKeyringAccount = KeyringAccount & {

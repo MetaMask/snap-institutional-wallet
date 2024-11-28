@@ -73,8 +73,8 @@ export const AddressSelector: SnapComponent<AddressSelectorProps> = ({
         ))}
       </Box>
       <Footer>
-        <Button name={FormConstants.confirm}>Confirm</Button>
         <Button name={FormConstants.cancel}>Cancel</Button>
+        <Button name={FormConstants.confirm}>Confirm</Button>
       </Footer>
     </Container>
   );

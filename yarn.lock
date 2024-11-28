@@ -5294,11 +5294,13 @@ __metadata:
     "@metamask/keyring-api": ^8.1.3
     "@metamask/snaps-cli": 6.2.1
     "@metamask/snaps-jest": ^8.7.1
-    "@metamask/snaps-sdk": 6.9.0
+    "@metamask/snaps-sdk": 6.12.0
     "@metamask/snaps-types": ^3.0.0
     "@metamask/utils": ^8.1.0
     "@types/jest": ^29.5.14
     "@types/node": ^20.6.2
+    "@types/react": 18.2.4
+    "@types/react-dom": 18.2.2
     "@typescript-eslint/eslint-plugin": ^5.33.0
     "@typescript-eslint/parser": ^5.33.0
     depcheck: ^1.4.6
@@ -5535,16 +5537,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/snaps-sdk@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@metamask/snaps-sdk@npm:6.9.0"
+"@metamask/snaps-sdk@npm:6.12.0":
+  version: 6.12.0
+  resolution: "@metamask/snaps-sdk@npm:6.12.0"
   dependencies:
     "@metamask/key-tree": ^9.1.2
-    "@metamask/providers": ^17.1.2
-    "@metamask/rpc-errors": ^6.3.1
+    "@metamask/providers": ^18.1.1
+    "@metamask/rpc-errors": ^7.0.1
     "@metamask/superstruct": ^3.1.0
-    "@metamask/utils": ^9.2.1
-  checksum: 73451155b2f144e8bcde1e00ccb79ca48a3317ecc02b6cf696c0f734b9b6909493025cff7209c910b6207043b5062254668005d17e334cd2b47545610116beeb
+    "@metamask/utils": ^10.0.0
+  checksum: 878dde330e161ee1eaa01a87899e9e1ea8c88561bfd20bc827c337271baf2748d9bdbad53e1eddf210325e9c8187f4585798118995fa725b1b8d8c4f4c53d821
   languageName: node
   linkType: hard
 
@@ -8212,6 +8214,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:18.2.2":
+  version: 18.2.2
+  resolution: "@types/react-dom@npm:18.2.2"
+  dependencies:
+    "@types/react": "*"
+  checksum: 261d8a47c886a1b80b48506fd77d9a4efb5511a603abc9a5c190f64005a2e7904f2b2ec28ee224b120d154c43d55ba7ae8300867bf85e95c1b82831828e04407
+  languageName: node
+  linkType: hard
+
 "@types/react-helmet@npm:^6.1.6":
   version: 6.1.6
   resolution: "@types/react-helmet@npm:6.1.6"
@@ -8238,6 +8249,17 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: 44289523dabaadcd3fd85689abb98f9ebcc8492d7e978348d1c986138acef4801030b279e89a19e38a6319e294bcea77559e37e0c803e4bacf2b8ae3a56ba587
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:18.2.4":
+  version: 18.2.4
+  resolution: "@types/react@npm:18.2.4"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: d920fc93832fe50d5e8175a0ba233086c97a9e238ff7327c8319b8dec57409618f491d6f71be2374c3132f40a8fc428b3e406c1e2a5f1dc32ccd6d47051786d2
   languageName: node
   linkType: hard
 

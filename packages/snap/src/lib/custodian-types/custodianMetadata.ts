@@ -5,7 +5,7 @@ enum CustodianApiVersions {
   ECA3 = 3, // ECA-3
 }
 
-type CustodianMetadata = {
+export type CustodianMetadata = {
   apiBaseUrl: string;
   refreshTokenUrl: string | null;
   name: string;
@@ -16,6 +16,7 @@ type CustodianMetadata = {
   custodianPublishesTransaction: boolean;
   iconUrl: string | null;
   isManualTokenInputSupported: boolean;
+  onboardingUrl?: string;
 };
 
 export const custodianMetadata: CustodianMetadata[] = [
@@ -30,6 +31,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://dashboard.metamask-institutional.io/custodian-icons/bitgo-icon.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://app.bitgo.com',
   },
   {
     refreshTokenUrl: null,
@@ -43,11 +45,12 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://dashboard.metamask-institutional.io/custodian-icons/bitgo-icon.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://app.bitgo.com',
   },
   {
     refreshTokenUrl: null,
     name: 'cactus',
-    displayName: null,
+    displayName: 'Cactus Custody',
     enabled: true,
     apiVersion: CustodianApiVersions.Cactus,
     custodianPublishesTransaction: true,
@@ -55,6 +58,7 @@ export const custodianMetadata: CustodianMetadata[] = [
       'https://dashboard.metamask-institutional.io/custodian-icons/cactus-icon.svg',
     isManualTokenInputSupported: false,
     apiBaseUrl: 'https://api.mycactus.com/custody/v1/mmi-api',
+    onboardingUrl: 'https://www.mycactus.com',
   },
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
@@ -66,6 +70,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://www.gk8.io/wp-content/uploads/2021/04/6-layers-4.svg',
     isManualTokenInputSupported: true,
+    onboardingUrl: 'https://www.gk8.io',
   },
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
@@ -77,6 +82,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://www.gk8.io/wp-content/uploads/2021/04/6-layers-4.svg',
     isManualTokenInputSupported: true,
+    onboardingUrl: 'https://www.gk8.io',
   },
   {
     refreshTokenUrl:
@@ -90,6 +96,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://raw.githubusercontent.com/safe-global/safe-react/dev/public/resources/logo.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://safe.global',
   },
   {
     refreshTokenUrl: 'https://safe-mmi.safe.global/api/v1/oauth/token/',
@@ -102,6 +109,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://raw.githubusercontent.com/safe-global/safe-react/dev/public/resources/logo.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://safe.global',
   },
   {
     refreshTokenUrl: 'https://safe-mmi.staging.5afe.dev/api/v1/oauth/token/',
@@ -114,6 +122,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://raw.githubusercontent.com/safe-global/safe-react/dev/public/resources/logo.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://safe.global',
   },
   {
     refreshTokenUrl:
@@ -126,6 +135,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://saturn-custody-ui.metamask-institutional.io/saturn.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://saturn-custody-ui.metamask-institutional.io',
   },
   {
     refreshTokenUrl: 'https://api.mpcvault.com/mmi/token-refresh',
@@ -138,6 +148,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://metamask-institutional.io/custodian-icons/mpcvault-icon.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://console.mpcvault.com/',
   },
   {
     refreshTokenUrl:
@@ -151,6 +162,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://neptune-custody-ui.metamask-institutional.io',
   },
   {
     refreshTokenUrl: 'https://api-preprod.uat.zodia.io/oauth/token',
@@ -162,6 +174,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://zodia.io',
   },
   {
     refreshTokenUrl: 'https://mmi.fireblocks.io/v1/auth/access',
@@ -174,6 +187,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://metamask-institutional.io/custodian-icons/fireblocks-icon.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://console.fireblocks.io/v2/',
   },
   {
     refreshTokenUrl: 'https://zapi.custody.zodia.io/oauth/token',
@@ -185,6 +199,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://zodia.io',
   },
   {
     refreshTokenUrl: 'https://api.sit.zodia.io/oauth/token',
@@ -196,6 +211,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://zodia.io',
   },
   {
     refreshTokenUrl:
@@ -209,6 +225,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://saturn-custody-ui.dev.metamask-institutional.io/saturn.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://saturn-custody-ui.dev.metamask-institutional.io',
   },
   {
     refreshTokenUrl: 'https://api-qa.qa.zodia.io/oauth/token',
@@ -220,6 +237,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://zodia.io',
   },
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
@@ -231,6 +249,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     custodianPublishesTransaction: true,
     iconUrl: 'https://www.gk8.io/wp-content/uploads/2021/04/6-layers-4.svg',
     isManualTokenInputSupported: true,
+    onboardingUrl: 'https://www.gk8.io',
   },
   {
     refreshTokenUrl: 'https://api.dev.mpcvault.com/mmi/token-refresh',
@@ -243,6 +262,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://dev.metamask-institutional.io/custodian-icons/mpcvault-icon.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://console.mpcvault.com/',
   },
   {
     refreshTokenUrl: 'https://gamma.signer.cubist.dev/v0/oauth/token',
@@ -280,5 +300,6 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl:
       'https://dev.metamask-institutional.io/custodian-icons/neptune-icon.svg',
     isManualTokenInputSupported: false,
+    onboardingUrl: 'https://neptune-custody-ui.dev.metamask-institutional.io',
   },
 ];
