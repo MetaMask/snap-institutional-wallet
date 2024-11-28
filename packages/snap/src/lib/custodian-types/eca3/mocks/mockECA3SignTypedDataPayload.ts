@@ -1,7 +1,7 @@
 import type { ECA3SignTypedDataPayload } from '../rpc-payloads/ECA3SignTypedDataPayload';
 
 export const mockJsonRpcSignTypedDataPayload: ECA3SignTypedDataPayload = [
-  { 
+  {
     address: '0xb2c77973279baaaf48c295145802695631d50c01',
     data: {
       types: {

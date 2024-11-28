@@ -14,7 +14,6 @@ import type {
   SignedTypedMessageMetadata,
 } from '../../types';
 import type { CreateTransactionMetadata } from '../../types/CreateTransactionMetadata';
-import type { IApiCallLogEntry } from '../../types/IApiCallLogEntry';
 import type { ICustodianApi } from '../../types/ICustodianApi';
 import type { IEthereumAccount } from '../../types/IEthereumAccount';
 import type { IEthereumAccountCustodianDetails } from '../../types/IEthereumAccountCustodianDetails';
@@ -24,7 +23,6 @@ import type { ITransactionDetails } from '../../types/ITransactionDetails';
 import type { ILegacyTXParams, IEIP1559TxParams } from '../../types/ITXParams';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 import {
-  API_REQUEST_LOG_EVENT,
   REFRESH_TOKEN_CHANGE_EVENT,
   INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT,
 } from '../constants';
@@ -60,10 +58,6 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
 
     this.#client.on(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, (event) => {
       this.emit(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, event);
-    });
-
-    this.#client.on(API_REQUEST_LOG_EVENT, (event: IApiCallLogEntry) => {
-      this.emit(API_REQUEST_LOG_EVENT, event);
     });
   }
 

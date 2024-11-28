@@ -335,6 +335,27 @@ const Index = () => {
       },
       successMessage: 'Request Rejected',
     },
+    {
+      name: 'Clear all requests',
+      description: 'Clear the request state',
+      action: {
+        callback: async () => {
+          const params = {
+            method: 'wallet_invokeSnap',
+            params: {
+              snapId: 'local:http://localhost:8080',
+              request: {
+                method: 'snap.internal.clearAllRequests',
+                params: {},
+              },
+            },
+          };
+          await window.ethereum.request(params);
+        },
+        label: 'Clear Requests',
+      },
+      successMessage: 'Requests cleared',
+    },
   ];
 
   return (

@@ -23,12 +23,12 @@ const onboardingState: {
   interfaceId: null,
 };
 
-export const setInterfaceId = (interfaceId: string) => {
+const setInterfaceId = (interfaceId: string) => {
   console.log('Setting interface ID', interfaceId);
   onboardingState.interfaceId = interfaceId;
 };
 
-export const getInterfaceState = async () => {
+const getInterfaceState = async () => {
   const state = await snap.request({
     method: 'snap_getInterfaceState',
     params: {

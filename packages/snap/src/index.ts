@@ -136,6 +136,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       return await handleOnboarding(request.params as OnBoardingRpcRequest);
     }
 
+    case InternalMethod.ClearAllRequests: {
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      return await (await getKeyring()).clearAllRequests();
+    }
+
     default: {
       throw new MethodNotSupportedError(request.method);
     }
@@ -214,6 +219,7 @@ async function handlePendingTransaction({
       transactionStatus.success &&
       transactionStatus.submitted) // They broadcasted it
   ) {
+    logger.info(`Transaction ${transactionId} is finished`);
     const newProperties: Partial<ITransactionDetails> = {};
 
     if (signedTransaction.signedRawTransaction) {

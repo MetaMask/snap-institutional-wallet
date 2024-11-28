@@ -22,8 +22,8 @@ export type ECA3GetTransactionByIdResponse = {
     };
     signedRawTransaction?: string;
   };
-  metadata?: {
-    chainId: number;
+  metadata: {
+    chainId: string;
     custodianPublishesTransaction: boolean;
     rpcUrl: string;
     note: string;

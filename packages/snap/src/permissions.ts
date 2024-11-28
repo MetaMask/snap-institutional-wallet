@@ -1,8 +1,8 @@
 import { KeyringRpcMethod } from '@metamask/keyring-api';
 
 export enum InternalMethod {
-  Test = 'snap.internal.test',
   Onboard = 'authentication.onboard',
+  ClearAllRequests = 'snap.internal.clearAllRequests',
 }
 
 export const originPermissions = new Map<string, string[]>([
@@ -36,8 +36,8 @@ export const originPermissions = new Map<string, string[]>([
       KeyringRpcMethod.ApproveRequest,
       KeyringRpcMethod.RejectRequest,
       // Custom methods
-      InternalMethod.Test,
       InternalMethod.Onboard,
+      InternalMethod.ClearAllRequests,
     ],
   ],
   [

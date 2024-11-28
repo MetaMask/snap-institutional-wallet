@@ -130,10 +130,6 @@ export const UpdateButton = (props: ComponentProps<typeof Button>) => {
   );
 };
 
-export const SendHelloButton = (props: ComponentProps<typeof Button>) => {
-  return <Button {...props}>Send message</Button>;
-};
-
 export const HeaderButtons = ({
   state,
   updateAvailable,

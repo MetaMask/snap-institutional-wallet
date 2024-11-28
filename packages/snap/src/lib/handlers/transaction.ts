@@ -4,13 +4,9 @@ import { TransactionFactory } from '@ethereumjs/tx';
 import logger from '../../logger';
 import { formatTransactionData } from '../../util';
 import { hexlify } from '../../util/hexlify';
+import { TRANSACTION_TYPES } from '../constants';
 import type { ITransactionDetails } from '../types/ITransactionDetails';
 import type { IEIP1559TxParams, ILegacyTXParams } from '../types/ITXParams';
-
-export const TRANSACTION_TYPES = {
-  LEGACY: '0',
-  EIP1559: '2',
-} as const;
 
 export class TransactionHandler {
   createTransactionPayload(tx: any): IEIP1559TxParams | ILegacyTXParams {
@@ -41,11 +37,12 @@ export class TransactionHandler {
 
   async getTransactionSignature(
     common: Common,
-    pendingRequest: ITransactionDetails,
+    transaction: ITransactionDetails,
   ): Promise<{ v: string; r: string; s: string }> {
-    if (pendingRequest.signedRawTransaction) {
+    if (transaction.signedRawTransaction) {
+      logger.info('Transaction is signed', transaction.signedRawTransaction);
       const signedRawTransaction = Buffer.from(
-        pendingRequest.signedRawTransaction.substring(2),
+        transaction.signedRawTransaction.substring(2),
         'hex',
       );
 
@@ -63,13 +60,13 @@ export class TransactionHandler {
 
     logger.debug(
       'Fetching signature from the network',
-      pendingRequest.transactionHash,
+      transaction.transactionHash,
     );
     // Use the global ethereum provider to get the transaction hash
 
     const tx = (await ethereum.request({
       method: 'eth_getTransactionByHash',
-      params: [pendingRequest.transactionHash],
+      params: [transaction.transactionHash],
     })) as { v: string; r: string; s: string };
 
     logger.debug('Got signature from the network', tx);

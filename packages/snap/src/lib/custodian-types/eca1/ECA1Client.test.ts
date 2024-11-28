@@ -23,13 +23,13 @@ const jsonRpcCall = jest
     },
   );
 
-// Mock the factory
-jest.mock('./util/json-rpc-call', () => ({
+// Mock the json-rpc-call factory
+jest.mock('../../../util/json-rpc-call', () => ({
   __esModule: true,
   default: (_url: string) => jsonRpcCall,
 }));
 
-jest.mock('@metamask-institutional/simplecache');
+jest.mock('../../simple-cache/SimpleCache');
 
 fetchMock.enableMocks();
 

@@ -26,5 +26,11 @@ export const mockJsonRpcGetTransactionByIdResponse: JsonRpcResult<ECA3GetTransac
           reason: '',
         },
       },
+      metadata: {
+        chainId: '1',
+        custodianPublishesTransaction: true,
+        rpcUrl: 'https://rpc.example.com',
+        note: '',
+      },
     },
   };

@@ -6,14 +6,3 @@ export type ReplaceTransactionParams = {
   maxFeePerGas?: string;
   gasLimit?: string;
 };
-
-export type ReplaceTransactionGasParams = {
-  gas?: string;
-  maxPriorityFeePerGas?: string;
-  maxFeePerGas?: string;
-};
-
-export type ReplaceTransactionPayload = [
-  ReplaceTransactionParams,
-  ReplaceTransactionGasParams,
-];

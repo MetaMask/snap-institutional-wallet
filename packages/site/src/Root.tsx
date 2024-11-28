@@ -6,15 +6,13 @@ import { light } from './config/theme';
 import { MetaMaskProvider } from './hooks';
 import { getThemePreference, setLocalStorage } from './utils';
 
-export type RootProps = {
+type RootProps = {
   children: ReactNode;
 };
 
 type ToggleTheme = () => void;
 
-export const ToggleThemeContext = createContext<ToggleTheme>(
-  (): void => undefined,
-);
+const ToggleThemeContext = createContext<ToggleTheme>((): void => undefined);
 
 export const Root: FunctionComponent<RootProps> = ({ children }) => {
   const [darkTheme, setDarkTheme] = useState(getThemePreference());

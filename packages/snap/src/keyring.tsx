@@ -27,6 +27,7 @@ import type {
 } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap } from './lib/types/CustodianType';
+import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
 import type { ITransactionDetails } from './lib/types/ITransactionDetails';
 import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
@@ -270,7 +271,7 @@ export class CustodialKeyring implements Keyring {
       const custodianApi = this.#getCustodianApi(wallet.details);
       this.#custodianApi[address] = custodianApi;
     }
-    return this.#custodianApi[address];
+    return this.#custodianApi[address] as ICustodianApi;
   }
 
   #getCustodianApi(details: OnBoardingRpcRequest): ICustodianApi {
@@ -408,7 +409,10 @@ export class CustodialKeyring implements Keyring {
     }
   }
 
-  async #signTransaction(tx: any, requestId: string): Promise<string> {
+  async #signTransaction(
+    tx: EthSignTransactionRequest,
+    requestId: string,
+  ): Promise<string> {
     try {
       const custodianApi = this.getCustodianApiForAddress(tx.from);
       const payload = this.#transactionHandler.createTransactionPayload(tx);
@@ -438,13 +442,18 @@ export class CustodialKeyring implements Keyring {
 
   async #processTransactionRequest(
     pendingRequest: ITransactionDetails,
+    chainId: string,
   ): Promise<{ v: string; r: string; s: string }> {
-    const common = createCommon(pendingRequest);
+    const common = createCommon(pendingRequest, chainId);
 
-    return this.#transactionHandler.getTransactionSignature(
+    const signature = await this.#transactionHandler.getTransactionSignature(
       common,
       pendingRequest,
     );
+
+    console.log('Transaction signature', signature);
+
+    return signature;
   }
 
   async #processSignatureRequest(id: string): Promise<any> {
@@ -458,6 +467,13 @@ export class CustodialKeyring implements Keyring {
     transaction: any,
   ): Promise<void> {
     this.#state.pendingTransactions[requestId] = transaction;
+    await this.#saveState();
+  }
+
+  async clearAllRequests(): Promise<void> {
+    this.#state.pendingRequests = {};
+    this.#state.pendingSignMessages = {};
+    this.#state.pendingTransactions = {};
     await this.#saveState();
   }
 

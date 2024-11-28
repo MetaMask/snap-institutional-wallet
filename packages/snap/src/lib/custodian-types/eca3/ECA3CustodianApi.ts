@@ -5,7 +5,6 @@ import { hexlify } from '../../../util/hexlify';
 import { mapTransactionStatus } from '../../../util/map-status';
 import { SimpleCache } from '../../simple-cache';
 import type {
-  IApiCallLogEntry,
   ICustodianApi,
   CustodianDeepLink,
   IEIP1559TxParams,
@@ -30,7 +29,6 @@ import type { CreateTransactionMetadata } from '../../types/CreateTransactionMet
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 import type { ReplaceTransactionParams } from '../../types/ReplaceTransactionParams';
 import {
-  API_REQUEST_LOG_EVENT,
   INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT,
   REFRESH_TOKEN_CHANGE_EVENT,
 } from '../constants';
@@ -58,7 +56,6 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
     this.#cacheAge = cacheAge;
 
     // This event is "bottom up" - from the custodian via the client.
-    // Just bubble it up to MMISDK
 
     this.#client.on(REFRESH_TOKEN_CHANGE_EVENT, (event) => {
       this.emit(REFRESH_TOKEN_CHANGE_EVENT, event);
@@ -66,10 +63,6 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
 
     this.#client.on(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, (event) => {
       this.emit(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, event);
-    });
-
-    this.#client.on(API_REQUEST_LOG_EVENT, (event: IApiCallLogEntry) => {
-      this.emit(API_REQUEST_LOG_EVENT, event);
     });
   }
 
@@ -197,7 +190,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       reason: result.transaction.status.reason,
       to: result.transaction.to,
       signedRawTransaction: result.transaction.signedRawTransaction ?? null,
-      chainId: result.metadata?.chainId ?? null,
+      chainId: result.metadata.chainId,
       custodianPublishesTransaction:
         result.metadata?.custodianPublishesTransaction ?? true,
       rpcUrl: result.metadata?.rpcUrl ?? null,
