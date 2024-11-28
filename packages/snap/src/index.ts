@@ -16,18 +16,43 @@ import type {
 
 import { homepageInterfaceHandler, addAcountPage } from './homepage';
 import { CustodialKeyring } from './keyring';
-import type { ITransactionDetails } from './lib/types';
 import type { CustodialSnapContext } from './lib/types/Context';
+import type { CustodialSnapRequest } from './lib/types/CustodialKeyring';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
-import type { ICustodianApi } from './lib/types/ICustodianApi';
 import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
 import logger from './logger';
 import type { OnboardingAccount } from './onboarding';
 import { chooseAccountDialog, onboardingInterfaceHandler } from './onboarding';
 import { InternalMethod, originPermissions } from './permissions';
+import { RequestManager } from './requestsManager';
 import { getState } from './stateManagement';
 
 let keyring: CustodialKeyring;
+let requestManager: RequestManager;
+
+// Allow the keyring to call certain methods on the request manager
+const requestManagerFacade = {
+  addPendingRequest: async (request: CustodialSnapRequest<any>) => {
+    requestManager = await getRequestManager();
+    return requestManager.addPendingRequest(request);
+  },
+  listRequests: async () => {
+    requestManager = await getRequestManager();
+    return requestManager.listRequests();
+  },
+};
+
+// Allow the request manager to call certain methods on the keyring
+const keyringFacade = {
+  getCustodianApiForAddress: async (address: string) => {
+    keyring = await getKeyring();
+    return keyring.getCustodianApiForAddress(address);
+  },
+  getAccount: async (accountId: string) => {
+    keyring = await getKeyring();
+    return keyring.getAccount(accountId);
+  },
+};
 
 /**
  * Return the keyring instance. If it doesn't exist, create it.
@@ -36,10 +61,21 @@ async function getKeyring(): Promise<CustodialKeyring> {
   if (!keyring) {
     const state = await getState();
     if (!keyring) {
-      keyring = new CustodialKeyring(state);
+      keyring = new CustodialKeyring(state, requestManagerFacade);
     }
   }
   return keyring;
+}
+
+/**
+ * Return the request manager instance. If it doesn't exist, create it.
+ */
+async function getRequestManager(): Promise<RequestManager> {
+  if (!requestManager) {
+    // eslint-disable-next-line require-atomic-updates
+    requestManager = new RequestManager(await getState(), keyringFacade);
+  }
+  return requestManager;
 }
 
 /**
@@ -140,7 +176,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
     case InternalMethod.ClearAllRequests: {
       // eslint-disable-next-line @typescript-eslint/no-shadow
-      return await (await getKeyring()).clearAllRequests();
+      const requestManager = await getRequestManager();
+      return await requestManager.clearAllRequests();
     }
 
     default: {
@@ -169,148 +206,13 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
   return handleKeyringRequest(await getKeyring(), request);
 };
 
-type PendingTransactionHandler = {
-  requestId: string;
-  address: string;
-  transactionId: string;
-  custodianApi: ICustodianApi;
-};
-
-/**
- * Handles a pending transaction.
- *
- * @param options - Pending transaction options.
- * @param options.requestId - Request ID.
- * @param options.address - Address.
- * @param options.transactionId - Transaction ID.
- * @param options.custodianApi - Custodian API.
- */
-async function handlePendingTransaction({
-  requestId,
-  address,
-  transactionId,
-  custodianApi,
-}: PendingTransactionHandler): Promise<void> {
-  const signedTransaction = await custodianApi.getTransaction(
-    address,
-    transactionId,
-  );
-
-  if (!signedTransaction) {
-    return; // Transaction not found
-  }
-
-  const { transactionStatus } = signedTransaction;
-
-  if (transactionStatus.finished && !transactionStatus.success) {
-    await keyring.rejectRequest(requestId);
-  }
-
-  const pendingTransaction = keyring
-    .listPendingTransactions()
-    .find((tx) => tx.custodianTransactionId === transactionId);
-
-  if (!pendingTransaction) {
-    console.error('pending transaction not found');
-    throw new Error(`Pending transaction '${transactionId}' not found`);
-  }
-
-  if (
-    signedTransaction.signedRawTransaction || // We broadcast this one\
-    (transactionStatus.finished &&
-      transactionStatus.success &&
-      transactionStatus.submitted) // They broadcasted it
-  ) {
-    logger.info(`Transaction ${transactionId} is finished`);
-    const newProperties: Partial<ITransactionDetails> = {};
-
-    if (signedTransaction.signedRawTransaction) {
-      newProperties.signedRawTransaction =
-        signedTransaction.signedRawTransaction;
-    }
-
-    if (signedTransaction.transactionHash) {
-      newProperties.transactionHash = signedTransaction.transactionHash;
-    }
-
-    const updatedRequestId = await keyring.updatePendingTransaction(
-      pendingTransaction.custodianTransactionId,
-      {
-        ...pendingTransaction,
-        ...newProperties,
-      },
-    );
-    await keyring.approveRequest(updatedRequestId);
-  }
-}
-
 // Improved polling function
-const pollTransactions = async (): Promise<void> => {
+const pollRequests = async (): Promise<void> => {
   try {
-    keyring = await getKeyring();
-    const pendingRequests = await keyring.listRequests();
-    const pendingMessages = keyring.listPendingSignMessages();
-    const pendingTransactions = keyring.listPendingTransactions();
-
-    const messagePromises = pendingMessages.map(async (message) => {
-      if (
-        !pendingRequests.find((request) => request.id === message.requestId)
-      ) {
-        await keyring.removePendingSignMessage(message.requestId);
-        return;
-      }
-      const request = await keyring.getRequest(message.requestId);
-      const { address } = await keyring.getAccount(request.account);
-      const custodianApi = keyring.getCustodianApiForAddress(address);
-
-      const signedMessage = await custodianApi.getSignedMessage(
-        address,
-        message.id as string,
-      );
-
-      if (signedMessage?.status?.finished) {
-        if (signedMessage.status.success) {
-          const requestId = await keyring.updatePendingSignature(
-            signedMessage.id,
-            signedMessage.signature as string,
-          );
-          await keyring.approveRequest(requestId);
-        } else {
-          await keyring.rejectRequest(message.requestId);
-        }
-      }
-    });
-
-    const transactionPromises = pendingTransactions.map(async (transaction) => {
-      if (!pendingRequests.find((req) => req.id === transaction.requestId)) {
-        await keyring.removePendingTransaction(transaction.requestId);
-        return;
-      }
-
-      const request = await keyring.getRequest(transaction.requestId);
-
-      // If the account doesnt exist, remove the transaction
-      const { account } = request;
-      const accountExists = await keyring.accountExists(account);
-      if (!accountExists) {
-        await keyring.removePendingTransaction(transaction.requestId);
-        return;
-      }
-
-      const { address } = await keyring.getAccount(account);
-      const custodianApi = keyring.getCustodianApiForAddress(address);
-
-      await handlePendingTransaction({
-        requestId: transaction.requestId,
-        address,
-        transactionId: transaction.custodianTransactionId,
-        custodianApi,
-      });
-    });
-
-    await Promise.all([...messagePromises, ...transactionPromises]);
+    await (await getRequestManager()).poll();
   } catch (error) {
-    logger.error('Error polling transactions:', (error as Error).message);
+    logger.error('Error polling requests', error);
+    throw error;
   }
 };
 
@@ -327,7 +229,7 @@ export const onCronjob: OnCronjobHandler = async ({ request }) => {
           return;
         }
 
-        await pollTransactions();
+        await pollRequests();
         // If this isn't the last iteration, wait 10 seconds
         if (i < 5) {
           await new Promise((resolve) => setTimeout(resolve, 10000));

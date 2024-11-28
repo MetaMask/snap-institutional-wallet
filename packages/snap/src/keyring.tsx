@@ -14,55 +14,50 @@ import { KeyringEvent } from '@metamask/keyring-api/dist/events';
 import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 
-import { ERROR_MESSAGES } from './lib/constants';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
-import { SignatureHandler } from './lib/handlers/signature';
-import { TransactionHandler } from './lib/handlers/transaction';
+import { SignedMessageHelper } from './lib/helpers/signedmessage';
+import { TransactionHelper } from './lib/helpers/transaction';
 import type { CustodianDeepLink } from './lib/types';
 import type {
   KeyringState,
   Wallet,
   CreateAccountOptions,
+  CustodialSnapRequest,
+  SignedMessageRequest,
+  TransactionRequest,
 } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap } from './lib/types/CustodianType';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
-import type { ITransactionDetails } from './lib/types/ITransactionDetails';
 import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
-import { RequestManager } from './requestsManager';
 import { saveState } from './stateManagement';
 import {
   isUniqueAddress,
   throwError,
-  createCommon,
   convertHexChainIdToCaip2Decimal,
 } from './util';
+
+type RequestManagerFacade = {
+  addPendingRequest: (
+    request: CustodialSnapRequest<SignedMessageRequest | TransactionRequest>,
+  ) => Promise<void>;
+  listRequests: () => Promise<
+    CustodialSnapRequest<SignedMessageRequest | TransactionRequest>[]
+  >;
+};
 
 export class CustodialKeyring implements Keyring {
   #state: KeyringState;
 
   #custodianApi: Record<string, ICustodianApi>; // maps address to memoized custodian api
 
-  #transactionHandler: TransactionHandler;
+  #requestManagerFacade: RequestManagerFacade;
 
-  #signatureHandler: SignatureHandler;
-
-  #requestManager: RequestManager;
-
-  removePendingSignMessage: (id?: string) => Promise<void>;
-
-  constructor(state: KeyringState) {
+  constructor(state: KeyringState, requestManagerFacade: RequestManagerFacade) {
     this.#state = state;
     this.#custodianApi = {};
-    this.#transactionHandler = new TransactionHandler();
-    this.#signatureHandler = new SignatureHandler(state);
-    this.#requestManager = new RequestManager(state);
-
-    this.removePendingSignMessage =
-      this.#signatureHandler.removePendingSignMessage.bind(
-        this.#signatureHandler,
-      );
+    this.#requestManagerFacade = requestManagerFacade;
   }
 
   async listAccounts(): Promise<CustodialKeyringAccount[]> {
@@ -174,100 +169,34 @@ export class CustodialKeyring implements Keyring {
     await this.#saveState();
   }
 
-  listPendingRequests(): KeyringRequest[] {
-    return Object.values(this.#state.pendingRequests);
-  }
-
-  listPendingTransactions() {
-    return this.#state.pendingTransactions
-      ? Object.keys(this.#state.pendingTransactions).map((key) => ({
-          ...(this.#state.pendingTransactions[key] as ITransactionDetails),
-          requestId: key,
-        }))
-      : [];
-  }
-
-  async updatePendingTransaction(
-    id: string,
-    transaction: ITransactionDetails,
-  ): Promise<string> {
-    const transactionKey = Object.keys(this.#state.pendingTransactions).find(
-      (key) =>
-        (this.#state.pendingTransactions[key] as ITransactionDetails)
-          .custodianTransactionId === id,
-    );
-    if (!transactionKey) {
-      throw new Error(`Transaction '${id}' not found`);
-    }
-    if (!transaction) {
-      throw new Error('Transaction is required');
-    }
-
-    this.#state.pendingTransactions[transactionKey] = transaction;
-    await this.#saveState();
-
-    return transactionKey;
-  }
-
-  listPendingSignMessages(): {
-    requestId: string;
-    id: string | undefined;
-  }[] {
-    return this.#state.pendingSignMessages
-      ? Object.keys(this.#state.pendingSignMessages).map((key) => ({
-          requestId: key,
-          id: this.#state.pendingSignMessages[key] as string,
-        }))
-      : [];
-  }
-
-  async updatePendingSignature(id: string, signature: string): Promise<string> {
-    const messageKey = Object.keys(this.#state.pendingSignMessages).find(
-      (key) => this.#state.pendingSignMessages[key] === id,
-    );
-    if (!messageKey) {
-      throw new Error(`Message '${id}' not found`);
-    }
-    this.#state.pendingSignMessages[messageKey] = signature;
-    await this.#saveState();
-
-    return messageKey;
-  }
-
+  // Maintain compatibility with the keyring api
   async listRequests(): Promise<KeyringRequest[]> {
-    return Object.values(this.#state.pendingRequests);
+    const requests = await this.#requestManagerFacade.listRequests();
+    return requests.map((request) => request.keyringRequest);
   }
 
+  // Maintain compatibility with the keyring api
   async getRequest(id: string): Promise<KeyringRequest> {
-    return (
-      this.#state.pendingRequests[id] ?? throwError(`Request '${id}' not found`)
-    );
+    const requests = await this.#requestManagerFacade.listRequests();
+    const request = requests.find((req) => req.keyringRequest.id === id);
+    if (!request) {
+      throw new Error(`Request '${id}' not found`);
+    }
+    return request.keyringRequest;
   }
 
   async submitRequest(request: KeyringRequest): Promise<SubmitRequestResponse> {
     return this.#asyncSubmitRequest(request);
   }
 
-  async approveRequest(id: string): Promise<void> {
-    if (!this.#state.pendingRequests[id]) {
-      throwError(ERROR_MESSAGES.REQUEST_NOT_FOUND(id));
-    }
-
-    await this.#requestManager.processPendingRequest(id, {
-      processTransaction: this.#processTransactionRequest.bind(this),
-      processSignature: this.#processSignatureRequest.bind(this),
-      emitEvent: this.#emitEvent.bind(this),
-    });
-    await this.#requestManager.removePendingRequest(id);
+  // Don't allow approving requests from the keyring api
+  async approveRequest(_id: string): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 
-  async rejectRequest(id: string): Promise<void> {
-    if (this.#state.pendingRequests[id] === undefined) {
-      throw new Error(`Request '${id}' not found`);
-    }
-
-    await this.#requestManager.removePendingRequest(id);
-    await this.#emitEvent(KeyringEvent.RequestRejected, { id });
+  // Don't allow rejecting requests from the keyring api
+  async rejectRequest(_id: string): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 
   getCustodianApiForAddress(address: string): ICustodianApi {
@@ -290,23 +219,13 @@ export class CustodialKeyring implements Keyring {
     return custodianApi;
   }
 
-  async removePendingTransaction(id?: string): Promise<void> {
-    if (!id || !this.#state.pendingTransactions[id]) {
-      return;
-    }
-    delete this.#state.pendingTransactions[id];
-    await this.#saveState();
-  }
-
   async #asyncSubmitRequest(
     request: KeyringRequest,
   ): Promise<SubmitRequestResponse> {
-    this.#state.pendingRequests[request.id] = request;
-
-    const result = await this.#handleSigningRequest(
+    const custodianId = await this.#handleSigningRequest(
       request.request.method,
       request.request.params ?? [],
-      request.id,
+      request,
     );
 
     const { address } = await this.getAccount(request.account);
@@ -318,11 +237,11 @@ export class CustodialKeyring implements Keyring {
     if (request.request.method === EthMethod.SignTransaction) {
       deepLink = (await this.getCustodianApiForAddress(
         address,
-      ).getTransactionLink(result as string)) as CustodianDeepLink;
+      ).getTransactionLink(custodianId)) as CustodianDeepLink;
     } else {
       deepLink = (await this.getCustodianApiForAddress(
         address,
-      ).getSignedMessageLink(result as string)) as CustodianDeepLink;
+      ).getSignedMessageLink(custodianId)) as CustodianDeepLink;
     }
 
     return {
@@ -346,53 +265,77 @@ export class CustodialKeyring implements Keyring {
   async #handleSigningRequest(
     method: string,
     params: Json,
-    requestId: string,
-  ): Promise<Json> {
+    keyringRequest: KeyringRequest,
+  ): Promise<string> {
     switch (method) {
       case EthMethod.PersonalSign: {
         const [message, from] = params as [string, string];
         const custodianApi = this.getCustodianApiForAddress(from);
-        this.#state.pendingSignMessages[requestId] = message;
-        await this.#saveState();
-        return await this.#signatureHandler.signPersonalMessage(
+
+        const details = await SignedMessageHelper.signPersonalMessage(
           from,
           message,
-          requestId,
           custodianApi,
         );
+
+        await this.#requestManagerFacade.addPendingRequest({
+          keyringRequest,
+          type: 'message',
+          subType: 'personalSign',
+          fulfilled: false,
+          rejected: false,
+          message: details,
+          signature: null,
+        });
+        return details.id;
       }
 
       case EthMethod.SignTransaction: {
-        const [tx] = params as [any];
-        return this.#signTransaction(tx, requestId);
+        const [tx] = params as [EthSignTransactionRequest];
+        const result = await this.#signTransaction(tx, keyringRequest);
+        return result;
       }
 
       case EthMethod.SignTypedDataV3: {
         const [from, data] = params as [string, TypedMessage<MessageTypes>];
         const custodianApi = this.getCustodianApiForAddress(from);
-        this.#state.pendingSignMessages[requestId] = data;
-        await this.#saveState();
-        return this.#signatureHandler.signTypedData(
+        const details = await SignedMessageHelper.signTypedData(
           from,
           data,
-          requestId,
           custodianApi,
           { version: SignTypedDataVersion.V3 },
         );
+        await this.#requestManagerFacade.addPendingRequest({
+          keyringRequest,
+          type: 'message',
+          subType: 'v3',
+          fulfilled: false,
+          rejected: false,
+          message: details,
+          signature: null,
+        });
+        return details.id;
       }
 
       case EthMethod.SignTypedDataV4: {
         const [from, data] = params as [string, TypedMessage<MessageTypes>];
         const custodianApi = this.getCustodianApiForAddress(from);
-        this.#state.pendingSignMessages[requestId] = data;
-        await this.#saveState();
-        return this.#signatureHandler.signTypedData(
+        const details = await SignedMessageHelper.signTypedData(
           from,
           data,
-          requestId,
           custodianApi,
-          { version: SignTypedDataVersion.V4 },
+          { version: SignTypedDataVersion.V3 },
         );
+        await this.#requestManagerFacade.addPendingRequest({
+          keyringRequest,
+          type: 'message',
+          subType: 'v4',
+          fulfilled: false,
+          rejected: false,
+          message: details,
+          signature: null,
+        });
+        return details.id;
       }
 
       default: {
@@ -403,11 +346,11 @@ export class CustodialKeyring implements Keyring {
 
   async #signTransaction(
     tx: EthSignTransactionRequest,
-    requestId: string,
+    keyringRequest: KeyringRequest,
   ): Promise<string> {
     try {
       const custodianApi = this.getCustodianApiForAddress(tx.from);
-      const payload = this.#transactionHandler.createTransactionPayload(tx);
+      const payload = TransactionHelper.createTransactionPayload(tx);
       const wallet = this.#getWalletByAddress(tx.from);
 
       const custodianPublishesTransaction =
@@ -418,9 +361,13 @@ export class CustodialKeyring implements Keyring {
         custodianPublishesTransaction,
       });
 
-      await this.#savePendingTransaction(requestId, {
-        ...payload,
-        custodianTransactionId: response.custodianTransactionId,
+      await this.#requestManagerFacade.addPendingRequest({
+        keyringRequest,
+        type: 'transaction',
+        fulfilled: false,
+        rejected: false,
+        transaction: response,
+        signature: null,
       });
 
       return response.custodianTransactionId;
@@ -430,41 +377,6 @@ export class CustodialKeyring implements Keyring {
         `Failed to sign transaction: ${(error as Error).message}`,
       );
     }
-  }
-
-  async #processTransactionRequest(
-    pendingRequest: ITransactionDetails,
-    chainId: string,
-  ): Promise<{ v: string; r: string; s: string }> {
-    const common = createCommon(pendingRequest, chainId);
-
-    const signature = await this.#transactionHandler.getTransactionSignature(
-      common,
-      pendingRequest,
-    );
-
-    return signature;
-  }
-
-  async #processSignatureRequest(id: string): Promise<any> {
-    const message = this.#state.pendingSignMessages[id];
-    delete this.#state.pendingSignMessages[id];
-    return message;
-  }
-
-  async #savePendingTransaction(
-    requestId: string,
-    transaction: any,
-  ): Promise<void> {
-    this.#state.pendingTransactions[requestId] = transaction;
-    await this.#saveState();
-  }
-
-  async clearAllRequests(): Promise<void> {
-    this.#state.pendingRequests = {};
-    this.#state.pendingSignMessages = {};
-    this.#state.pendingTransactions = {};
-    await this.#saveState();
   }
 
   async #saveState(): Promise<void> {
