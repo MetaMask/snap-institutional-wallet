@@ -1,1 +1,1 @@
-export type GetTransactionLinkPayload = [string]
+export type GetTransactionLinkPayload = [string];

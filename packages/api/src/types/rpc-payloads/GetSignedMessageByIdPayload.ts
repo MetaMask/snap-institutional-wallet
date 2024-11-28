@@ -1,1 +1,1 @@
-export type GetSignedMessageByIdPayload = [string]
+export type GetSignedMessageByIdPayload = [string];

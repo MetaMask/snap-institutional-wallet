@@ -1,7 +1,8 @@
-import { ListAccountsResponse } from "../types/rpc-responses/ListAccountsResponse";
-import accounts from "../custodian/accounts";
+import { ListAccountsResponse } from '../types/rpc-responses/ListAccountsResponse';
+import accounts from '../custodian/accounts';
 
-export const custodianListAccounts = async () : Promise<ListAccountsResponse> => {
+export const custodianListAccounts =
+  async (): Promise<ListAccountsResponse> => {
     const keyringAccounts = await accounts.getAccounts();
     return keyringAccounts.map((account) => {
       return {
@@ -18,6 +19,6 @@ export const custodianListAccounts = async () : Promise<ListAccountsResponse> =>
           deleted: false,
           isContract: false,
         },
-      }
-    })
-}
+      };
+    });
+  };

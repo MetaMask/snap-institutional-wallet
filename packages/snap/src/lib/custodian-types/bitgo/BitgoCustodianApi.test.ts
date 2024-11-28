@@ -8,6 +8,7 @@ import { bitgoGetAccountsMock } from './mocks/bitgoGetAccountsMock';
 import { bitgoGetCustomerProofMock } from './mocks/bitgoGetCustomerProofMock';
 import { bitgoMockPersonalSignResponse } from './mocks/bitgoPersonalSignMock';
 import { bitgoTransactionMock } from './mocks/bitgoTransactionMock';
+import { mapTransactionStatus } from '../../../util/map-status';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 jest.mock('./BitgoClient');
@@ -174,15 +175,17 @@ describe('BitgoCustodianApi', () => {
 
       expect(result).toStrictEqual({
         transactionHash: bitgoTransactionMock.transactionHash,
-        transactionStatus: bitgoTransactionMock.transactionStatus,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: bitgoTransactionMock.custodianTransactionId,
+        transactionStatus: mapTransactionStatus(
+          bitgoTransactionMock.transactionStatus,
+        ),
+        custodianPublishesTransaction: true,
+        custodianTransactionId: bitgoTransactionMock.custodianTransactionId,
         from: bitgoTransactionMock.from,
-        gasPrice: bitgoTransactionMock.gasPrice,
+        gasPrice: null,
+        maxFeePerGas: null,
+        maxPriorityFeePerGas: null,
+        nonce: null,
         gasLimit: bitgoTransactionMock.gasLimit,
-        nonce: bitgoTransactionMock.nonce,
-        maxFeePerGas: bitgoTransactionMock.maxFeePerGas,
-        maxPriorityFeePerGas: bitgoTransactionMock.maxPriorityFeePerGas,
       });
 
       expect(mockedBitgoClientInstance.getTransaction).toHaveBeenCalledWith(
@@ -203,9 +206,14 @@ describe('BitgoCustodianApi', () => {
 
       expect(result).toStrictEqual({
         from: fromAddress,
-        transactionStatus: 'created',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: bitgoMockPersonalSignResponse.data.id,
+        id: bitgoMockPersonalSignResponse.data.id,
+        signature: '0xtest',
+        status: {
+          displayText: 'signed',
+          finished: true,
+          signed: true,
+          success: true,
+        },
       });
 
       expect(
@@ -242,10 +250,10 @@ describe('BitgoCustodianApi', () => {
       );
 
       expect(result).toStrictEqual({
+        id: bitgoMockEip712Response.data.id,
+        signature: bitgoMockEip712Response.data.signature,
         from: fromAddress,
-        transactionStatus: 'created',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: bitgoMockEip712Response.data.id,
+        status: bitgoMockEip712Response.data.status,
       });
 
       expect(mockedBitgoClientInstance.signTypedData_v4).toHaveBeenCalledWith(

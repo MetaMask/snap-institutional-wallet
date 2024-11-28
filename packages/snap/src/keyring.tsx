@@ -1,16 +1,16 @@
 import type { MessageTypes, TypedMessage } from '@metamask/eth-sig-util';
 import { SignTypedDataVersion } from '@metamask/eth-sig-util';
+import {
+  emitSnapKeyringEvent,
+  EthAccountType,
+  EthMethod,
+  KeyringEvent,
+} from '@metamask/keyring-api';
 import type {
   Keyring,
   KeyringRequest,
   SubmitRequestResponse,
 } from '@metamask/keyring-api';
-import {
-  EthAccountType,
-  EthMethod,
-  emitSnapKeyringEvent,
-} from '@metamask/keyring-api';
-import { KeyringEvent } from '@metamask/keyring-api/dist/events';
 import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 

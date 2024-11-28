@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -6,6 +6,6 @@ dotenv.config();
 import HDKeyring from '@metamask/eth-hd-keyring';
 
 export default new HDKeyring({
-    numberOfAccounts: 10,
-    mnemonic: process.env.MNEMONIC,
+  numberOfAccounts: 10,
+  mnemonic: process.env.MNEMONIC,
 });

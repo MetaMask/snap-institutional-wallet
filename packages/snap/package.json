@@ -1,6 +1,6 @@
 {
   "name": "@metamask/snap-custodial-wallet-snap",
-  "version": "1.1.6",
+  "version": "0.0.1",
   "description": "Custodial accounts in MetaMask.",
   "keywords": [
     "metamask",
@@ -43,7 +43,7 @@
     "@ethereumjs/common": "^3.1.2",
     "@ethereumjs/tx": "^4.1.2",
     "@metamask/eth-sig-util": "^7.0.1",
-    "@metamask/keyring-api": "^8.1.3",
+    "@metamask/keyring-api": "11.0.0",
     "@metamask/snaps-sdk": "6.12.0",
     "@metamask/snaps-types": "^3.0.0",
     "@metamask/utils": "^8.1.0",

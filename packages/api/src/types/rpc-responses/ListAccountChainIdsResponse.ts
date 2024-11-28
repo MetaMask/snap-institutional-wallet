@@ -1,1 +1,1 @@
-export type ListAccountChainIdsResponse = string[]
+export type ListAccountChainIdsResponse = string[];

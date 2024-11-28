@@ -1,6 +1,7 @@
 import fetchMock from 'jest-fetch-mock';
 
 import { BitgoClient } from './BitgoClient';
+import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 fetchMock.enableMocks();
 
@@ -232,7 +233,14 @@ describe('BitgoClient', () => {
         },
       );
 
-      expect(result).toStrictEqual([]);
+      expect(result).toStrictEqual({});
+    });
+
+    it('should return null if the transaction is not found', async () => {
+      fetchMock.mockResponseOnce(JSON.stringify({ data: [] }));
+
+      const result = await bitgoClient.getTransaction('xxx');
+      expect(result).toBeNull();
     });
 
     it('should fail if an exception is thrown by the HTTP client', async () => {
@@ -271,6 +279,92 @@ describe('BitgoClient', () => {
       await expect(bitgoClient.getCustomerProof()).rejects.toThrow(
         'Network error',
       );
+    });
+    describe('BitgoClient#signTypedData_v4', () => {
+      it('should POST the /mmi/:coinId/wallet/:walletId/messages/typed endpoint', async () => {
+        fetchMock.mockResponseOnce(JSON.stringify('ok'));
+
+        const buffer: TypedMessage<MessageTypes> = {
+          types: {
+            EIP712Domain: [],
+          },
+          primaryType: 'test',
+          domain: {
+            name: 'test',
+          },
+          message: {},
+        };
+
+        await bitgoClient.signTypedData_v4(
+          'test',
+          buffer,
+          'gteth',
+          'test',
+          '4',
+        );
+
+        expect(fetchMock).toHaveBeenCalledWith(
+          `${mockUrl}/mmi/gteth/wallet/test/messages/typed`,
+          {
+            body: '{"address":"test","payload":{"types":{"EIP712Domain":[]},"primaryType":"test","domain":{"name":"test"},"message":{}},"encodingVersion":"4"}',
+            headers: {
+              Authorization: 'Bearer mock-jwt',
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+          },
+        );
+      });
+    });
+
+    it('should not include a chainId in the URL if none is passed', async () => {
+      fetchMock.mockResponseOnce(JSON.stringify('ok'));
+
+      const buffer: TypedMessage<MessageTypes> = {
+        types: {
+          EIP712Domain: [],
+        },
+        primaryType: 'test',
+        domain: {
+          name: 'test',
+        },
+        message: {},
+      };
+
+      await bitgoClient.signTypedData_v4('test', buffer, 'gteth', 'test', '4');
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${mockUrl}/mmi/gteth/wallet/test/messages/typed`,
+        {
+          body: '{"address":"test","payload":{"types":{"EIP712Domain":[]},"primaryType":"test","domain":{"name":"test"},"message":{}},"encodingVersion":"4"}',
+          headers: {
+            Authorization: 'Bearer mock-jwt',
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        },
+      );
+    });
+
+    it('should throw an error if an exception is thrown by the HTTP client', async () => {
+      fetchMock.mockImplementationOnce(async () =>
+        Promise.reject(new Error('Network failure')),
+      );
+
+      const buffer: TypedMessage<MessageTypes> = {
+        types: {
+          EIP712Domain: [],
+        },
+        primaryType: 'test',
+        domain: {
+          name: 'test',
+        },
+        message: {},
+      };
+
+      await expect(
+        bitgoClient.signTypedData_v4('test', buffer, 'gteth', 'test', '4'),
+      ).rejects.toThrow('Network failure');
     });
   });
 });

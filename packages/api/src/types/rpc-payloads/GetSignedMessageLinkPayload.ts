@@ -1,1 +1,1 @@
-export type GetSignedMessageLinkPayload = [string]
+export type GetSignedMessageLinkPayload = [string];

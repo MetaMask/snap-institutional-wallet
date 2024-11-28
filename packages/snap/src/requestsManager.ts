@@ -52,7 +52,7 @@ export class RequestManager {
     }
 
     const requestParams =
-      this.#state.requests[id]!.keyringRequest.request.params;
+      this.#state.requests[id]?.keyringRequest.request.params;
 
     if (!Array.isArray(requestParams) || requestParams.length === 0) {
       throw new Error(`Request ${id} has invalid params`);
@@ -77,7 +77,7 @@ export class RequestManager {
     );
 
     for (const request of pendingRequests) {
-      if (request.type === 'signedMessage') {
+      if (request.type === 'message') {
         await this.pollSignedMessage(
           request.keyringRequest.id,
           request as CustodialSnapRequest<SignedMessageRequest>,

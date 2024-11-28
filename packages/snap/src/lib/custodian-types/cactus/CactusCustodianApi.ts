@@ -138,7 +138,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
       custodianSignedMessageId,
     );
 
-    if (!result?.signature?.length) {
+    if (!result) {
       return null;
     }
     return {
