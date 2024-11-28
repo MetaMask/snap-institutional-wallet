@@ -7,3 +7,7 @@ export type OnboardingContext = {
 };
 
 export type CustodialSnapContext = OnboardingContext;
+
+export type HomePageContext = {
+  activity: 'homepage';
+};

@@ -6,6 +6,7 @@ import type {
   UserInputEvent,
   OnCronjobHandler,
   OnUserInputHandler,
+  OnHomePageHandler,
 } from '@metamask/snaps-sdk';
 import type {
   Json,
@@ -13,6 +14,7 @@ import type {
   OnRpcRequestHandler,
 } from '@metamask/snaps-types';
 
+import { homepageInterfaceHandler, addAcountPage } from './homepage';
 import { CustodialKeyring } from './keyring';
 import type { ITransactionDetails } from './lib/types';
 import type { CustodialSnapContext } from './lib/types/Context';
@@ -51,7 +53,7 @@ function hasPermission(origin: string, method: string): boolean {
   return originPermissions.get(origin)?.includes(method) ?? false;
 }
 
-const handleOnboarding = async (request: OnBoardingRpcRequest) => {
+export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
   const CustodianApiClass = CustodianApiMap[request.custodianType];
   keyring = await getKeyring();
 
@@ -360,9 +362,24 @@ export const onUserInput: OnUserInputHandler = async ({
 
     if (ourContext?.activity === 'onboarding') {
       await onboardingInterfaceHandler({ event, context: ourContext });
+    } else if (ourContext?.activity === 'homepage') {
+      await homepageInterfaceHandler({ event });
     }
   } catch (error) {
     logger.error('onUserInput error', error);
     throw error;
   }
+};
+
+export const onHomePage: OnHomePageHandler = async () => {
+  keyring = await getKeyring();
+  const interfaceId = await addAcountPage({
+    context: {
+      activity: 'homepage',
+    },
+    keyring,
+  });
+  return {
+    id: interfaceId,
+  };
 };
