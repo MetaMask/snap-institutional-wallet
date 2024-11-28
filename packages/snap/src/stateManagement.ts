@@ -8,9 +8,7 @@ import logger from './logger';
  */
 const defaultState: KeyringState = {
   wallets: {},
-  pendingRequests: {},
-  pendingTransactions: {},
-  pendingSignMessages: {},
+  requests: {},
 };
 
 /**

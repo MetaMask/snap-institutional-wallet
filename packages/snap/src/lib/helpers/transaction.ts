@@ -1,15 +1,14 @@
-import type { Common } from '@ethereumjs/common';
 import { TransactionFactory } from '@ethereumjs/tx';
 
 import logger from '../../logger';
-import { formatTransactionData } from '../../util';
+import { createCommon, formatTransactionData } from '../../util';
 import { hexlify } from '../../util/hexlify';
 import { TRANSACTION_TYPES } from '../constants';
 import type { ITransactionDetails } from '../types/ITransactionDetails';
 import type { IEIP1559TxParams, ILegacyTXParams } from '../types/ITXParams';
 
-export class TransactionHandler {
-  createTransactionPayload(tx: any): IEIP1559TxParams | ILegacyTXParams {
+export class TransactionHelper {
+  static createTransactionPayload(tx: any): IEIP1559TxParams | ILegacyTXParams {
     const isEIP1559 = tx.maxFeePerGas !== undefined;
     const basePayload = {
       ...tx,
@@ -35,10 +34,12 @@ export class TransactionHandler {
     };
   }
 
-  async getTransactionSignature(
-    common: Common,
+  static async getTransactionSignature(
     transaction: ITransactionDetails,
+    chainId: string,
   ): Promise<{ v: string; r: string; s: string }> {
+    const common = createCommon(transaction, chainId);
+
     if (transaction.signedRawTransaction) {
       logger.info('Transaction is signed', transaction.signedRawTransaction);
       const signedRawTransaction = Buffer.from(
