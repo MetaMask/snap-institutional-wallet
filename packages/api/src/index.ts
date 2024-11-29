@@ -13,9 +13,13 @@ import type http from 'http';
 import custodianRequests from './custodian/requests';
 import { methodMapping } from './method-mapping';
 import doc from './openrpc.json';
+import listRequestsHandler from './routes/listRequestsHandler';
 import tokenHandler from './routes/token-handler';
 import type { UpdateSignedMessageRequest } from './routes/updateSignedMessageHandler';
 import updateSignedMessageHandler from './routes/updateSignedMessageHandler';
+import type { UpdateTransactionRequest } from './routes/updateTransactionHandler';
+import updateTransactionHandler from './routes/updateTransactionHandler';
+import clearRequestsHandler from './routes/clearRequestsHandler';
 
 dotenv.config();
 
@@ -23,6 +27,24 @@ dotenv.config();
 custodianRequests.load();
 
 // We don't have access to the connect app here so we build a crude router
+
+/**
+ * Logs the URL and body of the request
+ * @param req - The incoming HTTP request
+ * @param res - The HTTP response object
+ * @param _res
+ * @param next - Function to pass control to the next middleware
+ */
+async function logUrlAndBody(
+  req: IncomingMessage,
+  _res: http.ServerResponse,
+  next: () => void,
+) {
+  const { body } = req as unknown as { body: unknown };
+  console.log(req.url);
+  console.log(body);
+  next();
+}
 
 /*
  * /v3/json-rpc -> JSON-RPC server for ECA-3
@@ -35,24 +57,29 @@ custodianRequests.load();
 /**
  * Routes incoming HTTP requests to the appropriate handler based on the URL path.
  *
- * @param req The incoming HTTP request
- * @param res The HTTP response object
- * @param next Function to pass control to the next middleware
+ * @param req - The incoming HTTP request
+ * @param res - The HTTP response object
+ * @param next - Function to pass control to the next middleware
  */
 async function router(
   req: IncomingMessage,
   res: http.ServerResponse,
   next: () => void,
 ) {
-  console.log(req.url);
-
   if (req.url!.startsWith('/oauth/token')) {
     return tokenHandler(req, res, next);
   }
 
   if (req.url!.startsWith('/v3/json-rpc')) {
-    next();
-    return;
+    return next();
+  }
+
+  if (req.url!.startsWith('/list/requests')) {
+    return listRequestsHandler(req, res, next);
+  }
+
+  if (req.url!.startsWith('/clear/requests')) {
+    return clearRequestsHandler(req, res, next);
   }
 
   if (req.url!.startsWith('/update/signedMessage')) {
@@ -61,6 +88,10 @@ async function router(
       res,
       next,
     );
+  }
+
+  if (req.url!.startsWith('/update/transaction')) {
+    return updateTransactionHandler(req as UpdateTransactionRequest, res, next);
   }
 
   // Otherwise, 404
@@ -79,7 +110,7 @@ export async function start() {
         type: 'HTTPTransport',
         options: {
           port: 3330,
-          middleware: [router],
+          middleware: [logUrlAndBody, router],
         } as HTTPServerTransportOptions,
       },
     ],

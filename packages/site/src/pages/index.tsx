@@ -40,6 +40,17 @@ const Index = () => {
   const [accountId, setAccountId] = useState<string | null>();
   const [accountObject, setAccountObject] = useState<string | null>();
   const [requestId, setRequestId] = useState<string | null>(null);
+  const [signedMessageId, setSignedMessageId] = useState<string | null>(null);
+  const [signedMessageIntent, setSignedMessageIntent] = useState<string | null>(
+    'signed',
+  );
+  const [signedMessageIds, setSignedMessageIds] = useState<string[]>([]);
+  const [transactions, setTransactions] = useState<string[]>([]);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [transactionIntent, setTransactionIntent] = useState<string | null>(
+    'signed',
+  );
+
   // const [accountPayload, setAccountPayload] =
   //   useState<Pick<KeyringAccount, 'name' | 'options'>>();
   const client = new KeyringSnapRpcClient(snapId, window.ethereum);
@@ -139,7 +150,13 @@ const Index = () => {
       inputs: [],
       action: {
         callback: async () =>
-          await injectToken(defaultCustodianApiUrl, defaultRefreshTokenUrl),
+          await injectToken(
+            defaultCustodianApiUrl,
+            defaultRefreshTokenUrl,
+            'ECA3',
+            'Local Dev',
+            'local-dev',
+          ),
         label: 'Inject Token',
       },
       successMessage: 'Import successful',
@@ -358,6 +375,191 @@ const Index = () => {
     },
   ];
 
+  const custodianTestMethods = [
+    {
+      name: 'Sign personal message',
+      description: 'Sign a personal message',
+      inputs: [],
+      action: {
+        callback: async () => {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await window.ethereum.request({
+            method: 'eth_accounts',
+          });
+          if (accounts.length === 0) {
+            throw new Error('No accounts found');
+          }
+          const account = accounts[0];
+          const message = 'Hello, world!';
+          const signature = await window.ethereum.request({
+            method: 'personal_sign',
+            params: [message, account],
+          });
+          return signature;
+        },
+        label: 'Sign Message',
+      },
+    },
+
+    {
+      name: 'List custodian API requests',
+      description: 'List all requests stored on the local test custodian API',
+      action: {
+        callback: async () => {
+          const response = await fetch(
+            `${defaultCustodianApiUrl}/list/requests`,
+          );
+          const data = await response.json();
+          setSignedMessageIds(
+            // eslint-disable-next-line id-denylist
+            data.signedMessages.map((msg: { id: string }) => msg.id),
+          );
+          // setTransactions(data.transactions);
+          return data;
+        },
+        label: 'List Requests',
+      },
+    },
+
+    {
+      name: 'Clear custodian API requests',
+      description: 'Clear all requests stored on the local test custodian API',
+      action: {
+        callback: async () => {
+          const response = await fetch(
+            `${defaultCustodianApiUrl}/clear/requests`,
+          );
+          const data = await response.json();
+          return data;
+        },
+        label: 'Clear Requests',
+      },
+    },
+    {
+      name: 'Update pending signed message',
+      description:
+        'Update a pending signed message stored on the local test custodian API',
+      inputs: [
+        {
+          id: 'sign-message-signed-message-id',
+          title: 'Signed Message ID',
+          type: InputType.Dropdown,
+          options: [
+            { value: 'Select an option' },
+            ...signedMessageIds.map((id) => ({ value: id })),
+          ],
+          onChange: (event: any) =>
+            setSignedMessageId(event.currentTarget.value),
+        },
+        // choose intent - signed or failed
+        {
+          id: 'sign-message-intent',
+          title: 'Intent',
+          type: InputType.Dropdown,
+          options: [{ value: 'signed' }, { value: 'failed' }],
+          onChange: (event: any) =>
+            setSignedMessageIntent(event.currentTarget.value),
+        },
+      ],
+      action: {
+        disabled: !signedMessageId,
+        callback: async () => {
+          if (!signedMessageId) {
+            throw new Error('No signed message id');
+          }
+          const response = await fetch(
+            `${defaultCustodianApiUrl}/update/signedMessage/${signedMessageId}`,
+            {
+              method: 'POST',
+              body: JSON.stringify({ intent: signedMessageIntent }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          );
+          const data = await response.json();
+          return data;
+        },
+        label: 'Update Signed Message',
+      },
+    },
+
+    {
+      name: 'Create a Sepolia transaction',
+      description: 'Create a pending Sepolia transaction in the extension',
+      inputs: [],
+      action: {
+        callback: async () => {
+          const payload = {
+            method: 'eth_sendTransaction',
+            params: [
+              {
+                chainId: '0xaa36a7',
+                nonce: '0x0',
+                maxPriorityFeePerGas: '0x59682f00',
+                maxFeePerGas: '0x45dbe936c',
+                gasLimit: '0xc8f7',
+                to: '0xfe7a0f0c76c136b9b438dcb27de9a1b618c016fc',
+                value: '0x0',
+                data: '0x97c5ed1e00000000000000000000000094b21bdbe1a2d4b09d048ab7d865a7d352da1a510000000000000000000000000000000000000000000000000de0b6b3a7640000',
+                accessList: [],
+                from: '0x94b21bdbe1a2d4b09d048ab7d865a7d352da1a51',
+                type: '0x2',
+              },
+            ],
+          };
+          const response = await window.ethereum.request(payload);
+          return response;
+        },
+        label: 'Create Transaction',
+      },
+    },
+
+    {
+      name: 'Update pending transaction',
+      description:
+        'Update a pending transaction stored on the local test custodian API',
+      inputs: [
+        {
+          id: 'update-transaction-transaction-id',
+          title: 'Transaction ID',
+          type: InputType.TextField,
+          onChange: (event: any) => setTransactionId(event.currentTarget.value),
+        },
+        // choose intent - signed or failed
+        {
+          id: 'update-transaction-intent',
+          title: 'Intent',
+          type: InputType.Dropdown,
+          options: [{ value: 'signed' }, { value: 'failed' }],
+          onChange: (event: any) =>
+            setTransactionIntent(event.currentTarget.value),
+        },
+      ],
+      action: {
+        disabled: !transactionId,
+        callback: async () => {
+          if (!transactionId) {
+            throw new Error('No transaction id');
+          }
+          const response = await fetch(
+            `${defaultCustodianApiUrl}/update/transaction/${transactionId}`,
+            {
+              method: 'POST',
+              body: JSON.stringify({ intent: transactionIntent }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          );
+          const data = await response.json();
+          return data;
+        },
+        label: 'Update Transaction',
+      },
+    },
+  ];
+
   return (
     <Container>
       <CardContainer>
@@ -382,11 +584,13 @@ const Index = () => {
       <StyledBox sx={{ flexGrow: 1 }}>
         <Grid container spacing={4} columns={[1, 2, 3]}>
           <Grid item xs={8} sm={4} md={2}>
-            <DividerTitle>Methods</DividerTitle>
+            <DividerTitle>Account Management Methods</DividerTitle>
             <Accordion items={accountManagementMethods} />
             <Divider />
             <DividerTitle>Request Methods</DividerTitle>
             <Accordion items={requestMethods} />
+            <DividerTitle>Custodian Test Methods</DividerTitle>
+            <Accordion items={custodianTestMethods} />
             <Divider />
           </Grid>
           <Grid item xs={4} sm={2} md={1}>

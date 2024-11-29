@@ -3,18 +3,21 @@
   "description": "Example custodian API",
   "packageManager": "yarn@3.6.3",
   "dependencies": {
+    "@ethereumjs/common": "^4.4.0",
+    "@ethereumjs/tx": "^5.4.0",
     "@metamask/eth-hd-keyring": "^8.0.0",
     "@open-rpc/schema-utils-js": "^2.0.5",
     "@open-rpc/server-js": "^1.9.5",
     "dotenv": "^16.4.5",
     "eip-712": "^1.0.0",
+    "ethers": "^6.13.4",
     "express": "^4.21.1",
     "typescript": "^5.6.3"
   },
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "nodemon src/index.ts"
+    "start": "nodemon src/index.ts --ignore data/"
   },
   "devDependencies": {
     "@types/connect": "^3.4.38",

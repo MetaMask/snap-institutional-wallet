@@ -11,6 +11,7 @@ import type {
 } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
+import logger from './logger';
 import { saveState } from './stateManagement';
 
 type KeyringFacade = {
@@ -78,15 +79,30 @@ export class RequestManager {
 
     for (const request of pendingRequests) {
       if (request.type === 'message') {
-        await this.pollSignedMessage(
-          request.keyringRequest.id,
-          request as CustodialSnapRequest<SignedMessageRequest>,
-        );
+        try {
+          await this.pollSignedMessage(
+            request.keyringRequest.id,
+            request as CustodialSnapRequest<SignedMessageRequest>,
+          );
+        } catch (error: any) {
+          logger.info(
+            `Error polling signed message request ${request.keyringRequest.id}`,
+          );
+          logger.error(error);
+        }
       } else if (request.type === 'transaction') {
-        await this.pollTransaction(
-          request.keyringRequest.id,
-          request as CustodialSnapRequest<TransactionRequest>,
-        );
+        try {
+          await this.pollTransaction(
+            request.keyringRequest.id,
+            request as CustodialSnapRequest<TransactionRequest>,
+          );
+        } catch (error: any) {
+          logger.info(
+            `Error polling transaction request ${request.keyringRequest.id}`,
+          );
+          console.error(error);
+          logger.error(error);
+        }
       }
     }
   }
@@ -175,15 +191,39 @@ export class RequestManager {
   }
 
   async emitApprovedEvent(id: string, result: Json): Promise<void> {
-    await emitSnapKeyringEvent(snap, KeyringEvent.RequestApproved, {
-      id,
-      result,
-    });
+    try {
+      await emitSnapKeyringEvent(snap, KeyringEvent.RequestApproved, {
+        id,
+        result,
+      });
+    } catch (error: any) {
+      /*
+       * we are looking for Request '${id}' not found, that means the request
+       * was removed from the snap keyring before we could emit the event
+       * So we should remove the request from the state and not throw an error
+       */
+
+      if (error.message.includes(`Request '${id}' not found`)) {
+        logger.info(`Request '${id}' not found, removing from state`);
+        await this.removePendingRequest(id);
+      } else {
+        throw error;
+      }
+    }
   }
 
   async emitRejectedEvent(id: string): Promise<void> {
-    await emitSnapKeyringEvent(snap, KeyringEvent.RequestRejected, {
-      id,
-    });
+    try {
+      await emitSnapKeyringEvent(snap, KeyringEvent.RequestRejected, {
+        id,
+      });
+    } catch (error: any) {
+      if (error.message.includes(`Request '${id}' not found`)) {
+        logger.info(`Request '${id}' not found, removing from state`);
+        await this.removePendingRequest(id);
+      } else {
+        throw error;
+      }
+    }
   }
 }

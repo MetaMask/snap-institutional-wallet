@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-custodial-wallet.git"
   },
   "source": {
-    "shasum": "P/rPDQ6hxYMjLamCcdU9gU6rHi5BU5Az0W9wU3j6KR0=",
+    "shasum": "QMUW0DQejZzKHj2+mF5NHmAOJ+AgLqzK7tiuhJ0P4sI=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

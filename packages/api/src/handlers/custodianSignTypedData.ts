@@ -1,18 +1,18 @@
 import custodianRequests from '../custodian/requests';
-import type { SignPayload } from '../types/rpc-payloads/SignPayload';
+import type { SignTypedDataPayload } from '../types/rpc-payloads/SignTypedDataPayload';
 
-export const custodianSign = async (
-  payload: SignPayload[0],
-  _metadata: SignPayload[1],
+export const custodianSignTypedData = async (
+  payload: SignTypedDataPayload[0],
+  _metadata: SignTypedDataPayload[1],
 ): Promise<string | null> => {
-  console.log('custodianSign', payload);
+  console.log('custodianSignTypedData', payload);
   try {
-    const { address, message } = payload;
+    const { address, data } = payload;
     // add the signed message to the custodian requests
     const id = custodianRequests.addSignedMessage({
       address,
-      message,
-      version: 'personal_sign',
+      message: data,
+      version: 'signTypedData_v4',
       signature: null,
       status: {
         finished: false,
