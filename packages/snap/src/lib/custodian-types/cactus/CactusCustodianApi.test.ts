@@ -11,6 +11,7 @@ import { mockCactusGetSignedMessageResponse } from './mocks/mockCactusGetSignedM
 import type { ISignedMessageDetails, ITransactionDetails } from '../../types';
 import type { ICactusTransaction } from './interfaces/ICactusTransaction';
 import { mockCactusGetTransactionsResult } from './mocks/mockCactusGetTransactionsResult';
+import { mapTransactionStatus } from '../../../util/map-status';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 jest.mock('./CactusClient');
@@ -165,6 +166,7 @@ describe('CactusCustodianApi', () => {
       expect(mockedCactusClientInstance.createTransaction).toHaveBeenCalledWith(
         {
           chainId: 4,
+          note: '',
         },
         txParams,
       );
@@ -181,9 +183,11 @@ describe('CactusCustodianApi', () => {
 
       expect(result).toStrictEqual({
         transactionHash: firstTransaction.transactionHash,
-        transactionStatus: firstTransaction.transactionStatus,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: firstTransaction.custodian_transactionId,
+        transactionStatus: mapTransactionStatus(
+          firstTransaction.transactionStatus,
+        ),
+        custodianPublishesTransaction: true,
+        custodianTransactionId: firstTransaction.custodian_transactionId,
         from: firstTransaction.from,
         gasPrice: firstTransaction.gasPrice,
         gasLimit: firstTransaction.gasLimit,
@@ -225,10 +229,11 @@ describe('CactusCustodianApi', () => {
 
       expect(result).toStrictEqual({
         from: fromAddress,
-        transactionStatus: mockCactusCreateSignatureResponse.transactionStatus,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId:
-          mockCactusCreateSignatureResponse.custodian_transactionId,
+        status: mapTransactionStatus(
+          mockCactusCreateSignatureResponse.transactionStatus,
+        ),
+        signature: null,
+        id: mockCactusCreateSignatureResponse.custodian_transactionId,
       });
 
       expect(
@@ -260,11 +265,12 @@ describe('CactusCustodianApi', () => {
       );
 
       expect(result).toStrictEqual({
+        id: mockCactusCreateSignatureResponse.custodian_transactionId,
+        signature: null,
         from: fromAddress,
-        transactionStatus: mockCactusCreateSignatureResponse.transactionStatus,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId:
-          mockCactusCreateSignatureResponse.custodian_transactionId,
+        status: mapTransactionStatus(
+          mockCactusCreateSignatureResponse.transactionStatus,
+        ),
       });
 
       expect(mockedCactusClientInstance.signTypedData_v4).toHaveBeenCalledWith(
@@ -314,16 +320,18 @@ describe('CactusCustodianApi', () => {
 
   describe('CactusCustodianApi#getSignedMessage', () => {
     it('gets a single SignedMessage by id', async () => {
-      const result: ISignedMessageDetails =
-        (await cactusCustodianApi.getSignedMessage(
-          '0x',
-          mockCactusGetSignedMessageResponse.custodian_transactionId,
-        )) as ISignedMessageDetails;
+      const result = await cactusCustodianApi.getSignedMessage(
+        '0x',
+        mockCactusGetSignedMessageResponse.custodian_transactionId,
+      );
 
       expect(result).toStrictEqual({
-        id: result.id,
-        signature: result.signature,
-        status: result.status,
+        from: '0x',
+        id: mockCactusGetSignedMessageResponse.custodian_transactionId,
+        signature: mockCactusGetSignedMessageResponse.signature,
+        status: mapTransactionStatus(
+          mockCactusGetSignedMessageResponse.transactionStatus,
+        ),
       });
 
       expect(mockedCactusClientInstance.getSignedMessage).toHaveBeenCalledWith(

@@ -159,7 +159,6 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
 
     return {
       transactionStatus: result.status,
-      transactionStatusDisplayText: result.status?.displayText,
       custodianTransactionId: result.id,
       from: result.from,
       gasLimit: result.gas ?? null,

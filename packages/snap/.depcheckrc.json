@@ -2,6 +2,8 @@
   "ignores": [
     "@metamask/auto-changelog",
     "@lavamoat/allow-scripts",
-    "@types/jest"
+    "@types/jest",
+    "@types/react",
+    "@types/react-dom"
   ]
 }

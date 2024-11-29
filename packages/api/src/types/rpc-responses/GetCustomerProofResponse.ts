@@ -1,3 +1,3 @@
 export interface GetCustomerProofResponse {
-  jwt: string
+  jwt: string;
 }

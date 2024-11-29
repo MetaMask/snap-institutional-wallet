@@ -68,12 +68,8 @@ describe('ECA1Client', () => {
     it('should call the refresh token URL and return the access token', async () => {
       const result = await client.getAccessToken();
 
-      const expectedParams = new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: 'refresh_token',
-      });
       expect(fetchMock).toHaveBeenCalledWith('http://refresh-token-url', {
-        body: expectedParams,
+        body: 'grant_type=refresh_token&refresh_token=refresh_token',
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

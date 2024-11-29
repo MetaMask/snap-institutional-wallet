@@ -1,1 +1,1 @@
-export type ListAccountChainIdsPayload = [string]
+export type ListAccountChainIdsPayload = [string];

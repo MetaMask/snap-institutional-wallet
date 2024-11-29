@@ -18,8 +18,6 @@ export type ITransactionDetails = {
   value?: string; // Optional because it's not really needed and some custodians do not set this
   data?: string; // Optional because it's not really needed and some custodians do not set this
 
-  transactionStatusDisplayText?: string; // Optional because it's used for displayText from custodian transaction
-
   transactionId?: string;
 
   chainId?: string; // Optional because early custodian APIs did not return this

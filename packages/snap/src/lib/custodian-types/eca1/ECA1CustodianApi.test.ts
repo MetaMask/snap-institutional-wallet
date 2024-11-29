@@ -14,7 +14,6 @@ import { mockECA1SignResponse } from './mocks/mockECA1SignResponse';
 import { mockECA1SignTypedDataPayload } from './mocks/mockECA1SignTypedDataPayload';
 import { mockECA1SignTypedDataResponse } from './mocks/mockECA1SignTypedDataResponse';
 import { hexlify } from '../../../util/hexlify';
-import { mapStatusObjectToStatusText } from '../../../util/mapStatusObjectToStatusText';
 import type { IEIP1559TxParams, ILegacyTXParams } from '../../types';
 
 jest.mock('./ECA1Client');
@@ -192,9 +191,16 @@ describe('ECA1CustodianApi', () => {
       ]);
 
       expect(result).toStrictEqual({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: mockECA1CreateTransactionResponse.result,
-        transactionStatus: 'created',
+        custodianTransactionId: mockECA1CreateTransactionResponse.result,
+        custodianPublishesTransaction: true,
+        transactionStatus: {
+          displayText: 'Created',
+          finished: false,
+          reason: '',
+          signed: false,
+          submitted: false,
+          success: false,
+        },
         from: fromAddress,
       });
     });
@@ -229,9 +235,16 @@ describe('ECA1CustodianApi', () => {
       ]);
 
       expect(result).toStrictEqual({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: mockECA1CreateTransactionResponse.result,
-        transactionStatus: 'created',
+        custodianTransactionId: mockECA1CreateTransactionResponse.result,
+        custodianPublishesTransaction: true,
+        transactionStatus: {
+          displayText: 'Created',
+          finished: false,
+          reason: '',
+          signed: false,
+          submitted: false,
+          success: false,
+        },
         from: fromAddress,
       });
     });
@@ -268,22 +281,17 @@ describe('ECA1CustodianApi', () => {
       );
 
       expect(result).toStrictEqual({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: mockECA1GetTransactionByIdResponse.result.id,
-        transactionStatus: mapStatusObjectToStatusText(
-          mockECA1GetTransactionByIdResponse.result.status,
-        ),
-        transactionStatusDisplayText:
-          mockECA1GetTransactionByIdResponse.result.status.displayText,
+        custodianTransactionId: mockECA1GetTransactionByIdResponse.result.id,
+        custodianPublishesTransaction: true,
+        transactionStatus: mockECA1GetTransactionByIdResponse.result.status,
         from: mockECA1GetTransactionByIdResponse.result.from,
         gasLimit: mockECA1GetTransactionByIdResponse.result.gas,
         gasPrice: mockECA1GetTransactionByIdResponse.result.gasPrice,
-        maxFeePerGas: mockECA1GetTransactionByIdResponse.result.maxFeePerGas,
-        maxPriorityFeePerGas:
-          mockECA1GetTransactionByIdResponse.result.maxPriorityFeePerGas,
+        maxFeePerGas: null,
+        maxPriorityFeePerGas: null,
+        reason: '',
         nonce: mockECA1GetTransactionByIdResponse.result.nonce,
         transactionHash: mockECA1GetTransactionByIdResponse.result.hash,
-        reason: null,
         to: mockECA1GetTransactionByIdResponse.result.to,
       });
     });
@@ -326,9 +334,17 @@ describe('ECA1CustodianApi', () => {
 
       expect(result).toStrictEqual({
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: mockECA1SignTypedDataResponse.result,
-        transactionStatus: 'created',
+        id: mockECA1SignTypedDataResponse.result,
+        status: {
+          displayText: 'Created',
+          finished: false,
+          reason: '',
+          signed: false,
+          submitted: false,
+          success: false,
+        },
         from: mockECA1SignTypedDataPayload[0],
+        signature: null,
       });
     });
 
@@ -358,9 +374,17 @@ describe('ECA1CustodianApi', () => {
 
       expect(result).toStrictEqual({
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        custodian_transactionId: mockECA1SignResponse.result,
-        transactionStatus: 'created',
+        id: mockECA1SignResponse.result,
+        status: {
+          displayText: 'Created',
+          finished: false,
+          reason: '',
+          signed: false,
+          submitted: false,
+          success: false,
+        },
         from: mockECA1SignTypedDataPayload[0],
+        signature: null,
       });
     });
 

@@ -7,11 +7,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.1]
-
-### Added
-
-- Initial commit
-
-[Unreleased]: https://github.com/MetaMask/snap-custodial-wallet/compare/v0.0.1...HEAD
-[0.0.1]: https://github.com/MetaMask/snap-custodial-wallet/releases/tag/v0.0.1
+[Unreleased]: https://github.com/MetaMask/snap-custodial-wallet/

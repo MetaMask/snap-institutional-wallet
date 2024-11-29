@@ -1,3 +1,3 @@
 export interface ListAccountSignedResponse {
-  jwt: string
+  jwt: string;
 }

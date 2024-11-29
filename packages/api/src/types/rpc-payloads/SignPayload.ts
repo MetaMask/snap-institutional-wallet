@@ -1,11 +1,11 @@
 export type SignPayload = [
   {
-    address: string
-    message: string
+    address: string;
+    message: string;
   },
   {
-    chainId: string
-    originUrl: string
-    note: string
+    chainId: string;
+    originUrl: string;
+    note: string;
   },
-]
+];
