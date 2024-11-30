@@ -45,7 +45,7 @@ const Index = () => {
     'signed',
   );
   const [signedMessageIds, setSignedMessageIds] = useState<string[]>([]);
-  const [transactions, setTransactions] = useState<string[]>([]);
+  const [transactionIds, setTransactionIds] = useState<string[]>([]);
   const [transactionId, setTransactionId] = useState<string | null>(null);
   const [transactionIntent, setTransactionIntent] = useState<string | null>(
     'signed',
@@ -383,9 +383,9 @@ const Index = () => {
       action: {
         callback: async () => {
           await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const accounts = await window.ethereum.request({
+          const accounts = (await window.ethereum.request({
             method: 'eth_accounts',
-          });
+          })) as string[];
           if (accounts.length === 0) {
             throw new Error('No accounts found');
           }
@@ -414,7 +414,11 @@ const Index = () => {
             // eslint-disable-next-line id-denylist
             data.signedMessages.map((msg: { id: string }) => msg.id),
           );
-          // setTransactions(data.transactions);
+          setTransactionIds(
+            data.transactions.map(
+              (tx: { transaction: { id: string } }) => tx.transaction.id,
+            ),
+          );
           return data;
         },
         label: 'List Requests',
@@ -523,7 +527,11 @@ const Index = () => {
         {
           id: 'update-transaction-transaction-id',
           title: 'Transaction ID',
-          type: InputType.TextField,
+          type: InputType.Dropdown,
+          options: [
+            { value: 'Select an option' },
+            ...transactionIds.map((id) => ({ value: id })),
+          ],
           onChange: (event: any) => setTransactionId(event.currentTarget.value),
         },
         // choose intent - signed or failed

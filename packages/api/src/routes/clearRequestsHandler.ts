@@ -1,3 +1,4 @@
+/* eslint-disable import/no-nodejs-modules */
 import type { IncomingMessage } from 'connect';
 import type http from 'http';
 

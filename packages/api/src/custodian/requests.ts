@@ -143,7 +143,6 @@ class CustodianRequests {
   }
 
   async updateSignedMessage(id: string, body: { intent: string }) {
-    console.log('updateSignedMessage', id, body);
     const signedMessage = this.getSignedMessage(id);
     if (!signedMessage) {
       throw new Error(`Signed message with id ${id} not found`);
@@ -178,8 +177,6 @@ class CustodianRequests {
   }
 
   async updateTransaction(id: string, body: { intent: string }) {
-    console.log('updateTransaction', id, body);
-
     const request = this.getTransaction(id);
     if (!request?.transaction?.status) {
       throw new Error(`Transaction with id ${id} not found`);
@@ -312,11 +309,11 @@ class CustodianRequests {
       : 0;
 
     console.log(
-      `locallNonce: ${localNonce} blockChainNonce: ${blockChainNonce}`,
+      `local Nonce: ${localNonce} blockChainNonce: ${blockChainNonce}`,
     );
 
     if (blockChainNonce === 0 || blockChainNonce > localNonce) {
-      console.log('Using blockchain nonce');
+      ('Using blockchain nonce');
       nonce = blockChainNonce;
     } else {
       console.log('Using local nonce');
