@@ -1,11 +1,14 @@
 import { KeyringRpcMethod } from '@metamask/keyring-api';
 
+import config from './config';
+import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
+
 export enum InternalMethod {
   Onboard = 'authentication.onboard',
   ClearAllRequests = 'snap.internal.clearAllRequests',
 }
 
-export const originPermissions = new Map<string, string[]>([
+const originPermissions = new Map<string, string[]>([
   [
     'metamask',
     [
@@ -20,60 +23,39 @@ export const originPermissions = new Map<string, string[]>([
       KeyringRpcMethod.RejectRequest,
     ],
   ],
-  [
-    'http://localhost:8000',
-    [
-      // Keyring methods
-      KeyringRpcMethod.ListAccounts,
-      KeyringRpcMethod.GetAccount,
-      KeyringRpcMethod.CreateAccount,
-      KeyringRpcMethod.FilterAccountChains,
-      KeyringRpcMethod.UpdateAccount,
-      KeyringRpcMethod.DeleteAccount,
-      KeyringRpcMethod.ExportAccount,
-      KeyringRpcMethod.ListRequests,
-      KeyringRpcMethod.GetRequest,
-      KeyringRpcMethod.ApproveRequest,
-      KeyringRpcMethod.RejectRequest,
-      // Custom methods
-      InternalMethod.Onboard,
-      InternalMethod.ClearAllRequests,
-    ],
-  ],
-  [
-    'https://metamask.github.io',
-    [
-      // Keyring methods
-      KeyringRpcMethod.ListAccounts,
-      KeyringRpcMethod.GetAccount,
-      KeyringRpcMethod.CreateAccount,
-      KeyringRpcMethod.FilterAccountChains,
-      KeyringRpcMethod.UpdateAccount,
-      KeyringRpcMethod.DeleteAccount,
-      KeyringRpcMethod.ExportAccount,
-      KeyringRpcMethod.ListRequests,
-      KeyringRpcMethod.GetRequest,
-      KeyringRpcMethod.ApproveRequest,
-      KeyringRpcMethod.RejectRequest,
-      // Custom methods
-    ],
-  ],
-  [
-    'metamask.github.io',
-    [
-      // Keyring methods
-      KeyringRpcMethod.ListAccounts,
-      KeyringRpcMethod.GetAccount,
-      KeyringRpcMethod.CreateAccount,
-      KeyringRpcMethod.FilterAccountChains,
-      KeyringRpcMethod.UpdateAccount,
-      KeyringRpcMethod.DeleteAccount,
-      KeyringRpcMethod.ExportAccount,
-      KeyringRpcMethod.ListRequests,
-      KeyringRpcMethod.GetRequest,
-      KeyringRpcMethod.ApproveRequest,
-      KeyringRpcMethod.RejectRequest,
-      // Custom methods
-    ],
-  ],
 ]);
+
+custodianMetadata.forEach((custodian) => {
+  if (custodian.allowedOnboardingDomains) {
+    // exclude localhost
+    custodian.allowedOnboardingDomains.forEach((domain) => {
+      originPermissions.set(domain, [InternalMethod.Onboard]);
+      originPermissions.set(`https://${domain}`, [InternalMethod.Onboard]);
+    });
+  }
+});
+
+// Add localhost to the originPermissions
+const localhostPermissions = [
+  // Keyring methods
+  KeyringRpcMethod.ListAccounts,
+  KeyringRpcMethod.GetAccount,
+  KeyringRpcMethod.CreateAccount,
+  KeyringRpcMethod.FilterAccountChains,
+  KeyringRpcMethod.UpdateAccount,
+  KeyringRpcMethod.DeleteAccount,
+  KeyringRpcMethod.ExportAccount,
+  KeyringRpcMethod.ListRequests,
+  KeyringRpcMethod.GetRequest,
+  KeyringRpcMethod.ApproveRequest,
+  KeyringRpcMethod.RejectRequest,
+  // Custom methods
+  InternalMethod.Onboard,
+  InternalMethod.ClearAllRequests,
+];
+
+if (config.dev) {
+  originPermissions.set('http://localhost:8000', localhostPermissions);
+}
+
+export { originPermissions };

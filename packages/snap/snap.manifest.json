@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-custodial-wallet.git"
   },
   "source": {
-    "shasum": "P/rPDQ6hxYMjLamCcdU9gU6rHi5BU5Az0W9wU3j6KR0=",
+    "shasum": "RV7s/jzmLWy02HuJq+vzJsW2Svx4px4Olejk4f5wbTg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -17,20 +17,48 @@
       }
     }
   },
+  "initialConnections": {
+    "localhost:8000": {},
+    "https://localhost:8000": {},
+    "https://neptune-custody-ui.dev.metamask-institutional.io": {},
+    "https://neptune-custody-ui.metamask-institutional.io": {},
+    "https://zodia.io": {},
+    "https://sit.zodia.io": {},
+    "https://qa.zodia.io": {},
+    "https://console.fireblocks.io": {},
+    "https://console.dev.mpcvault.com": {},
+    "https://saturn-custody-ui.dev.metamask-institutional.io": {},
+    "https://saturn-custody-ui.metamask-institutional.io": {},
+    "https://console.mpcvault.com": {},
+    "https://app.bitgo.com": {},
+    "https://app.bitgo-test.com": {},
+    "https://apps-portal.safe.global": {}
+  },
   "initialPermissions": {
     "endowment:network-access": {},
     "endowment:ethereum-provider": {},
     "endowment:keyring": {
       "allowedOrigins": [
-        "https://metamask.github.io",
-        "metamask.github.io",
         "localhost:8000",
-        "http://localhost:8000",
-        "https://neptune-custody-ui.dev.metamask-institutional.io"
+        "http://localhost:8000"
       ]
     },
     "endowment:rpc": {
-      "dapps": true
+      "allowedOrigins": [
+        "localhost:8000",
+        "http://localhost:8000",
+        "https://neptune-custody-ui.dev.metamask-institutional.io",
+        "https://zodia.io",
+        "https://sit.zodia.io",
+        "https://qa.zodia.io",
+        "https://console.fireblocks.io",
+        "https://console.dev.mpcvault.com",
+        "https://saturn-custody-ui.dev.metamask-institutional.io",
+        "https://console.mpcvault.com",
+        "https://app.bitgo.com",
+        "https://app.bitgo-test.com",
+        "https://apps-portal.safe.global"
+      ]
     },
     "endowment:cronjob": {
       "jobs": [
