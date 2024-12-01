@@ -1,6 +1,8 @@
-# TypeScript Example Snap Front-end
+# Custodial snap frontend
 
-This project was bootstrapped with [Gatsby](https://www.gatsbyjs.com/).
+This project was forked from the original [Simple Snap Keyring Frontend](https://github.com/MetaMask/snap-simple-keyring/tree/main/packages/site)
+
+It's intended to work with the custodial snap as well as the Local Custodian API (in the /api package). By default that runs at http://localhost:3330.
 
 ## Available Scripts
 
@@ -11,7 +13,7 @@ In the project directory, you can run:
 Runs the app in the development mode.\
 Open [http://localhost:8000](http://localhost:8000) to view it in the browser.
 
-The page will reload if you make edits.\
+The page will reload if you make edits.
 You will also see any lint errors in the console.
 
 ### `yarn build`

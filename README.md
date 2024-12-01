@@ -1,20 +1,24 @@
 # Custodial Wallet Snap
 
-## Snaps is pre-release software
+## Description
 
-To interact with (your) Snaps, you will need to install [MetaMask
-Flask](https://metamask.io/flask/), a canary distribution for developers that
-provides access to upcoming features.
+The custodian snap allows users to use custodial wallets with MetaMask. It acts as a client to any custodian which implements the Ethereum Custodian API.
 
-## Getting Started
+Information on how to implement the Ethereum Custodian API and be supported in MetaMask can be found in the [integration docs](integration-docs/index.md).
 
-Clone the template-snap repository [using this
-template](https://github.com/MetaMask/template-snap-monorepo/generate) and
-setup the development environment:
+## Running the Snap
+
+## Install and run with yarn
 
 ```shell
 yarn install && yarn start
 ```
+
+## Testing
+
+The custodial snap supports any of the custodians previously supported by MetaMask Institutional. The easiest way to test the snap is to run this repo and use the local companion site to test it with the local dev custodian.
+
+It should also function with Neptune Custody which has a UI located at https://neptune-custody-ui.dev.metamask-institutional.io/
 
 ## Cloning
 
