@@ -1,7 +1,7 @@
 # Transactions
 
-!!!	info
-		Relevant JSON-RPC method: `custodian_createTransaction`
+!!! info
+Relevant JSON-RPC method: `custodian_createTransaction`
 
 ![Areas of responsibility - transactions](../../assets/images/transaction-responsibility.png)
 
@@ -32,35 +32,33 @@ Preventing users from copying their address when they have an unsupported networ
 Warning users that a specific chain is not supported before they send a transaction
 When custodians (or their users) add a new chain, support for this chain can be signalled by adding it to the response for this command.
 
-
 ## Transaction updates
 
 After a transaction is created, the custodian is responsible for updating the transaction status to include the signed raw transaction via the `custodian_getTransactionById` method. The snap will poll this method until the transaction contains a valid signature or the transaction is marked as not successful.
 
 ### Rules
 
-* To give users access to the Defi ecosystem, they must have the power to make calls to smart contracts and conduct other types of transactions, such as:
+- To give users access to the Defi ecosystem, they must have the power to make calls to smart contracts and conduct other types of transactions, such as:
 
-	* ETH transfers.
-	* ERC-20 transfers and approves - a special case of smart contract calls.
-	* General smart contract calls, i.e. transactions where the `to` parameter is a smart contract address and the data.
+  - ETH transfers.
+  - ERC-20 transfers and approves - a special case of smart contract calls.
+  - General smart contract calls, i.e. transactions where the `to` parameter is a smart contract address and the data.
 
-* We expect custodians to have their own rules on what contracts their customers can call. 
+- We expect custodians to have their own rules on what contracts their customers can call.
 
 ### Parameters
 
 The parameters we send with our HTTP request are similar to the `ITXParams` in the appendices, and closely resemble the parameters of `eth_sendTransaction` in the Ethereum JSON-RPC API. Hexlified string values are necessary for supporting large numbers.
 
-* `from`: the Ethereum address of the user.
-* `to`: the Ethereum address of the contract we are calling, or the recipient in the case of a simple transfer.
-* `value`: stringified integer of the value sent with this transaction, in Wei.
-* `gasLimit`: same as `value`, set by the user, but can be overridden.
-* `data`: the calldata, i.e. the 4 byte prefix and the contract method parameters.
-* Gas parameters: see the [next section](../gas).
+- `from`: the Ethereum address of the user.
+- `to`: the Ethereum address of the contract we are calling, or the recipient in the case of a simple transfer.
+- `value`: stringified integer of the value sent with this transaction, in Wei.
+- `gasLimit`: same as `value`, set by the user, but can be overridden.
+- `data`: the calldata, i.e. the 4 byte prefix and the contract method parameters.
+- Gas parameters: see the [next section](../gas).
 
-!!!	tip "Nonce"
-	We do not send a nonce. We expect the custodian to manage the nonce as well as publish the transaction. This is essential for avoiding stuck transactions.
-
+!!! tip "Nonce"
+We do not send a nonce. We expect the custodian to manage the nonce as well as publish the transaction. This is essential for avoiding stuck transactions.
 
 ## Transactions FAQ
 
@@ -82,16 +80,17 @@ In transaction methods and webhooks, the `status` field has the following conten
 
 ```typescript
 {
-  finished: boolean
-  signed: boolean
-  submitted: boolean
-  success: boolean
-  displayText: string
-  reason: string
+  finished: boolean;
+  signed: boolean;
+  submitted: boolean;
+  success: boolean;
+  displayText: string;
+  reason: string;
 }
 ```
 
 #### Subfield explanations
+
 - `finished` - whether the transaction is done, i.e. it is no longer necessary to poll for the status of this transaction. This should be true whether or not the transaction was successful
 - `signed` - Whether the transaction has been signed - it has an available hash
 - `submitted` - Whether the transaction has been broadcast to an RPC network and made available in the mempool. The custodia should not set this to true unless it is monitoring transactions

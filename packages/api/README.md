@@ -2,11 +2,11 @@
 
 The local custodian API partly implements the [Ethereum Custodian API version 3](https://consensys-vertical-apps.github.io/ethereum-custodian-api/) (ECA-3) for use with the custodial snap.
 
-It makes available a refresh token API at 
+It makes available a refresh token API at
 
 http://localhost:3330/oauth/token
 
-and an ECA-3 endpoint at 
+and an ECA-3 endpoint at
 
 http://localhost:3330/v3/json-rpc
 

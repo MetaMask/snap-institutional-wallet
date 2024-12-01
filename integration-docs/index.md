@@ -4,11 +4,11 @@ The custodial snap provides a customized client library that supports custodian 
 
 ## How it works
 
-* A custodian API creates transactions and signed messages with users' Ethereum accounts, accepting arbitrary transaction parameters.
-* After the transaction or signed message is created, the custodian provides a link to the request in their own user interface, so that the user can view the request status and details.
-* The user can then sign the transaction or signed message through whatever mechanism the custodian provides.
-* The snap will poll the custodian's API to check if the transaction or signed message has been signed.
-* Once signed, Metamask will broadcast the transaction to the network and yield a receipt to the request originator (e.g. a dapp)
+- A custodian API creates transactions and signed messages with users' Ethereum accounts, accepting arbitrary transaction parameters.
+- After the transaction or signed message is created, the custodian provides a link to the request in their own user interface, so that the user can view the request status and details.
+- The user can then sign the transaction or signed message through whatever mechanism the custodian provides.
+- The snap will poll the custodian's API to check if the transaction or signed message has been signed.
+- Once signed, Metamask will broadcast the transaction to the network and yield a receipt to the request originator (e.g. a dapp)
 
 ## Basic custodian requirements
 

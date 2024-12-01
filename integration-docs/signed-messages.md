@@ -1,6 +1,5 @@
-!!!	info
-		Relevant JSON-RPC methods: `custodian_sign` and `custodian_signTypedData`
-
+!!! info
+Relevant JSON-RPC methods: `custodian_sign` and `custodian_signTypedData`
 
 Many Dapps require users to sign messages. This is usually done to prove ownership of an account, or to prove that the user has agreed to a particular message. The custodian must provide a mechanism for signing messages using the `custodian_sign` and `custodian_signTypedData` methods, which correspond to the `personal_sign` and `eth_signTypedData` methods of the [MetaMask JSON-RPC API](https://docs.metamask.io/guide/signing-data.html).
 
@@ -22,7 +21,7 @@ MetaMask doesn't persist signatures; one of the main reasons is that users can i
 
 A general convention, and expectation of dapps, is that ethereum signatures are RFC-6979 compliant, which is to say they use a non-random `k` value. This value also cannot be fixed, e.g `5`, or subsequent signatures with the same `k` value will leak private keys, so normally a hash of the private key is used.
 
-This is not possible to achieve per se for secret sharing schemes because it's impossible to hash the private key. 
+This is not possible to achieve per se for secret sharing schemes because it's impossible to hash the private key.
 
 Most custodians therefore store signatures permanently (and treat a an already-signed payload for a given address as permanently approved).
 
@@ -30,8 +29,7 @@ Most custodians therefore store signatures permanently (and treat a an already-s
 
 The status field in the response of `custodian_getSignedMessageById` is an object containing the same subfields as that of `custodian_getTransactionById` but does not include `submitted`
 
-
-```typescript  
+```typescript
 {
     "finished": boolean, // This is true if the message is complete - successfully or otherwise
     "signed": boolean, // This is true if the message has been signed

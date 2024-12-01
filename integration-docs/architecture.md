@@ -1,4 +1,3 @@
-
 # Overview
 
 The custodial snap is a preinstalled component of MetaMask that allows users to interact with decentralised applications across EVMs and propose transactions to custodians as if the keys were stored in the extension. It is a thin client that runs in the browser and communicates directly with a custodian service to initiate transactions and message signing.

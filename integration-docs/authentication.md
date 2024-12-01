@@ -11,9 +11,11 @@ If the custodian has a web UI, they should implement a button or link that takes
 If the custodian only has a desktop application, they can host a webpage which takes the token (or a reference to the token) as a parameter and injects it as above.
 
 ## Token refresh endpoint
+
 Your refresh token endpoint must support application/json request bodies.
 
 ## Example requests
+
 Here are some example requests. that would be made by the custodial snap to your refresh token endpoint.
 
 ```json
@@ -29,6 +31,7 @@ Content-Type: application/json
 ```
 
 ## Example responses
+
 This is the response made by your refresh token endpoint in response to the above requests.
 
 ```json
@@ -59,3 +62,4 @@ The custodial snap does not use a standard Oauth 2.0 flow. However, it does cont
 The user provides, from the custodian, a refresh token. The custodial snap uses this token to obtain the actual token for accompanying requests.
 
 Ideally, this token is issued in a non-interactive way; i.e. the credential exchange happens at the custodian and this is effectively a Machine-to-Machine token. Since the custodial snap is an extension and not an ordinary web application, it cannot accept redirects.x
+```
