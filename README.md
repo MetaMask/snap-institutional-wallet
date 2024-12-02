@@ -6,8 +6,6 @@ The custodian snap allows users to use custodial wallets with MetaMask. It acts 
 
 Information on how to implement the Ethereum Custodian API and be supported in MetaMask can be found in the [integration docs](integration-docs/index.md).
 
-## Running the Snap
-
 ## Install and run with yarn
 
 ```shell
