@@ -26,10 +26,7 @@ import type { ECA3SignTypedDataResponse } from './rpc-responses/ECA3SignTypedDat
 import factory from '../../../util/json-rpc-call';
 import type { IRefreshTokenChangeEvent } from '../../types';
 import type { JsonRpcResult } from '../../types/JsonRpcResult';
-import {
-  INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT,
-  REFRESH_TOKEN_CHANGE_EVENT,
-} from '../constants';
+import { TOKEN_EXPIRED_EVENT, REFRESH_TOKEN_CHANGE_EVENT } from '../constants';
 
 export class ECA3Client extends EventEmitter {
   #call: <Params, Result>(
@@ -72,6 +69,7 @@ export class ECA3Client extends EventEmitter {
     const payload: IRefreshTokenChangeEvent = {
       oldRefreshToken: this.#refreshToken,
       newRefreshToken: refreshToken,
+      apiUrl: this.#apiBaseUrl,
     };
     this.emit(REFRESH_TOKEN_CHANGE_EVENT, payload);
     this.#refreshToken = refreshToken;
@@ -125,7 +123,7 @@ export class ECA3Client extends EventEmitter {
           .update(oldRefreshToken + url)
           .digest('hex');
 
-        this.emit(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, {
+        this.emit(TOKEN_EXPIRED_EVENT, {
           url,
           oldRefreshToken: hashedToken,
         });
@@ -160,6 +158,7 @@ export class ECA3Client extends EventEmitter {
 
         // This is a "bottom up" refresh token change, from the custodian
         const payload: IRefreshTokenChangeEvent = {
+          apiUrl: this.#apiBaseUrl,
           oldRefreshToken,
           newRefreshToken: responseJson.refresh_token,
         };

@@ -21,10 +21,7 @@ import factory from '../../../util/json-rpc-call';
 import { SimpleCache } from '../../simple-cache/SimpleCache';
 import type { IRefreshTokenChangeEvent } from '../../types/IRefreshTokenChangeEvent';
 import type { JsonRpcResult } from '../../types/JsonRpcResult';
-import {
-  INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT,
-  REFRESH_TOKEN_CHANGE_EVENT,
-} from '../constants';
+import { REFRESH_TOKEN_CHANGE_EVENT, TOKEN_EXPIRED_EVENT } from '../constants';
 
 export class ECA1Client extends EventEmitter {
   #call: <Params, Result>(
@@ -66,6 +63,7 @@ export class ECA1Client extends EventEmitter {
     const payload: IRefreshTokenChangeEvent = {
       oldRefreshToken: this.#refreshToken,
       newRefreshToken: refreshToken,
+      apiUrl: this.#apiBaseUrl,
     };
     this.emit(REFRESH_TOKEN_CHANGE_EVENT, payload);
     this.#refreshToken = refreshToken;
@@ -116,7 +114,7 @@ export class ECA1Client extends EventEmitter {
           .update(oldRefreshToken + url)
           .digest('hex');
 
-        this.emit(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, {
+        this.emit(TOKEN_EXPIRED_EVENT, {
           url,
           oldRefreshToken: hashedToken,
         });
@@ -151,6 +149,7 @@ export class ECA1Client extends EventEmitter {
 
         // This is a "bottom up" refresh token change, from the custodian
         const payload: IRefreshTokenChangeEvent = {
+          apiUrl: this.#apiBaseUrl,
           oldRefreshToken,
           newRefreshToken,
         };
