@@ -1,5 +1,5 @@
 {
-  "name": "@metamask/custodial-wallet-api",
+  "name": "@metamask/institutional-wallet-api",
   "description": "Example custodian API",
   "packageManager": "yarn@3.6.3",
   "dependencies": {

@@ -1,18 +1,18 @@
 {
   "version": "0.0.1",
-  "description": "Custodial accounts in MetaMask.",
-  "proposedName": "MetaMask Custodial Wallet",
+  "description": "Institutional accounts in MetaMask.",
+  "proposedName": "Institutional Wallet",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MetaMask/snap-custodial-wallet.git"
+    "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "vwn1nQknjYrb8+VxmW28i9j4fVxjyVJm4uQzryaUMAI=",
+    "shasum": "pAM+McrqnMYKY0ctbnqvhb2POFwcXh5wdz8DnklnoXc=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "@metamask/snap-custodial-wallet-snap",
+        "packageName": "@metamask/snap-institutional-wallet-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
