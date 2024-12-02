@@ -26,13 +26,15 @@ const logger = {
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),
     ),
-  error: (...args: any[]) =>
+  error: (...args: any[]) => {
     console.error(
       '[Custodial snap]',
       ...args.map((arg) =>
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),
-    ),
+    );
+    console.error(args);
+  },
   debug: (...args: any[]) =>
     console.debug(
       '[Custodial snap]',

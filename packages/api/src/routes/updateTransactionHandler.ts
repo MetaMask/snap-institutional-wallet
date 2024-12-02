@@ -3,25 +3,25 @@ import type http from 'http';
 
 import custodianRequests from '../custodian/requests';
 
-export type UpdateSignedMessageRequest = {
+export type UpdateTransactionRequest = {
   body: {
     intent: string;
   };
 } & IncomingMessage;
 
 /**
- * Handles updating a signed message
+ * Handles updating a transaction
  * @param req - The request object
  * @param res - The response object
  * @param _next - The next middleware function
  */
-export default async function updateSignedMessageHandler(
-  req: UpdateSignedMessageRequest,
+export default async function updateTransactionHandler(
+  req: UpdateTransactionRequest,
   res: http.ServerResponse,
   // eslint-disable-next-line @typescript-eslint/ban-types
   _next: Function,
 ) {
-  console.log('updateSignedMessageHandler', req.url, req.body);
+  console.log('updateTransactionHandler', req.url, req.body);
 
   // Extract the id from the url
   const id = req.url?.split('/').pop();
@@ -40,11 +40,11 @@ export default async function updateSignedMessageHandler(
     return;
   }
 
-  // Update the signed message
-  await custodianRequests.updateSignedMessage(id, body);
+  // Update the transaction
+  await custodianRequests.updateTransaction(id, body);
 
-  const updatedSignedMessage = custodianRequests.getSignedMessage(id);
+  const updatedTransaction = custodianRequests.getTransaction(id);
 
   res.statusCode = 200;
-  res.end(JSON.stringify(updatedSignedMessage));
+  res.end(JSON.stringify(updatedTransaction));
 }

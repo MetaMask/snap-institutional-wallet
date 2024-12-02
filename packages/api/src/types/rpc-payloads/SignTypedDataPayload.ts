@@ -1,4 +1,4 @@
-import { TypedData } from 'eip-712';
+import type { TypedData } from 'eip-712';
 
 export type SignTypedDataPayload = [
   {

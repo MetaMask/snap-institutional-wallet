@@ -343,4 +343,16 @@ export const custodianMetadata: CustodianMetadata[] = [
     isManualTokenInputSupported: true,
     allowedOnboardingDomains: ['localhost:8000', 'http://localhost:8000'],
   },
+  {
+    refreshTokenUrl: 'http://localhost:3330/oauth/token',
+    apiBaseUrl: 'http://localhost:3330',
+    apiVersion: CustodianApiVersions.ECA3,
+    custodianPublishesTransaction: false,
+    name: 'local-dev',
+    displayName: 'Local Dev',
+    enabled: false,
+    iconUrl:
+      'https://dev.metamask-institutional.io/custodian-icons/neptune-icon.svg',
+    isManualTokenInputSupported: true,
+  },
 ];

@@ -208,6 +208,7 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
 
 // Improved polling function
 const pollRequests = async (): Promise<void> => {
+  logger.info('Polling requests');
   try {
     await (await getRequestManager()).poll();
   } catch (error) {

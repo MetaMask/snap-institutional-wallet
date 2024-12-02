@@ -137,6 +137,10 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
       meta,
     ]);
 
+    if (typeof result !== 'string') {
+      throw new Error('Failed to create transaction');
+    }
+
     return {
       custodianTransactionId: result,
       transactionStatus: mapTransactionStatus('created'),

@@ -3,6 +3,7 @@ import accounts from '../custodian/accounts';
 
 export const custodianListAccounts =
   async (): Promise<ListAccountsResponse> => {
+    console.log('custodianListAccounts');
     const keyringAccounts = await accounts.getAccounts();
     return keyringAccounts.map((account) => {
       return {

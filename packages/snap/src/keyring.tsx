@@ -263,14 +263,24 @@ export class CustodialKeyring implements Keyring {
 
     let deepLink: CustodianDeepLink | null = null;
 
-    if (request.request.method === EthMethod.SignTransaction) {
-      deepLink = (await this.getCustodianApiForAddress(
-        address,
-      ).getTransactionLink(custodianId)) as CustodianDeepLink;
-    } else {
-      deepLink = (await this.getCustodianApiForAddress(
-        address,
-      ).getSignedMessageLink(custodianId)) as CustodianDeepLink;
+    try {
+      if (request.request.method === EthMethod.SignTransaction) {
+        deepLink = (await this.getCustodianApiForAddress(
+          address,
+        ).getTransactionLink(custodianId)) as CustodianDeepLink;
+      } else {
+        deepLink = (await this.getCustodianApiForAddress(
+          address,
+        ).getSignedMessageLink(custodianId)) as CustodianDeepLink;
+      }
+    } catch (error) {
+      deepLink = {
+        text: 'Complete in Custodian App',
+        id: custodianId,
+        url: '',
+        action: 'view',
+      };
+      console.error('Error getting deep link', error);
     }
 
     return {
