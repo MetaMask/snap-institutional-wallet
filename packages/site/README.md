@@ -1,8 +1,8 @@
-# Custodial snap frontend
+# Institutional snap frontend
 
 This project was forked from the original [Simple Snap Keyring Frontend](https://github.com/MetaMask/snap-simple-keyring/tree/main/packages/site)
 
-It's intended to work with the custodial snap as well as the Local Custodian API (in the /api package). By default that runs at http://localhost:3330.
+It's intended to work with the institutional snap as well as the Local Custodian API (in the /api package). By default that runs at http://localhost:3330.
 
 ## Available Scripts
 

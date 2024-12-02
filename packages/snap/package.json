@@ -1,20 +1,20 @@
 {
-  "name": "@metamask/snap-custodial-wallet-snap",
+  "name": "@metamask/snap-institutional-wallet-snap",
   "version": "0.0.1",
-  "description": "Custodial accounts in MetaMask.",
+  "description": "Institutional accounts in MetaMask.",
   "keywords": [
     "metamask",
     "snap",
     "keyring",
     "account"
   ],
-  "homepage": "https://github.com/MetaMask/snap-custodial-wallet#readme",
+  "homepage": "https://github.com/MetaMask/snap-institutional-wallet#readme",
   "bugs": {
-    "url": "https://github.com/MetaMask/snap-custodial-wallet/issues"
+    "url": "https://github.com/MetaMask/snap-institutional-wallet/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MetaMask/snap-custodial-wallet.git"
+    "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "main": "dist/bundle.js",

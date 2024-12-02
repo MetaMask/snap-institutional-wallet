@@ -35,7 +35,9 @@ export const AddToken: SnapComponent<AddTokenProps> = ({
           <Field label="Paste your Refresh Token">
             <Input name="token" placeholder="Enter your Refresh Token" />
           </Field>
-          <Field label={`${!selectedCustodian?.displayName} API URL`}>
+          <Field
+            label={`${selectedCustodian?.displayName ?? 'Custodian'} API URL`}
+          >
             <Input name="apiUrl" placeholder={selectedCustodian?.apiBaseUrl} />
           </Field>
         </Form>

@@ -7,28 +7,28 @@
 const logger = {
   log: (...args: any[]) =>
     console.log(
-      '[Custodial snap]',
+      '[Institutional snap]',
       ...args.map((arg) =>
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),
     ),
   info: (...args: any[]) =>
     console.info(
-      '[Custodial snap]',
+      '[Institutional snap]',
       ...args.map((arg) =>
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),
     ),
   warn: (...args: any[]) =>
     console.warn(
-      '[Custodial snap]',
+      '[Institutional snap]',
       ...args.map((arg) =>
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),
     ),
   error: (...args: any[]) => {
     console.error(
-      '[Custodial snap]',
+      '[Institutional snap]',
       ...args.map((arg) =>
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),
@@ -37,7 +37,7 @@ const logger = {
   },
   debug: (...args: any[]) =>
     console.debug(
-      '[Custodial snap]',
+      '[Institutional snap]',
       ...args.map((arg) =>
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),

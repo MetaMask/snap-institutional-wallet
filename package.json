@@ -1,20 +1,20 @@
 {
-  "name": "@metamask/snap-custodial-wallet",
+  "name": "@metamask/snap-institutional-wallet",
   "version": "0.0.1",
-  "description": "Custodial accounts in MetaMask",
+  "description": "Institutional accounts in MetaMask",
   "keywords": [
     "metamask",
     "snap",
     "keyring",
     "account"
   ],
-  "homepage": "https://github.com/MetaMask/snap-custodial-wallet#readme",
+  "homepage": "https://github.com/MetaMask/snap-institutional-wallet#readme",
   "bugs": {
-    "url": "https://github.com/MetaMask/snap-custodial-wallet/issues"
+    "url": "https://github.com/MetaMask/snap-institutional-wallet/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/snap-custodial-wallet.git"
+    "url": "https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "author": "",
@@ -23,8 +23,8 @@
   ],
   "scripts": {
     "build": "yarn workspaces foreach --parallel --verbose --topological run build",
-    "build:dapp": "yarn workspace @metamask/snap-custodial-wallet-site build",
-    "build:snap": "yarn workspace @metamask/snap-custodial-wallet-snap build",
+    "build:dapp": "yarn workspace @metamask/snap-institutional-wallet-site build",
+    "build:snap": "yarn workspace @metamask/snap-institutional-wallet-snap build",
     "lint": "yarn workspaces foreach --parallel --verbose run lint",
     "lint:deps": "yarn workspaces foreach --parallel --verbose run depcheck",
     "lint:eslint": "yarn workspaces foreach --parallel --verbose run lint:eslint",

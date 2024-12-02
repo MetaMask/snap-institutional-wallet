@@ -1,8 +1,8 @@
-# Custodial Wallet Snap
+# Institutional Wallet Snap
 
 ## Description
 
-The custodian snap allows users to use custodial wallets with MetaMask. It acts as a client to any custodian which implements the Ethereum Custodian API.
+The institutional snap allows users to use custodial wallets with MetaMask. It acts as a client to any custodian which implements the Ethereum Custodian API.
 
 Information on how to implement the Ethereum Custodian API and be supported in MetaMask can be found in the [integration docs](integration-docs/index.md).
 
@@ -14,7 +14,7 @@ yarn install && yarn start
 
 ## Testing
 
-The custodial snap supports any of the custodians previously supported by MetaMask Institutional. The easiest way to test the snap is to run this repo and use the local companion site to test it with the local dev custodian.
+The institutional snap supports any of the custodians previously supported by MetaMask Institutional. The easiest way to test the snap is to run this repo and use the local companion site to test it with the local dev custodian.
 
 It should also function with Neptune Custody which has a UI located at https://neptune-custody-ui.dev.metamask-institutional.io/
 

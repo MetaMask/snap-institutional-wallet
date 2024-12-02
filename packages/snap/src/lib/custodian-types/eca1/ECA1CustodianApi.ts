@@ -239,7 +239,7 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
     };
   }
 
-  // MMI Legacy feature that is not used in the custodial snap
+  // MMI Legacy feature that is not used in the Institutional snap
   public async getCustomerProof(): Promise<string> {
     const { result } = await this.#client.getCustomerProof();
     return result.jwt;

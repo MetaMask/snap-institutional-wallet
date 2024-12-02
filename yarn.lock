@@ -4756,26 +4756,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/custodial-wallet-api@workspace:packages/api":
-  version: 0.0.0-use.local
-  resolution: "@metamask/custodial-wallet-api@workspace:packages/api"
-  dependencies:
-    "@ethereumjs/common": ^4.4.0
-    "@ethereumjs/tx": ^5.4.0
-    "@metamask/eth-hd-keyring": ^8.0.0
-    "@open-rpc/schema-utils-js": ^2.0.5
-    "@open-rpc/server-js": ^1.9.5
-    "@types/connect": ^3.4.38
-    dotenv: ^16.4.5
-    eip-712: ^1.0.0
-    ethers: ^6.13.4
-    express: ^4.21.1
-    nodemon: ^3.1.7
-    ts-node: ^10.9.2
-    typescript: ^5.6.3
-  languageName: unknown
-  linkType: soft
-
 "@metamask/eslint-config-jest@npm:^12.1.0":
   version: 12.1.0
   resolution: "@metamask/eslint-config-jest@npm:12.1.0"
@@ -4943,6 +4923,26 @@ __metadata:
   checksum: 9eb4f894b24c43b7b14a9180cebb0603d4a07c1af583b0c4a36d58f24e202831bbdf98888666b4a3ea2e4d4a9fef4c6cc55d09379870b20b080ea5582764e622
   languageName: node
   linkType: hard
+
+"@metamask/institutional-wallet-api@workspace:packages/api":
+  version: 0.0.0-use.local
+  resolution: "@metamask/institutional-wallet-api@workspace:packages/api"
+  dependencies:
+    "@ethereumjs/common": ^4.4.0
+    "@ethereumjs/tx": ^5.4.0
+    "@metamask/eth-hd-keyring": ^8.0.0
+    "@open-rpc/schema-utils-js": ^2.0.5
+    "@open-rpc/server-js": ^1.9.5
+    "@types/connect": ^3.4.38
+    dotenv: ^16.4.5
+    eip-712: ^1.0.0
+    ethers: ^6.13.4
+    express: ^4.21.1
+    nodemon: ^3.1.7
+    ts-node: ^10.9.2
+    typescript: ^5.6.3
+  languageName: unknown
+  linkType: soft
 
 "@metamask/json-rpc-engine@npm:^10.0.0, @metamask/json-rpc-engine@npm:^10.0.1":
   version: 10.0.1
@@ -5292,9 +5292,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/snap-custodial-wallet-site@workspace:packages/site":
+"@metamask/snap-insitutional-wallet-site@workspace:packages/site":
   version: 0.0.0-use.local
-  resolution: "@metamask/snap-custodial-wallet-site@workspace:packages/site"
+  resolution: "@metamask/snap-insitutional-wallet-site@workspace:packages/site"
   dependencies:
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
@@ -5344,9 +5344,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@metamask/snap-custodial-wallet-snap@workspace:packages/snap":
+"@metamask/snap-institutional-wallet-snap@workspace:packages/snap":
   version: 0.0.0-use.local
-  resolution: "@metamask/snap-custodial-wallet-snap@workspace:packages/snap"
+  resolution: "@metamask/snap-institutional-wallet-snap@workspace:packages/snap"
   dependencies:
     "@ethereumjs/common": ^3.1.2
     "@ethereumjs/tx": ^4.1.2
@@ -5389,9 +5389,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@metamask/snap-custodial-wallet@workspace:.":
+"@metamask/snap-institutional-wallet@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@metamask/snap-custodial-wallet@workspace:."
+  resolution: "@metamask/snap-institutional-wallet@workspace:."
   dependencies:
     "@metamask/eslint-config": ^12.2.0
     "@metamask/eslint-config-jest": ^12.1.0

@@ -1,6 +1,6 @@
 # Local Custodian API
 
-The local custodian API partly implements the [Ethereum Custodian API version 3](https://consensys-vertical-apps.github.io/ethereum-custodian-api/) (ECA-3) for use with the custodial snap.
+The local custodian API partly implements the [Ethereum Custodian API version 3](https://consensys-vertical-apps.github.io/ethereum-custodian-api/) (ECA-3) for use with the institutional snap.
 
 It makes available a refresh token API at
 

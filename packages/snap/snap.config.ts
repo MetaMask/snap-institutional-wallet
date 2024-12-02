@@ -10,7 +10,8 @@ const config: SnapConfig = {
     crypto: true,
   },
   environment: {
-    DAPP_ORIGIN_PRODUCTION: 'https://metamask.github.io/snap-custodial-wallet/',
+    DAPP_ORIGIN_PRODUCTION:
+      'https://metamask.github.io/snap-insitutional-wallet/',
     DAPP_ORIGIN_DEVELOPMENT: 'http://localhost:8000/',
   },
   stats: {

@@ -93,7 +93,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
     );
   }
 
-  // MMI Legacy feature that is n ot used in the custodial snap
+  // MMI Legacy feature that is n ot used in the Institutional snap
   async getListAccountsSigned(): Promise<string> {
     const { result } = await this.#client.listAccountsSigned();
 
@@ -149,7 +149,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       ...(typeof txMeta.custodianPublishesTransaction === 'boolean' && {
         custodianPublishesTransaction: txMeta.custodianPublishesTransaction,
       }),
-      ...(txMeta.rpcUrl && { rpcUrl: txMeta.rpcUrl }), // MMI Legacy feature that is  not used in the custodial snap
+      ...(txMeta.rpcUrl && { rpcUrl: txMeta.rpcUrl }), // MMI Legacy feature that is  not used in the Institutional snap
     };
 
     const { result } = await this.#client.createTransaction([
@@ -201,7 +201,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
     };
   }
 
-  // MMI Legacy feature that is  not used in the custodial snap
+  // MMI Legacy feature that is  not used in the Institutional snap
   async replaceTransaction(
     txParams: ReplaceTransactionParams,
   ): Promise<{ transactionId: string }> {
@@ -297,7 +297,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
     };
   }
 
-  // MMI Legacy feature that is not used in the custodial snap
+  // MMI Legacy feature that is not used in the Institutional snap
   public async getCustomerProof(): Promise<string> {
     const { result } = await this.#client.getCustomerProof();
     return result.jwt;
