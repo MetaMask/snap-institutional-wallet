@@ -10,7 +10,8 @@ import {
 } from '@metamask/snaps-sdk/jsx';
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 
-import type { CustodialKeyringAccount } from '../lib/types/CustodialKeyringAccount';
+import type { CustodialKeyringAccount } from '../../../lib/types/CustodialKeyringAccount';
+import { HomePageNames } from '../types';
 
 export type RemoveCustodianTokenProps = {
   accounts: CustodialKeyringAccount[];
@@ -45,8 +46,8 @@ export const RemoveCustodianToken: SnapComponent<RemoveCustodianTokenProps> = ({
         ))}
       </Box>
       <Footer>
-        <Button name="cancel-remove-token">Cancel</Button>
-        <Button name="remove-token">Remove</Button>
+        <Button name={HomePageNames.CancelRemoveToken}>Cancel</Button>
+        <Button name={HomePageNames.RemoveToken}>Remove</Button>
       </Footer>
     </Container>
   );
