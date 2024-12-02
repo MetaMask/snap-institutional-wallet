@@ -4,7 +4,7 @@ import fetchMock from 'jest-fetch-mock';
 
 import { ECA1Client } from './ECA1Client';
 import { SimpleCache } from '../../simple-cache';
-import { INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT } from '../constants';
+import { TOKEN_EXPIRED_EVENT } from '../constants';
 import { mockECA1CreateTransactionPayload } from './mocks/mockECA1CreateTransactionPayload';
 import { mockECA1GetSignedMessageByIdPayload } from './mocks/mockECA1GetSignedMessageByIdPayload';
 import { mockECA1GetTransactionByIdPayload } from './mocks/mockECA1GetTransactionByIdPayload';
@@ -139,7 +139,7 @@ describe('ECA1Client', () => {
 
       const messageHandler = jest.fn();
 
-      client.on(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, messageHandler);
+      client.on(TOKEN_EXPIRED_EVENT, messageHandler);
 
       try {
         await client.getAccessToken();

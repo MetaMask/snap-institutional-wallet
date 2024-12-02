@@ -14,10 +14,11 @@ import type {
 import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 
+import { TOKEN_EXPIRED_EVENT } from './lib/custodian-types/constants';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
 import { SignedMessageHelper } from './lib/helpers/signedmessage';
 import { TransactionHelper } from './lib/helpers/transaction';
-import type { CustodianDeepLink } from './lib/types';
+import type { CustodianDeepLink, IRefreshTokenChangeEvent } from './lib/types';
 import type {
   KeyringState,
   Wallet,
@@ -204,6 +205,12 @@ export class CustodialKeyring implements Keyring {
       const wallet = this.#getWalletByAddress(address);
       const custodianApi = this.#getCustodianApi(wallet.details);
       this.#custodianApi[address] = custodianApi;
+      custodianApi.on(
+        TOKEN_EXPIRED_EVENT,
+        (payload: IRefreshTokenChangeEvent) => {
+          this.#handleTokenChangedEvent(payload).catch(console.error);
+        },
+      );
     }
     return this.#custodianApi[address] as ICustodianApi;
   }
@@ -217,6 +224,28 @@ export class CustodialKeyring implements Keyring {
       1000,
     );
     return custodianApi;
+  }
+
+  async #handleTokenChangedEvent(
+    payload: IRefreshTokenChangeEvent,
+  ): Promise<void> {
+    // Find all the wallets with the old refresh token
+    const wallets = Object.values(this.#state.wallets).filter(
+      (wallet) =>
+        wallet.details.token === payload.oldRefreshToken &&
+        wallet.details.custodianApiUrl === payload.apiUrl,
+    );
+    // Update the custodian api for each wallet
+    wallets.forEach((wallet) => {
+      wallet.details.token = payload.newRefreshToken;
+    });
+
+    // Delete the custodian api from the cache for each address
+    wallets.forEach((wallet) => {
+      delete this.#custodianApi[wallet.account.address];
+    });
+
+    await this.#saveState();
   }
 
   async #asyncSubmitRequest(

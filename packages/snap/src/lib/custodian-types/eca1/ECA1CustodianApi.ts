@@ -10,6 +10,7 @@ import { mapTransactionStatus } from '../../../util/map-status';
 import { SimpleCache } from '../../simple-cache/SimpleCache';
 import type {
   CustodianDeepLink,
+  IRefreshTokenChangeEvent,
   SignedMessageMetadata,
   SignedTypedMessageMetadata,
 } from '../../types';
@@ -22,10 +23,7 @@ import type { ISignedMessageDetails } from '../../types/ISignedMessageDetails';
 import type { ITransactionDetails } from '../../types/ITransactionDetails';
 import type { ILegacyTXParams, IEIP1559TxParams } from '../../types/ITXParams';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
-import {
-  REFRESH_TOKEN_CHANGE_EVENT,
-  INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT,
-} from '../constants';
+import { REFRESH_TOKEN_CHANGE_EVENT, TOKEN_EXPIRED_EVENT } from '../constants';
 
 export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
   #client: ECA1Client;
@@ -50,14 +48,16 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
     this.#cacheAge = cacheAge;
 
     // This event is "bottom up" - from the custodian via the client.
-    // Just bubble it up to MMISDK
 
-    this.#client.on(REFRESH_TOKEN_CHANGE_EVENT, (event) => {
-      this.emit(REFRESH_TOKEN_CHANGE_EVENT, event);
-    });
+    this.#client.on(
+      REFRESH_TOKEN_CHANGE_EVENT,
+      (event: IRefreshTokenChangeEvent) => {
+        this.emit(REFRESH_TOKEN_CHANGE_EVENT, event);
+      },
+    );
 
-    this.#client.on(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, (event) => {
-      this.emit(INTERACTIVE_REPLACEMENT_TOKEN_CHANGE_EVENT, event);
+    this.#client.on(TOKEN_EXPIRED_EVENT, (event) => {
+      this.emit(TOKEN_EXPIRED_EVENT, event);
     });
   }
 
