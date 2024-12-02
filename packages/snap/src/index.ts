@@ -127,7 +127,6 @@ export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
 
   try {
     result = await renderOnboarding({
-      interfaceId: null,
       selectedAccounts: [],
       request,
       accounts,
@@ -297,6 +296,7 @@ export const onUserInput: OnUserInputHandler = async ({
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
+  keyring = await getKeyring();
   const context = await getHomePageContext({ keyring });
   return { id: await renderHomePage(context) };
 };

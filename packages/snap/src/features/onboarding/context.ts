@@ -7,5 +7,4 @@ export type OnboardingContext = {
   request: OnBoardingRpcRequest;
   accounts: { name: string; address: string }[];
   selectedAccounts: OnboardingAccount[];
-  interfaceId: string | null;
 };

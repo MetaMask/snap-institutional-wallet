@@ -11,9 +11,17 @@ import {
  * Handles the confirm button click event.
  *
  * @param context - The onboarding context.
+ * @param context.id - The interface ID.
+ * @param context.context - The context.
  */
-export async function onConfirmClick(context: OnboardingContext) {
-  const state = await getInterfaceState(context.interfaceId as string);
+export async function onConfirmClick({
+  id,
+  context,
+}: {
+  id: string;
+  context: OnboardingContext;
+}) {
+  const state = await getInterfaceState(id);
 
   const selectedAccounts = Object.keys(state)
     .filter((key) => state[key] === true)
@@ -29,7 +37,7 @@ export async function onConfirmClick(context: OnboardingContext) {
 
   if (selectedAccounts.length === 0) {
     await updateInterface(
-      context.interfaceId as string,
+      id,
       <GenericMessage
         title="No accounts imported"
         message="No accounts were selected"
@@ -37,7 +45,7 @@ export async function onConfirmClick(context: OnboardingContext) {
       context,
     );
   } else {
-    await resolveInterface(context.interfaceId as string, selectedAccounts);
+    await resolveInterface(id, selectedAccounts);
   }
 }
 
@@ -45,9 +53,10 @@ export async function onConfirmClick(context: OnboardingContext) {
  * Handles the cancel button click event.
  *
  * @param context - The onboarding context.
+ * @param context.id - The interface ID.
  */
-export async function onCancelClick(context: OnboardingContext) {
-  await resolveInterface(context.interfaceId as string, []);
+export async function onCancelClick({ id }: { id: string }) {
+  await resolveInterface(id, []);
 }
 
 export const eventHandlers = {

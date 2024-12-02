@@ -4,7 +4,6 @@ import type { CustodialKeyringAccount } from '../../lib/types/CustodialKeyringAc
 export type HomePageContext = {
   activity: string;
   accounts: CustodialKeyringAccount[];
-  interfaceId: string | null;
 };
 
 /**
@@ -16,6 +15,5 @@ export async function getHomePageContext(snapContext: SnapContext) {
   return {
     activity: 'homepage',
     accounts: await snapContext.keyring.listAccounts(),
-    interfaceId: null,
   };
 }
