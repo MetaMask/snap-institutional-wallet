@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-custodial-wallet.git"
   },
   "source": {
-    "shasum": "SRiSlgUNv6Hsn+8alDjZOw6z/kh7mPatvwr2UmyycTk=",
+    "shasum": "vwn1nQknjYrb8+VxmW28i9j4fVxjyVJm4uQzryaUMAI=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -40,7 +40,8 @@
     "endowment:keyring": {
       "allowedOrigins": [
         "localhost:8000",
-        "http://localhost:8000"
+        "http://localhost:8000",
+        "https://neptune-custody-ui.dev.metamask-institutional.io"
       ]
     },
     "endowment:rpc": {
