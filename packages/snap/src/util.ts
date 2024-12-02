@@ -83,3 +83,23 @@ export const createCommon = (
     },
   );
 };
+
+/**
+ * Truncates the address to show only the first 6 and last 4 characters.
+ *
+ * @param address - The address to truncate.
+ * @returns The truncated address.
+ */
+export function truncateAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+/**
+ * Gets the Etherscan link for an Ethereum address.
+ *
+ * @param address - The Ethereum address to get the Etherscan link for.
+ * @returns The Etherscan URL for viewing the address details.
+ */
+export function getAccountLink(address: string) {
+  return `https://etherscan.io/address/${address}`;
+}

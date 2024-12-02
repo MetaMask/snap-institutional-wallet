@@ -10,37 +10,16 @@ import {
   Link,
 } from '@metamask/snaps-sdk/jsx';
 
-import type { OnboardingAccount } from '../onboarding';
-import { FormConstants, FormPrefixes } from '../onboarding';
+import { getAccountLink, truncateAddress } from '../../../util';
+import type { OnboardingAccount } from '../types';
+import { FormPrefixes, OnboardingNames } from '../types';
 
 type AddressSelectorProps = {
   accounts: OnboardingAccount[];
 };
 
-/**
- * Gets the Etherscan link for an Ethereum address.
- *
- * @param address - The Ethereum address to get the Etherscan link for.
- * @returns The Etherscan URL for viewing the address details.
- */
-function getAccountLink(address: string) {
-  return `https://etherscan.io/address/${address}`;
-}
-
-/**
- * Truncates the address to show only the first 6 and last 4 characters.
- *
- * @param address - The address to truncate.
- * @returns The truncated address.
- */
-function truncateAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
-
 export const AddressSelector: SnapComponent<AddressSelectorProps> = ({
   accounts,
-}: {
-  accounts: OnboardingAccount[];
 }) => {
   if (accounts.length === 0) {
     return (
@@ -49,7 +28,7 @@ export const AddressSelector: SnapComponent<AddressSelectorProps> = ({
           <Heading>No accounts found</Heading>
         </Box>
         <Footer>
-          <Button name={FormConstants.cancel}>Cancel</Button>
+          <Button name={OnboardingNames.CancelButton}>Cancel</Button>
         </Footer>
       </Container>
     );
@@ -73,8 +52,8 @@ export const AddressSelector: SnapComponent<AddressSelectorProps> = ({
         ))}
       </Box>
       <Footer>
-        <Button name={FormConstants.cancel}>Cancel</Button>
-        <Button name={FormConstants.confirm}>Confirm</Button>
+        <Button name={OnboardingNames.CancelButton}>Cancel</Button>
+        <Button name={OnboardingNames.ConfirmButton}>Confirm</Button>
       </Footer>
     </Container>
   );

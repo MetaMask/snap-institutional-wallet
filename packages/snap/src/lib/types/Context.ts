@@ -1,13 +1,5 @@
-import type { OnBoardingRpcRequest } from './OnBoardingRpcRequest';
+import type { CustodialKeyring } from '../../keyring';
 
-export type OnboardingContext = {
-  activity: 'onboarding';
-  request: OnBoardingRpcRequest;
-  accounts: { name: string; address: string }[];
-};
-
-export type CustodialSnapContext = OnboardingContext;
-
-export type HomePageContext = {
-  activity: 'homepage';
+export type SnapContext = {
+  keyring: CustodialKeyring;
 };

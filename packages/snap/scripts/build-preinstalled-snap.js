@@ -1,5 +1,5 @@
 // @ts-check
-/* eslint-disable n/no-sync */
+/* eslint-disable */
 
 const { readFileSync, writeFileSync } = require('node:fs');
 const { join } = require('node:path');
@@ -32,27 +32,13 @@ const bundle = readFileContents(bundlePath);
 const icon = readFileContents(iconPath);
 const manifest = readFileContents(manifestPath);
 
-/**
- * @typedef {object} PreinstalledSnap
- * @property {string} snapId - The unique identifier for the snap.
- * @property {object} manifest - The parsed manifest for the snap.
- * @property {Array<object>} files - The list of files included in the snap.
- * @property {boolean} removable - Indicates if the snap is removable.
- */
+const snapId =
+  /** @type {import('@metamask/snaps-controllers').PreinstalledSnap['snapId']} */ (
+    `npm:${packageFile.name}`
+  );
 
 /**
- * Constructs a snap ID using the package name.
- * @param {string} packageName - The name of the package.
- * @returns {string} The constructed snap ID.
- */
-function constructSnapId(packageName) {
-  return `npm:${packageName}`;
-}
-
-const snapId = constructSnapId(packageFile.name);
-
-/**
- * @type {PreinstalledSnap}
+ * @type {import('@metamask/snaps-controllers').PreinstalledSnap}
  */
 const preinstalledSnap = {
   snapId,
@@ -68,11 +54,11 @@ const preinstalledSnap = {
     },
   ],
   removable: false,
+  hideSnapBranding: true,
 };
 
 // Write preinstalled-snap file
 try {
-  // Preinstalled Snap File
   const outputPath = join(__dirname, '..', 'dist/preinstalled-snap.json');
   writeFileSync(outputPath, JSON.stringify(preinstalledSnap, null, 0));
 

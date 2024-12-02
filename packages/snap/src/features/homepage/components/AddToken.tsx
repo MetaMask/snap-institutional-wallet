@@ -10,7 +10,8 @@ import {
 } from '@metamask/snaps-sdk/jsx';
 import type { SnapComponent, SnapElement } from '@metamask/snaps-sdk/jsx';
 
-import { custodianMetadata } from '../lib/custodian-types/custodianMetadata';
+import { custodianMetadata } from '../../../lib/custodian-types/custodianMetadata';
+import { HomePageNames, HomePagePrefixes } from '../types';
 
 export type AddTokenProps = {
   custodianName?: string;
@@ -40,8 +41,10 @@ export const AddToken: SnapComponent<AddTokenProps> = ({
         </Form>
       </Box>
       <Footer>
-        <Button name="cancel-token">Cancel</Button>
-        <Button name={`connect-token-${custodianName}`}>Connect</Button>
+        <Button name={HomePageNames.CancelToken}>Cancel</Button>
+        <Button name={`${HomePagePrefixes.ConnectToken}${custodianName}`}>
+          Connect
+        </Button>
       </Footer>
     </Container>
   ) as SnapElement;

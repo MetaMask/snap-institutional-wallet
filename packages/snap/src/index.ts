@@ -14,15 +14,21 @@ import type {
   OnRpcRequestHandler,
 } from '@metamask/snaps-types';
 
-import { homepageInterfaceHandler, addAcountPage } from './homepage';
+import { getHomePageContext } from './features/homepage/context';
+import {
+  eventHandles as homePageEvents,
+  prefixEventHandles as homePagePrefixEvents,
+} from './features/homepage/events';
+import { renderHomePage } from './features/homepage/render';
+import { eventHandlers as onboardingEvents } from './features/onboarding/events';
+import { renderOnboarding } from './features/onboarding/render';
+import type { OnboardingAccount } from './features/onboarding/types';
 import { CustodialKeyring } from './keyring';
-import type { CustodialSnapContext } from './lib/types/Context';
+import type { SnapContext } from './lib/types/Context';
 import type { CustodialSnapRequest } from './lib/types/CustodialKeyring';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
 import logger from './logger';
-import type { OnboardingAccount } from './onboarding';
-import { chooseAccountDialog, onboardingInterfaceHandler } from './onboarding';
 import { InternalMethod, originPermissions } from './permissions';
 import { RequestManager } from './requestsManager';
 import { getState } from './stateManagement';
@@ -120,7 +126,9 @@ export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
   let result: OnboardingAccount[];
 
   try {
-    result = await chooseAccountDialog({
+    result = await renderOnboarding({
+      interfaceId: null,
+      selectedAccounts: [],
       request,
       accounts,
       activity: 'onboarding',
@@ -253,36 +261,42 @@ export const onUserInput: OnUserInputHandler = async ({
   event: UserInputEvent;
   context: Record<string, Json> | null;
 }) => {
-  try {
-    const ourContext = context as unknown as CustodialSnapContext;
-
-    logger.info(
-      'onUserInput',
-      id,
-      JSON.stringify(event, undefined, 2),
-      JSON.stringify(ourContext, undefined, 2),
-    );
-
-    if (ourContext?.activity === 'onboarding') {
-      await onboardingInterfaceHandler({ event, context: ourContext });
-    } else if (ourContext?.activity === 'homepage') {
-      await homepageInterfaceHandler({ event });
-    }
-  } catch (error) {
-    logger.error('onUserInput error', error);
-    throw error;
+  /**
+   * Using the name of the component, route it to the correct handler
+   */
+  if (!event.name) {
+    return;
   }
+
+  const uiEventHandlers: Record<string, (...args: any) => Promise<void>> = {
+    ...onboardingEvents,
+    ...homePageEvents,
+  };
+
+  const prefixEventHandlers: Record<string, (...args: any) => Promise<void>> = {
+    ...homePagePrefixEvents,
+  };
+
+  const handler =
+    uiEventHandlers[event.name] ??
+    prefixEventHandlers[
+      Object.keys(prefixEventHandlers).find((key) =>
+        event.name?.startsWith(key),
+      ) ?? ''
+    ];
+
+  if (!handler) {
+    return;
+  }
+
+  const snapContext: SnapContext = {
+    keyring,
+  };
+
+  await handler({ id, event, context, snapContext });
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  keyring = await getKeyring();
-  const interfaceId = await addAcountPage({
-    context: {
-      activity: 'homepage',
-    },
-    keyring,
-  });
-  return {
-    id: interfaceId,
-  };
+  const context = await getHomePageContext({ keyring });
+  return { id: await renderHomePage(context) };
 };
