@@ -1,6 +1,7 @@
 import { emitSnapKeyringEvent, KeyringEvent } from '@metamask/keyring-api';
 import type { Json } from '@metamask/snaps-sdk';
 
+import { renderErrorMessage } from './features/error-message/render';
 import { TransactionHelper } from './lib/helpers/transaction';
 import type { ICustodianApi } from './lib/types';
 import type {
@@ -48,6 +49,15 @@ export class RequestManager {
   }
 
   async getChainIdFromPendingRequest(id: string): Promise<string> {
+    const transactionRequest = this.getRequestParams(id);
+    if (!transactionRequest.chainId) {
+      throw new Error(`Request ${id} has no chainId`);
+    }
+
+    return transactionRequest.chainId;
+  }
+
+  getRequestParams(id: string): EthSignTransactionRequest {
     if (!this.#state.requests[id]) {
       throw new Error(`Request ${id} not found`);
     }
@@ -59,12 +69,7 @@ export class RequestManager {
       throw new Error(`Request ${id} has invalid params`);
     }
 
-    const transactionRequest = requestParams[0] as EthSignTransactionRequest;
-    if (!transactionRequest.chainId) {
-      throw new Error(`Request ${id} has no chainId`);
-    }
-
-    return transactionRequest.chainId;
+    return requestParams[0] as EthSignTransactionRequest;
   }
 
   async clearAllRequests(): Promise<void> {
@@ -144,6 +149,22 @@ export class RequestManager {
         transactionResponse,
         chainId,
       );
+
+      const validationResult = TransactionHelper.validateTransaction(
+        this.getRequestParams(requestId),
+        transactionResponse,
+      );
+
+      if (!validationResult.isValid) {
+        // First show a dialog with the error message
+        if (validationResult.error) {
+          const errorMessage = `Transaction ${custodianTransactionId} was signed by custodian but failed validation: ${validationResult.error}`;
+          await renderErrorMessage(errorMessage);
+        }
+        await this.emitRejectedEvent(requestId);
+        await this.removePendingRequest(requestId);
+        return;
+      }
 
       const updatedTransaction = {
         ...request,
