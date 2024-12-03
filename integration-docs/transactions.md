@@ -5,7 +5,7 @@ Relevant JSON-RPC method: `custodian_createTransaction`
 
 ![Areas of responsibility - transactions](../../assets/images/transaction-responsibility.png)
 
-MetaMask via the custodial snap creates/proposes transactions to the custodian API, including a proposed gas price. However, custodians may (at their users' request, or automatically) use a different gas price. Custodians are responsible for the ordering of transactions.
+MetaMask via the institutional snap creates/proposes transactions to the custodian API, including a proposed gas price. However, custodians may (at their users' request, or automatically) use a different gas price. Custodians are responsible for the ordering of transactions.
 
 ## Supporting multiple chains
 
@@ -21,7 +21,7 @@ This is the network that the user intended to create the transaction on.
 This parameter is needed to sign an ethereum transaction, and custodians can also use it to decide where to broadcast the transaction.
 
 `custodian_listAccountChainIds`
-A custodian_listAccountChainIds method exists on the Custodian JSON-RPC API which is executed when the extension is unlocked, for each custodian account stored in MMI.
+A custodian_listAccountChainIds method exists on the Custodian JSON-RPC API which is executed when the extension is unlocked, for each custodian account stored in the institutional snap.
 
 This method takes a single parameter, the ethereum account address in question. Custodians may ignore this parameter if users use their addresses with all their configured chains.
 
