@@ -13,5 +13,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit
 
-[Unreleased]: https://github.com/MetaMask/snap-insitutional-wallet/compare/v0.0.1...HEAD
-[0.0.1]: https://github.com/MetaMask/snap-insitutional-wallet/releases/tag/v0.0.1
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/MetaMask/snap-institutional-wallet/releases/tag/v0.0.1

@@ -1,4 +1,4 @@
-# MMI's JSON-RPC provider
+# JSON-RPC provider
 
 !!! info "Terminology information"
 This document refers to the `injected RPC provider` also known as `window.ethereum`. This is the provider that is injected into the browser by Metamask. It does not refer to the JSON-RPC endpoint served by the custodian, or the JSON-RPC provider endpoint served by Ethereum nodes.
@@ -7,18 +7,18 @@ The browser ethereum provider is used by dapps to communicate with the extension
 
 ### Initial connection
 
-In order to first check if the custodial snap is installed and to use later method, it's first necessary to establish a connection.
+In order to first check if the institutional snap is installed and to use later method, it's first necessary to establish a connection.
 
 ```
 await window.ethereum.request({
   method: "wallet_requestSnaps",
   params: {
-    "npm:@metamask/custodial-wallet-snap": {},
+    "npm:@metamask/institutional-wallet-snap": {},
   },
 })
 ```
 
-Once the custodial is fully integrated, the custodian UI can be added as an initial connection and this step can be skipped.
+Once the custodian is fully integrated, the custodian UI can be added as an initial connection and this step can be skipped.
 
 ## authentication.onboard : Inject the token
 
@@ -34,7 +34,7 @@ Several values here will depend on the your integration process.
 await window.ethereum.request({
   method: 'wallet_invokeSnap',
   params: {
-    snapId: 'npm:@metamask/custodial-wallet-snap',
+    snapId: 'npm:@metamask/institutional-wallet-snap',
     request: {
       method: 'authentication.onboard',
       params: {

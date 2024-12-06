@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "pAM+McrqnMYKY0ctbnqvhb2POFwcXh5wdz8DnklnoXc=",
+    "shasum": "6KG5Omb+KFNCRvJ5uSSrIuAgJAGprnKFqj1PDPzsaN0=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -35,6 +35,7 @@
     "https://apps-portal.safe.global": {}
   },
   "initialPermissions": {
+    "snap_notify": {},
     "endowment:network-access": {},
     "endowment:ethereum-provider": {},
     "endowment:keyring": {
