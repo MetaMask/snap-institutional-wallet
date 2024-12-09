@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "6KG5Omb+KFNCRvJ5uSSrIuAgJAGprnKFqj1PDPzsaN0=",
+    "shasum": "na9W2N+kGWJ55paHtJbpTJmPnZCXB5kWnQ887jf08Qc=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -42,7 +42,8 @@
       "allowedOrigins": [
         "localhost:8000",
         "http://localhost:8000",
-        "https://neptune-custody-ui.dev.metamask-institutional.io"
+        "https://neptune-custody-ui.dev.metamask-institutional.io",
+        "https://saturn-custody-ui.dev.metamask-institutional.io"
       ]
     },
     "endowment:rpc": {

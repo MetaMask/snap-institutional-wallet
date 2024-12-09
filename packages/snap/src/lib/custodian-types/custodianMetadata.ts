@@ -238,7 +238,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     enabled: false,
     apiBaseUrl: 'https://saturn-custody.dev.metamask-institutional.io/eth',
     apiVersion: CustodianApiVersions.JSONRPC,
-    custodianPublishesTransaction: false,
+    custodianPublishesTransaction: true,
     iconUrl:
       'https://saturn-custody-ui.dev.metamask-institutional.io/saturn.svg',
     isManualTokenInputSupported: false,
