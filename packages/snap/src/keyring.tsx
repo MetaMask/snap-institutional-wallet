@@ -274,20 +274,14 @@ export class CustodialKeyring implements Keyring {
         ).getSignedMessageLink(custodianId)) as CustodianDeepLink;
       }
     } catch (error) {
-      deepLink = {
-        text: 'Complete in Custodian App',
-        id: custodianId,
-        url: '',
-        action: 'view',
-      };
       console.error('Error getting deep link', error);
     }
 
     return {
       pending: true,
       redirect: {
-        message: deepLink.text,
-        url: deepLink.url,
+        message: deepLink?.text ?? 'Complete in Custodian App',
+        ...(deepLink?.url ? { url: deepLink.url } : {}),
       },
     };
   }
