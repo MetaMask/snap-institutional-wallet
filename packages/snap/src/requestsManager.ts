@@ -150,20 +150,24 @@ export class RequestManager {
         chainId,
       );
 
-      const validationResult = TransactionHelper.validateTransaction(
-        this.getRequestParams(requestId),
-        transactionResponse,
-      );
+      // Check that the transaction was not altered by the custodian
+      // Do not do this for externally published transactions
+      if (transactionResponse.signedRawTransaction) {
+        const validationResult = TransactionHelper.validateTransaction(
+          this.getRequestParams(requestId),
+          transactionResponse,
+        );
 
-      if (!validationResult.isValid) {
-        // First show a dialog with the error message
-        if (validationResult.error) {
-          const errorMessage = `Transaction ${custodianTransactionId} was signed by custodian but failed validation: ${validationResult.error}`;
-          await renderErrorMessage(errorMessage);
+        if (!validationResult.isValid) {
+          // First show a dialog with the error message
+          if (validationResult.error) {
+            const errorMessage = `Transaction ${custodianTransactionId} was signed by custodian but failed validation: ${validationResult.error}`;
+            await renderErrorMessage(errorMessage);
+          }
+          await this.emitRejectedEvent(requestId);
+          await this.removePendingRequest(requestId);
+          return;
         }
-        await this.emitRejectedEvent(requestId);
-        await this.removePendingRequest(requestId);
-        return;
       }
 
       const updatedTransaction = {
