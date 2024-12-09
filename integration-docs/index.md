@@ -1,6 +1,6 @@
-This document is for crypto custodians looking to integrate with the custodial snap.
+This document is for crypto custodians looking to integrate with the institutional MetaMask snap.
 
-The custodial snap provides a customized client library that supports custodian APIs. This document is a guide to the API a custodian must have in order for it to be usable with the custodial snap.
+The institutional snap provides a customized client library that supports custodian APIs. This document is a guide to the API a custodian must have in order for it to be usable with the institutional snap.
 
 ## How it works
 
@@ -20,4 +20,4 @@ The custodial snap provides a customized client library that supports custodian 
 
 ## How to get allowlisted
 
-Please create a pull request on this repository adding your API to the list of allowlisted custodians in [this file](/packages/snap/src/lib/custodian-types/custodianMetadata.ts.
+Please create a pull request on this repository adding your API to the list of allowlisted custodians in [this file](/packages/snap/src/lib/custodian-types/custodianMetadata.ts.)
