@@ -1,6 +1,6 @@
 {
   "name": "@metamask/snap-institutional-wallet",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Institutional accounts in MetaMask",
   "keywords": [
     "metamask",
