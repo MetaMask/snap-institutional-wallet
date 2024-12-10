@@ -1,4 +1,4 @@
-name: Create Release Pull Request
+name: Create Release PR
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # This is to guarantee that the most recent tag is fetched.
           # This can be configured to a more reasonable value by consumers.
@@ -30,12 +30,31 @@ jobs:
           # branch for all git operations and the release PR.
           ref: ${{ github.event.inputs.base-branch }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-      - uses: MetaMask/action-create-release-pr@v2
+      - uses: MetaMask/action-create-release-pr@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           release-type: ${{ github.event.inputs.release-type }}
           release-version: ${{ github.event.inputs.release-version }}
+  update-snap-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: create-release-pr
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - name: Update Snap Version
+        id: update-release-pr
+        shell: bash
+        run: |
+          chmod +x ./scripts/update-release-pr.sh
+          ./scripts/update-release-pr.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

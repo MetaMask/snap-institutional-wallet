@@ -11,58 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Uncategorized
 
-- 0.2.0
-- chore: remove changelog validation for the moment
-- 0.1.0
-- chore: validate that custodians did not change parameters when signing
-- chore: rename everything to institutional
-- Merge branch 'main' into MMI-XXX-local-api-upgrade
-- docs: add documentation including integration docs
-- lint fixes
-- chore: support sending transactions and sign typed data on local test custodian API
-- chore: fix lint, prettier, add changelogs and fix tests
-- chore: more linting and cleanup
-- chore: remove all the unused code and exports
-- chore: lint fix
-- Bump the npm_and_yarn group across 1 directory with 7 updates
-- Initial commit
+- Release pipeline changes
 
 ## [0.2.0]
 
 ### Uncategorized
 
-- chore: remove changelog validation for the moment
-- 0.1.0
-- chore: validate that custodians did not change parameters when signing
-- chore: rename everything to institutional
-- Merge branch 'main' into MMI-XXX-local-api-upgrade
-- docs: add documentation including integration docs
-- lint fixes
-- chore: support sending transactions and sign typed data on local test custodian API
-- chore: fix lint, prettier, add changelogs and fix tests
-- chore: more linting and cleanup
-- chore: remove all the unused code and exports
-- chore: lint fix
-- Bump the npm_and_yarn group across 1 directory with 7 updates
-- Initial commit
+- Release pipeline changes
 
 ## [0.1.0]
 
 ### Uncategorized
 
-- chore: validate that custodians did not change parameters when signing
-- chore: rename everything to institutional
-- Merge branch 'main' into MMI-XXX-local-api-upgrade
-- docs: add documentation including integration docs
-- lint fixes
-- chore: support sending transactions and sign typed data on local test custodian API
-- chore: fix lint, prettier, add changelogs and fix tests
-- Bump the npm_and_yarn group across 1 directory with 7 updates ([#1](https://github.com/MetaMask/snap-institutional-wallet/pull/1))
-- chore: more linting and cleanup
-- chore: remove all the unused code and exports
-- chore: lint fix
-- Bump the npm_and_yarn group across 1 directory with 7 updates
-- Initial commit
+- Release pipeline changes
 
 ## [0.0.1]
 
