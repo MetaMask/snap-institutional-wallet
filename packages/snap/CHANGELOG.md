@@ -11,72 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Uncategorized
 
-- 0.2.0
-- chore: fix manifest
-- chore: use default values for deeplink
-- chore: dont validate TX if the custodian publishes it
-- chore: fix manifest
-- chore: remove changelog validation for the moment
-- 0.1.0
-- chore: remove failing test
-- chore: fix manifest
-- chore: fix saturn dev
-- chore: validate that custodians did not change parameters when signing
-- chore: rename everything to institutional
-- fix: remove interfaceId from context
-- chore: refactor
-- Merge branch 'main' into MMI-XXX-local-api-upgrade
-- chore: support refresh token change by API
-- docs: add documentation including integration docs
-- lint fixes
-- chore: lock down permissions
-- chore: support sending transactions and sign typed data on local test custodian API
-- chore: fix lint, prettier, add changelogs and fix tests
-- refactor: refactor how requests work
-- feat: add homepage and token add/remove
-- chore: enable and disable custodians
-- chore: more linting and cleanup
-- chore: remove all the unused code and exports
-- chore: fix lint part 3
-- chore: final lint fixes
-- chore: lint
-- chore: lint fix
-- Initial commit
+- Release pipeline changes
 
 ## [0.2.0]
 
 ### Uncategorized
 
-- chore: fix manifest
-- chore: use default values for deeplink
-- chore: dont validate TX if the custodian publishes it
-- chore: fix manifest
-- chore: remove changelog validation for the moment
-- 0.1.0
-- chore: remove failing test
-- chore: fix manifest
-- chore: fix saturn dev
-- chore: validate that custodians did not change parameters when signing
-- chore: rename everything to institutional
-- fix: remove interfaceId from context
-- chore: refactor
-- Merge branch 'main' into MMI-XXX-local-api-upgrade
-- chore: support refresh token change by API
-- docs: add documentation including integration docs
-- lint fixes
-- chore: lock down permissions
-- chore: support sending transactions and sign typed data on local test custodian API
-- chore: fix lint, prettier, add changelogs and fix tests
-- refactor: refactor how requests work
-- feat: add homepage and token add/remove
-- chore: enable and disable custodians
-- chore: more linting and cleanup
-- chore: remove all the unused code and exports
-- chore: fix lint part 3
-- chore: final lint fixes
-- chore: lint
-- chore: lint fix
-- Initial commit
+- Release pipeline changes
 
 ## [0.1.0]
 

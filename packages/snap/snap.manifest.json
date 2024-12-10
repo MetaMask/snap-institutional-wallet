@@ -7,12 +7,12 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "AYlNO6RlESjbG+UJpei6p02lkeLkihzZcP8uA35MMoE=",
+    "shasum": "P7NsrWYdlG0bX87GKlL5p5dzqABWS8ND9RPCX5BPRvs=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "@metamask/snap-institutional-wallet-snap",
+        "packageName": "@metamask/institutional-wallet-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
