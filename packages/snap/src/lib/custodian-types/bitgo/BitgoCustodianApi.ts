@@ -9,7 +9,7 @@ import type {
   ILegacyTXParams,
   ISignedMessageDetails,
   ITransactionDetails,
-  ITokenAuthDetails,
+  IRefreshTokenAuthDetails,
   ICustodianApi,
 } from '../../types';
 import type { IBitgoEthereumAccountCustodianDetails } from './interfaces/IBitgoEthereumAccountCustodianDetails';
@@ -22,14 +22,17 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
   #client: BitgoClient;
 
   constructor(
-    authDetails: ITokenAuthDetails,
+    authDetails: IRefreshTokenAuthDetails,
     // eslint-disable-next-line @typescript-eslint/default-param-last
     apiUrl = DefaultBitgoCustodianDetails.apiUrl,
     _cacheAge: number,
   ) {
     super();
-    const { jwt } = authDetails;
-    this.#client = new BitgoClient(apiUrl, jwt);
+
+    // Bitgo's token is not actually a refresh token, but to simplify
+    // the interface, we treat it as one.
+    const { refreshToken } = authDetails;
+    this.#client = new BitgoClient(apiUrl, refreshToken);
   }
 
   async getEthereumAccounts(
