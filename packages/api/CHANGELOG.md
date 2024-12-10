@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0]
+### Uncategorized
+- 0.1.0
+- chore: do not publish the API
+- chore: rename everything to institutional
+- Merge branch 'main' into MMI-XXX-local-api-upgrade
+- chore: prettier
+- docs: add documentation including integration docs
+- lint fixes
+- chore: support sending transactions and sign typed data on local test custodian API
+- chore: fix lint, prettier, add changelogs and fix tests
+- chore: remove all the unused code and exports
+- Initial commit
+
 ## [0.1.0]
 ### Uncategorized
 - chore: do not publish the API
@@ -19,5 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - chore: remove all the unused code and exports
 - Initial commit
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/MetaMask/snap-institutional-wallet/releases/tag/v0.1.0
