@@ -1,5 +1,4 @@
 # Changelog
-
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -7,10 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.1]
-
+## [0.2.2]
 ### Uncategorized
+- chore: fix up release
+- 0.2.1
 
+## [0.2.1]
+### Uncategorized
 - 0.2.0
 - chore: fix manifest
 - chore: use default values for deeplink
@@ -44,9 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial commit
 
 ## [0.2.0]
-
 ### Uncategorized
-
 - chore: fix manifest
 - chore: use default values for deeplink
 - chore: dont validate TX if the custodian publishes it
@@ -79,9 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial commit
 
 ## [0.1.0]
-
 ### Uncategorized
-
 - chore: remove failing test
 - chore: fix manifest
 - chore: fix saturn dev
@@ -110,12 +108,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial commit
 
 ## [0.0.1]
-
 ### Added
-
 - Initial commit
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.0.1...v0.1.0
