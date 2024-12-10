@@ -22,7 +22,11 @@ describe('BitgoCustodianApi', () => {
   const mockUrl = 'http://mock-url';
 
   beforeEach(() => {
-    bitgoCustodianApi = new BitgoCustodianApi({ jwt: mockJwt }, mockUrl, 0);
+    bitgoCustodianApi = new BitgoCustodianApi(
+      { refreshToken: mockJwt, refreshTokenUrl: mockUrl },
+      mockUrl,
+      0,
+    );
 
     mockedBitgoClientInstance = mockedBitgoClient.mock
       .instances[0] as BitgoClient;

@@ -2,7 +2,6 @@
 export type { IMetamaskContractMetadata } from './IMetamaskContractMetadata';
 export type { IRefreshTokenAuthDetails } from './IRefreshTokenAuthDetails';
 export type { ISignedMessageDetails } from './ISignedMessageDetails';
-export type { ITokenAuthDetails } from './ITokenAuthDetails';
 export type { ITransactionDetails } from './ITransactionDetails';
 export type { ILegacyTXParams } from './ITXParams';
 export type { IEIP1559TxParams } from './ITXParams';
