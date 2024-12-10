@@ -54,7 +54,8 @@ jobs:
         id: update-release-pr
         shell: bash
         run: |
-          chmod +x ./scripts/update-release-pr.sh
-          ./scripts/update-release-pr.sh
+          chmod +x ./scripts/update_release_pr.sh
+          ./scripts/update_release_pr.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
