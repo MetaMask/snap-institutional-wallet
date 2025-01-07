@@ -188,7 +188,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['zodia.io'],
+    allowedOnboardingDomains: ['ui-preprod-v2.uat.zodia.io'],
   },
   {
     refreshTokenUrl: 'https://mmi.fireblocks.io/v1/auth/access',
@@ -215,7 +215,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['zodia.io'],
+    allowedOnboardingDomains: ['zodia.io', 'v2.custody.zodia.io'],
   },
   {
     refreshTokenUrl: 'https://api.sit.zodia.io/oauth/token',
@@ -228,7 +228,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['sit.zodia.io'],
+    allowedOnboardingDomains: ['sit.zodia.io', 'ui-v2.sit.zodia.io'],
   },
   {
     refreshTokenUrl:
@@ -258,7 +258,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['qa.zodia.io'],
+    allowedOnboardingDomains: ['qa.zodia.io', 'ui-v2.qa.zodia.io'],
   },
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
