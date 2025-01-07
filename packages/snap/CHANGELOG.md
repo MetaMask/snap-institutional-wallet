@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.9]
 
-### Uncategorized
+### Changed
 
 - chore: add zodia UI URLs to allowlist ([#27](https://github.com/MetaMask/snap-institutional-wallet/pull/27))
 
