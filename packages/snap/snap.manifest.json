@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "53n/GROJHYuLSrae/Swx19tJSt+ublrwrcLhxB5bBgc=",
+    "shasum": "pQQf+Gp5xe4cXa+sSkYmh0oAys79s6cAr/L2jwflbVE=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -20,14 +20,13 @@
   "initialConnections": {
     "localhost:8000": {},
     "https://localhost:8000": {},
-    "https://neptune-custody-ui.dev.metamask-institutional.io": {},
     "https://neptune-custody-ui.metamask-institutional.io": {},
-    "https://zodia.io": {},
-    "https://sit.zodia.io": {},
-    "https://qa.zodia.io": {},
+    "https://ui-v2.sit.zodia.io": {},
+    "https://ui-v2.qa.zodia.io": {},
+    "https://ui-preprod-v2.qa.zodia.io": {},
+    "https://v2.custody.zodia.io": {},
     "https://console.fireblocks.io": {},
     "https://console.dev.mpcvault.com": {},
-    "https://saturn-custody-ui.dev.metamask-institutional.io": {},
     "https://saturn-custody-ui.metamask-institutional.io": {},
     "https://console.mpcvault.com": {},
     "https://app.bitgo.com": {},
@@ -42,23 +41,27 @@
       "allowedOrigins": [
         "localhost:8000",
         "http://localhost:8000",
-        "https://neptune-custody-ui.dev.metamask-institutional.io",
-        "https://saturn-custody-ui.dev.metamask-institutional.io"
+        "https://neptune-custody-ui.metamask-institutional.io",
+        "https://saturn-custody-ui.metamask-institutional.io",
+        "https://ui-v2.sit.zodia.io",
+        "https://ui-v2.qa.zodia.io",
+        "https://ui-preprod-v2.qa.zodia.io",
+        "https://v2.custody.zodia.io"
       ]
     },
     "endowment:rpc": {
       "allowedOrigins": [
         "localhost:8000",
         "http://localhost:8000",
-        "https://neptune-custody-ui.dev.metamask-institutional.io",
+        "https://neptune-custody-ui.metamask-institutional.io",
         "https://zodia.io",
         "https://ui-v2.sit.zodia.io",
         "https://ui-v2.qa.zodia.io",
         "https://ui-preprod-v2.qa.zodia.io",
-        "https://v2.qa.zodia.io",
+        "https://v2.custody.zodia.io",
         "https://console.fireblocks.io",
         "https://console.dev.mpcvault.com",
-        "https://saturn-custody-ui.dev.metamask-institutional.io",
+        "https://saturn-custody-ui.metamask-institutional.io",
         "https://console.mpcvault.com",
         "https://app.bitgo.com",
         "https://app.bitgo-test.com",
