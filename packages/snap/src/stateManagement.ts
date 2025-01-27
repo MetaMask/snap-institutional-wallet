@@ -22,7 +22,7 @@ export async function getState(): Promise<KeyringState> {
     params: { operation: 'get' },
   })) as any;
 
-  logger.debug('Retrieved state:', JSON.stringify(state));
+  logger.debug('Retrieved state:', JSON.stringify(state)); // @audit - infoleak to console log?
 
   return {
     ...defaultState,
@@ -43,7 +43,7 @@ export async function clearState(): Promise<void> {
  * @param state - New snap state.
  */
 export async function saveState(state: KeyringState) {
-  logger.debug('Saving state:', JSON.stringify(state));
+  logger.debug('Saving state:', JSON.stringify(state)); // @audit infoleak keyring state
 
   await snap.request({
     method: 'snap_manageState',

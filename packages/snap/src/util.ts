@@ -34,7 +34,7 @@ export function throwError(message: string): never {
  * @param message - Error message to throw if the callback fails.
  * @returns The result of the callback.
  */
-export function runSensitive<Type>(
+export function runSensitive<Type>( // @audit good idea, but never used
   callback: () => Type,
   message?: string,
 ): Type {
@@ -52,7 +52,7 @@ export function runSensitive<Type>(
  * @returns The CAIP-20 chain ID.
  */
 export function convertHexChainIdToCaip2Decimal(chainId: string): string {
-  return `eip155:${parseInt(chainId, 16)}`;
+  return `eip155:${parseInt(chainId, 16)}`; // @audit may return NaN, Inf.
 }
 export const formatTransactionData = (
   data: string | Uint8Array | undefined,
@@ -74,7 +74,7 @@ export const createCommon = (
 ): Common => {
   return Common.custom(
     // eslint-disable-next-line radix
-    { chainId: parseInt(chainId) },
+    { chainId: parseInt(chainId) }, // @audit - might return NaN
     {
       hardfork:
         transaction.maxPriorityFeePerGas || transaction.maxFeePerGas
@@ -91,7 +91,8 @@ export const createCommon = (
  * @returns The truncated address.
  */
 export function truncateAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  // @audit never used
+  return `${address.slice(0, 6)}...${address.slice(-4)}`; // @audit min len;
 }
 
 /**
@@ -101,5 +102,6 @@ export function truncateAddress(address: string) {
  * @returns The Etherscan URL for viewing the address details.
  */
 export function getAccountLink(address: string) {
-  return `https://etherscan.io/address/${address}`;
+  // @audit never used
+  return `https://etherscan.io/address/${address}`; // @audit /? injection? enforce addr format
 }

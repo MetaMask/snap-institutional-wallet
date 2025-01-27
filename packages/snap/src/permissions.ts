@@ -8,35 +8,39 @@ export enum InternalMethod {
   ClearAllRequests = 'snap.internal.clearAllRequests',
 }
 
-const originPermissions = new Map<string, string[]>([
-  [
-    'metamask',
-    [
-      // Keyring methods
-      KeyringRpcMethod.ListAccounts,
-      KeyringRpcMethod.GetAccount,
-      KeyringRpcMethod.FilterAccountChains,
-      KeyringRpcMethod.DeleteAccount,
-      KeyringRpcMethod.ListRequests,
-      KeyringRpcMethod.GetRequest,
-      KeyringRpcMethod.SubmitRequest,
-      KeyringRpcMethod.RejectRequest,
-    ],
-  ],
+const metamaskPermissions = new Set([
+  KeyringRpcMethod.ListAccounts,
+  KeyringRpcMethod.GetAccount,
+  KeyringRpcMethod.FilterAccountChains,
+  KeyringRpcMethod.DeleteAccount,
+  KeyringRpcMethod.ListRequests,
+  KeyringRpcMethod.GetRequest,
+  KeyringRpcMethod.SubmitRequest,
+  KeyringRpcMethod.RejectRequest,
 ]);
+
+const metamask = 'metamask';
+
+export const originPermissions = new Map<string, Set<string>>([]);
+
+originPermissions.set(metamask, metamaskPermissions);
 
 custodianMetadata.forEach((custodian) => {
   if (custodian.allowedOnboardingDomains) {
     // exclude localhost
     custodian.allowedOnboardingDomains.forEach((domain) => {
-      originPermissions.set(domain, [InternalMethod.Onboard]);
-      originPermissions.set(`https://${domain}`, [InternalMethod.Onboard]);
+      // @audit - includes dev endpoints that should be excluded in prod
+      originPermissions.set(domain, new Set([InternalMethod.Onboard])); // @audit - should enforce HTTPS (this is a trust module; no more insecure transports); check if https prefix, else add it
+      originPermissions.set(
+        `https://${domain}`,
+        new Set([InternalMethod.Onboard]),
+      );
     });
   }
 });
 
 // Add localhost to the originPermissions
-const localhostPermissions = [
+const localhostPermissions = new Set([
   // Keyring methods
   KeyringRpcMethod.ListAccounts,
   KeyringRpcMethod.GetAccount,
@@ -44,18 +48,15 @@ const localhostPermissions = [
   KeyringRpcMethod.FilterAccountChains,
   KeyringRpcMethod.UpdateAccount,
   KeyringRpcMethod.DeleteAccount,
-  KeyringRpcMethod.ExportAccount,
   KeyringRpcMethod.ListRequests,
   KeyringRpcMethod.GetRequest,
   KeyringRpcMethod.ApproveRequest,
   KeyringRpcMethod.RejectRequest,
   // Custom methods
   InternalMethod.Onboard,
-  InternalMethod.ClearAllRequests,
-];
+  InternalMethod.ClearAllRequests, // @audit-ok only local dev
+]);
 
 if (config.dev) {
-  originPermissions.set('http://localhost:8000', localhostPermissions);
+  originPermissions.set('http://localhost:8000', localhostPermissions); // @audit-ok - remove for prod
 }
-
-export { originPermissions };

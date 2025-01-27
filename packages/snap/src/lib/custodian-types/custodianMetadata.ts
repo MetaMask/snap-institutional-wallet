@@ -33,7 +33,7 @@ export const custodianMetadata: CustodianMetadata[] = [
       'https://dashboard.metamask-institutional.io/custodian-icons/bitgo-icon.svg',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://app.bitgo-test.com',
-    allowedOnboardingDomains: ['app.bitgo-test.com'],
+    allowedOnboardingDomains: ['app.bitgo-test.com'], // @audit - remove dev/test domains
   },
   {
     refreshTokenUrl: null,
@@ -188,7 +188,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['ui-preprod-v2.uat.zodia.io'],
+    allowedOnboardingDomains: ['zodia.io'],
   },
   {
     refreshTokenUrl: 'https://mmi.fireblocks.io/v1/auth/access',
@@ -215,7 +215,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['zodia.io', 'v2.custody.zodia.io'],
+    allowedOnboardingDomains: ['zodia.io'],
   },
   {
     refreshTokenUrl: 'https://api.sit.zodia.io/oauth/token',
@@ -228,7 +228,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['sit.zodia.io', 'ui-v2.sit.zodia.io'],
+    allowedOnboardingDomains: ['sit.zodia.io'], // @audit dev host
   },
   {
     refreshTokenUrl:
@@ -238,7 +238,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     enabled: false,
     apiBaseUrl: 'https://saturn-custody.dev.metamask-institutional.io/eth',
     apiVersion: CustodianApiVersions.JSONRPC,
-    custodianPublishesTransaction: true,
+    custodianPublishesTransaction: false,
     iconUrl:
       'https://saturn-custody-ui.dev.metamask-institutional.io/saturn.svg',
     isManualTokenInputSupported: false,
@@ -258,7 +258,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['qa.zodia.io', 'ui-v2.qa.zodia.io'],
+    allowedOnboardingDomains: ['qa.zodia.io'],
   },
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',

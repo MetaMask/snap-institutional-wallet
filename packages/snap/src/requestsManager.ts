@@ -1,15 +1,14 @@
 import { emitSnapKeyringEvent, KeyringEvent } from '@metamask/keyring-api';
 import type { Json } from '@metamask/snaps-sdk';
 
-import { renderErrorMessage } from './features/error-message/render';
 import { TransactionHelper } from './lib/helpers/transaction';
-import type { ICustodianApi } from './lib/types';
 import type {
-  CustodialSnapRequest,
-  KeyringState,
   SignedMessageRequest,
   TransactionRequest,
-} from './lib/types/CustodialKeyring';
+  CustodialSnapRequest,
+} from './lib/structs/CustodialKeyringStructs';
+import type { ICustodianApi } from './lib/types';
+import type { KeyringState } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import logger from './logger';
@@ -39,17 +38,30 @@ export class RequestManager {
   async addPendingRequest(
     request: CustodialSnapRequest<SignedMessageRequest | TransactionRequest>,
   ): Promise<void> {
-    this.#state.requests[request.keyringRequest.id] = request;
-    await saveState(this.#state);
+    // @audit no runtime type enforcement/input validation
+    this.#state.requests[request.keyringRequest.id] = request; // @audit overwrite requests? cross domain, race. all actions here should prob be limited to origins own requests (id is prob uuid; is this leaked to other origins?)
+    await saveState(this.#state); // @audit race?
   }
 
   async removePendingRequest(id: string): Promise<void> {
-    delete this.#state.requests[id];
-    await saveState(this.#state);
+    delete this.#state.requests[id]; // @audit insecure; may remove Record props? dblcheck
+    await saveState(this.#state); // @audit race?
   }
 
   async getChainIdFromPendingRequest(id: string): Promise<string> {
-    const transactionRequest = this.getRequestParams(id);
+    if (!this.#state.requests[id]) {
+      // @audit - maybe use map instead? this inhertis from object.prototype and might be true for "toString" and other protos.
+      throw new Error(`Request ${id} not found`);
+    }
+
+    const requestParams =
+      this.#state.requests[id]?.keyringRequest.request.params; // @audit superstruct assert input val runtime type enforcement
+
+    if (!Array.isArray(requestParams) || requestParams.length === 0) {
+      throw new Error(`Request ${id} has invalid params`);
+    }
+
+    const transactionRequest = requestParams[0] as EthSignTransactionRequest;
     if (!transactionRequest.chainId) {
       throw new Error(`Request ${id} has no chainId`);
     }
@@ -57,23 +69,8 @@ export class RequestManager {
     return transactionRequest.chainId;
   }
 
-  getRequestParams(id: string): EthSignTransactionRequest {
-    if (!this.#state.requests[id]) {
-      throw new Error(`Request ${id} not found`);
-    }
-
-    const requestParams =
-      this.#state.requests[id]?.keyringRequest.request.params;
-
-    if (!Array.isArray(requestParams) || requestParams.length === 0) {
-      throw new Error(`Request ${id} has invalid params`);
-    }
-
-    return requestParams[0] as EthSignTransactionRequest;
-  }
-
   async clearAllRequests(): Promise<void> {
-    this.#state.requests = {};
+    this.#state.requests = {}; // @audit race?
     await saveState(this.#state);
   }
 
@@ -84,6 +81,7 @@ export class RequestManager {
 
     for (const request of pendingRequests) {
       if (request.type === 'message') {
+        // @audit switch(); default nop
         try {
           await this.pollSignedMessage(
             request.keyringRequest.id,
@@ -93,7 +91,7 @@ export class RequestManager {
           logger.info(
             `Error polling signed message request ${request.keyringRequest.id}`,
           );
-          logger.error(error);
+          logger.error(error); // @audit infoleak?
         }
       } else if (request.type === 'transaction') {
         try {
@@ -105,10 +103,9 @@ export class RequestManager {
           logger.info(
             `Error polling transaction request ${request.keyringRequest.id}`,
           );
-          console.error(error);
-          logger.error(error);
+          logger.error(error); // @audit - infoleak
         }
-      }
+      } // @audit what happens to other txtypes? are they kept forever? should they be cleaned up and error reported?
     }
   }
 
@@ -149,26 +146,6 @@ export class RequestManager {
         transactionResponse,
         chainId,
       );
-
-      // Check that the transaction was not altered by the custodian
-      // Do not do this for externally published transactions
-      if (transactionResponse.signedRawTransaction) {
-        const validationResult = TransactionHelper.validateTransaction(
-          this.getRequestParams(requestId),
-          transactionResponse,
-        );
-
-        if (!validationResult.isValid) {
-          // First show a dialog with the error message
-          if (validationResult.error) {
-            const errorMessage = `Transaction ${custodianTransactionId} was signed by custodian but failed validation: ${validationResult.error}`;
-            await renderErrorMessage(errorMessage);
-          }
-          await this.emitRejectedEvent(requestId);
-          await this.removePendingRequest(requestId);
-          return;
-        }
-      }
 
       const updatedTransaction = {
         ...request,

@@ -4,6 +4,8 @@
  * @namespace logger
  */
 
+import config from './config';
+
 const logger = {
   log: (...args: any[]) =>
     console.log(
@@ -12,13 +14,16 @@ const logger = {
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
       ),
     ),
-  info: (...args: any[]) =>
-    console.info(
-      '[Institutional snap]',
-      ...args.map((arg) =>
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
-      ),
-    ),
+  info: (...args: any[]) => {
+    if (config.dev) {
+      console.info(
+        '[Institutional snap]',
+        ...args.map((arg) =>
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
+        ),
+      );
+    }
+  },
   warn: (...args: any[]) =>
     console.warn(
       '[Institutional snap]',
@@ -35,13 +40,16 @@ const logger = {
     );
     console.error(args);
   },
-  debug: (...args: any[]) =>
-    console.debug(
-      '[Institutional snap]',
-      ...args.map((arg) =>
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
-      ),
-    ),
+  debug: (...args: any[]) => {
+    if (config.dev) {
+      console.debug(
+        '[Institutional snap]',
+        ...args.map((arg) =>
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
+        ),
+      );
+    }
+  },
 };
 
 export default logger;

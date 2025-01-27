@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { BitgoClient } from './BitgoClient';
 import { BitgoCustodianApi } from './BitgoCustodianApi';
-import type { ITransactionDetails } from '../../types';
 import type { IBitgoEthereumAccount } from './interfaces/IBitgoEthereumAccount';
 import { bitgoMockEip712Response } from './mocks/bitgoEip712Mock';
 import { bitgoGetAccountsMock } from './mocks/bitgoGetAccountsMock';
@@ -9,6 +8,7 @@ import { bitgoGetCustomerProofMock } from './mocks/bitgoGetCustomerProofMock';
 import { bitgoMockPersonalSignResponse } from './mocks/bitgoPersonalSignMock';
 import { bitgoTransactionMock } from './mocks/bitgoTransactionMock';
 import { mapTransactionStatus } from '../../../util/map-status';
+import type { TransactionDetails } from '../../structs/CustodialKeyringStructs';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 jest.mock('./BitgoClient');
@@ -171,7 +171,7 @@ describe('BitgoCustodianApi', () => {
 
   describe('BitgoCustodianApi#getTransaction', () => {
     it('gets a specific transaction', async () => {
-      const result: ITransactionDetails | null =
+      const result: TransactionDetails | null =
         await bitgoCustodianApi.getTransaction(
           '0x',
           bitgoTransactionMock.custodianTransactionId,

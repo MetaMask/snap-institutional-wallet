@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "GHqjFgyi1lAWisW7bx2RJg2a3fUK4st6Du/ftsPnKVE=",
+    "shasum": "TvABHvS60LFSBgzChRAWIj2o9xHQZE2EG0GVVaqWg5c=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

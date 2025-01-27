@@ -11,11 +11,10 @@ import {
   getInterfaceState,
   updateInterface,
 } from '../../lib/helpers/interface';
+import type { OnBoardingRpcRequest } from '../../lib/structs/CustodialKeyringStructs';
 import type { SnapContext } from '../../lib/types/Context';
 import type { CustodianType } from '../../lib/types/CustodianType';
-import type { OnBoardingRpcRequest } from '../../lib/types/OnBoardingRpcRequest';
 import logger from '../../logger';
-
 /**
  * Handles the select custodian button click event.
  * @param options - The options for the event.

@@ -1,5 +1,6 @@
 import type { JsonRpcError } from '../lib/types/JsonRpcError';
 import type { JsonRpcResult } from '../lib/types/JsonRpcResult';
+import logger from '../logger';
 
 /**
  * Factory function to create a JSON-RPC call function.
@@ -19,8 +20,7 @@ export default function (jsonRpcEndpoint: string) {
     let responseJson;
 
     requestId += 1;
-
-    console.debug('JSON-RPC >', method, requestId, params, jsonRpcEndpoint);
+    logger.debug('JSON-RPC >', method, requestId, params, jsonRpcEndpoint);
 
     try {
       response = await fetch(jsonRpcEndpoint, {
@@ -41,7 +41,7 @@ export default function (jsonRpcEndpoint: string) {
       responseJson = await response.json();
 
       if ((responseJson as JsonRpcError).error) {
-        console.error(
+        logger.error(
           'JSON-RPC <',
           method,
           requestId,
@@ -52,7 +52,7 @@ export default function (jsonRpcEndpoint: string) {
         throw new Error((responseJson as JsonRpcError).error.message);
       }
 
-      console.debug(
+      logger.debug(
         'JSON-RPC <',
         method,
         requestId,
@@ -63,8 +63,8 @@ export default function (jsonRpcEndpoint: string) {
       // FIXME: Handle the various error types
       // TODO: How do we handle an expired token?
 
-      console.log('JSON-RPC <', method, requestId, error, jsonRpcEndpoint);
-      console.error(error);
+      logger.error('JSON-RPC <', method, requestId, error, jsonRpcEndpoint);
+      logger.error(error);
 
       throw error;
     }

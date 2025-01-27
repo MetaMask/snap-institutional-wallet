@@ -7,13 +7,15 @@ import type {
   IEIP1559TxParams,
   IEthereumAccount,
   ILegacyTXParams,
-  ISignedMessageDetails,
-  ITransactionDetails,
   IRefreshTokenAuthDetails,
   ICustodianApi,
 } from '../../types';
 import type { IBitgoEthereumAccountCustodianDetails } from './interfaces/IBitgoEthereumAccountCustodianDetails';
 import { mapTransactionStatus } from '../../../util/map-status';
+import type {
+  SignedMessageDetails,
+  TransactionDetails,
+} from '../../structs/CustodialKeyringStructs';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 const BITGO_ADDITIONAL_GAS = 100000;
@@ -78,7 +80,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
 
   async createTransaction(
     txParams: IEIP1559TxParams | ILegacyTXParams,
-  ): Promise<ITransactionDetails> {
+  ): Promise<TransactionDetails> {
     const fromAddress = txParams.from;
 
     const accounts = await this.getEthereumAccountsByAddress(fromAddress);
@@ -116,7 +118,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
   async getTransaction(
     _from: string,
     custodianTransactionId: string,
-  ): Promise<ITransactionDetails | null> {
+  ): Promise<TransactionDetails | null> {
     const result = await this.#client.getTransaction(custodianTransactionId);
 
     if (!result) {
@@ -171,7 +173,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
   async getSignedMessage(
     address: string,
     custodianSignedMessageId: string,
-  ): Promise<ISignedMessageDetails | null> {
+  ): Promise<SignedMessageDetails | null> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
     if (!accounts.length) {
@@ -207,7 +209,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
     address: string,
     message: TypedMessage<MessageTypes>,
     version: string,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
     if (!accounts.length || !accounts[0]?.custodianDetails) {
@@ -236,7 +238,7 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
   async signPersonalMessage(
     address: string,
     message: string,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
     if (!accounts.length || !accounts[0]?.custodianDetails) {

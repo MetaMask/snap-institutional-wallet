@@ -4,8 +4,6 @@ import type {
   IEIP1559TxParams,
   ILegacyTXParams,
   IRefreshTokenAuthDetails,
-  ISignedMessageDetails,
-  ITransactionDetails,
   IEthereumAccount,
   IEthereumAccountCustodianDetails,
   CreateTransactionMetadata,
@@ -15,6 +13,10 @@ import type {
 } from '.';
 import type { MessageTypes, TypedMessage } from './ITypedMessage';
 import type { ReplaceTransactionParams } from './ReplaceTransactionParams';
+import type {
+  SignedMessageDetails,
+  TransactionDetails,
+} from '../structs/CustodialKeyringStructs';
 
 export type ICustodianApi = {
   getListAccountsSigned?(): Promise<string>;
@@ -36,7 +38,7 @@ export type ICustodianApi = {
   createTransaction(
     txParams: ILegacyTXParams | IEIP1559TxParams,
     txMeta: CreateTransactionMetadata,
-  ): Promise<ITransactionDetails>;
+  ): Promise<TransactionDetails>;
 
   replaceTransaction?(
     txParams: ReplaceTransactionParams,
@@ -45,7 +47,7 @@ export type ICustodianApi = {
   getTransaction(
     from: string,
     transactionId: string,
-  ): Promise<ITransactionDetails | null>;
+  ): Promise<TransactionDetails | null>;
 
   // Obtain a JWT from the custodian that we can use to authenticate to
   getCustomerProof(): Promise<string>;
@@ -56,13 +58,13 @@ export type ICustodianApi = {
     data: TypedMessage<MessageTypes>,
     version: string,
     signedTypedMessageMetadata: SignedTypedMessageMetadata,
-  ): Promise<ISignedMessageDetails>;
+  ): Promise<SignedMessageDetails>;
 
   signPersonalMessage(
     address: string,
     mesage: string,
     signedMessageMetadata: SignedMessageMetadata,
-  ): Promise<ISignedMessageDetails>;
+  ): Promise<SignedMessageDetails>;
 
   getSupportedChains(address?: string): Promise<string[]>;
 
@@ -77,7 +79,7 @@ export type ICustodianApi = {
   getSignedMessage(
     address: string,
     signatureId: string,
-  ): Promise<ISignedMessageDetails | null>;
+  ): Promise<SignedMessageDetails | null>;
 
   changeRefreshTokenAuthDetails(authDetails: IRefreshTokenAuthDetails): void;
 } & EventEmitter;

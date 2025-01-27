@@ -5035,6 +5035,7 @@ __metadata:
     jest-fetch-mock: ^3.0.3
     prettier: ^2.2.1
     rimraf: ^3.0.2
+    superstruct: ^2.0.2
     ts-jest: ^29.2.5
     typescript: ^4.7.4
     uuid: ^9.0.0
@@ -25517,6 +25518,13 @@ __metadata:
   version: 1.0.3
   resolution: "superstruct@npm:1.0.3"
   checksum: 761790bb111e6e21ddd608299c252f3be35df543263a7ebbc004e840d01fcf8046794c274bcb351bdf3eae4600f79d317d085cdbb19ca05803a4361840cc9bb1
+  languageName: node
+  linkType: hard
+
+"superstruct@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "superstruct@npm:2.0.2"
+  checksum: a5f75b72cb8b14b86f4f7f750dae8c5ab0e4e1d92414b55e7625bae07bbcafad81c92486e7e32ccacd6ae1f553caff2b92a50ff42ad5093fd35b9cb7f4e5ec86
   languageName: node
   linkType: hard
 

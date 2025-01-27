@@ -2,16 +2,19 @@
 import { CactusClient } from './CactusClient';
 import { CactusCustodianApi } from './CactusCustodianApi';
 import type { ICactusEthereumAccount } from './interfaces/ICactusEthereumAccount';
+import type { ICactusTransaction } from './interfaces/ICactusTransaction';
 import { mockCactusCreateSignatureResponse } from './mocks/mockCactusCreateSignatureResponse';
 import { mockCactusCreateTransactionResult } from './mocks/mockCactusCreateTransactionResult';
 import { mockCactusGetChainIdsResponse } from './mocks/mockCactusGetChainIdsResponse';
 import { mockCactusGetCustomerProofResponse } from './mocks/mockCactusGetCustomerProofResponse';
 import { mockCactusGetEthereumAccountsResponse } from './mocks/mockCactusGetEthereumAccountsResponse';
 import { mockCactusGetSignedMessageResponse } from './mocks/mockCactusGetSignedMessageResponse';
-import type { ISignedMessageDetails, ITransactionDetails } from '../../types';
-import type { ICactusTransaction } from './interfaces/ICactusTransaction';
 import { mockCactusGetTransactionsResult } from './mocks/mockCactusGetTransactionsResult';
 import { mapTransactionStatus } from '../../../util/map-status';
+import type {
+  SignedMessageDetails,
+  TransactionDetails,
+} from '../../structs/CustodialKeyringStructs';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 
 jest.mock('./CactusClient');
@@ -175,11 +178,11 @@ describe('CactusCustodianApi', () => {
 
   describe('CactusCustodianApi#getTransaction', () => {
     it('gets a single transaction by id', async () => {
-      const result: ITransactionDetails =
+      const result: TransactionDetails =
         (await cactusCustodianApi.getTransaction(
           '0x',
           firstTransaction.custodian_transactionId,
-        )) as ITransactionDetails;
+        )) as TransactionDetails;
 
       expect(result).toStrictEqual({
         transactionHash: firstTransaction.transactionHash,
@@ -207,11 +210,11 @@ describe('CactusCustodianApi', () => {
         .mockImplementation()
         .mockResolvedValueOnce(null);
 
-      const result: ITransactionDetails =
+      const result: TransactionDetails =
         (await cactusCustodianApi.getTransaction(
           '0x',
           firstTransaction.custodian_transactionId,
-        )) as ITransactionDetails;
+        )) as TransactionDetails;
 
       expect(result).toBeNull();
     });
@@ -345,11 +348,11 @@ describe('CactusCustodianApi', () => {
         .mockImplementation()
         .mockResolvedValueOnce(null);
 
-      const result: ISignedMessageDetails =
+      const result: SignedMessageDetails =
         (await cactusCustodianApi.getSignedMessage(
           '0x',
           mockCactusGetSignedMessageResponse.custodian_transactionId,
-        )) as ISignedMessageDetails;
+        )) as SignedMessageDetails;
 
       expect(result).toBeNull();
     });
