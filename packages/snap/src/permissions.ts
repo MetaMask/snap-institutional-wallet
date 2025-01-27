@@ -16,7 +16,6 @@ const metamaskPermissions = new Set([
   KeyringRpcMethod.ListRequests,
   KeyringRpcMethod.GetRequest,
   KeyringRpcMethod.SubmitRequest,
-  KeyringRpcMethod.RejectRequest,
 ]);
 
 const metamask = 'metamask';
@@ -50,8 +49,6 @@ const localhostPermissions = new Set([
   KeyringRpcMethod.DeleteAccount,
   KeyringRpcMethod.ListRequests,
   KeyringRpcMethod.GetRequest,
-  KeyringRpcMethod.ApproveRequest,
-  KeyringRpcMethod.RejectRequest,
   // Custom methods
   InternalMethod.Onboard,
   InternalMethod.ClearAllRequests, // @audit-ok only local dev

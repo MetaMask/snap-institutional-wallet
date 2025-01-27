@@ -6,7 +6,8 @@ import type {
   OnBoardingRpcRequest,
 } from '../structs/CustodialKeyringStructs';
 
-export type KeyringState = {
+export type SnapState = {
+  walletIds: string[];
   wallets: Record<string, Wallet>;
   requests: Record<
     string,

@@ -6,6 +6,7 @@ import { CustodianList } from './components/CustodianList';
 import { RemoveCustodianToken } from './components/RemoveCustodianToken';
 import type { HomePageContext } from './context';
 import { HomePageNames, HomePagePrefixes } from './types';
+import type { CustodianMetadata } from '../../lib/custodian-types/custodianMetadata';
 import { custodianMetadata } from '../../lib/custodian-types/custodianMetadata';
 import {
   getInterfaceState,
@@ -13,7 +14,6 @@ import {
 } from '../../lib/helpers/interface';
 import type { OnBoardingRpcRequest } from '../../lib/structs/CustodialKeyringStructs';
 import type { SnapContext } from '../../lib/types/Context';
-import type { CustodianType } from '../../lib/types/CustodianType';
 import logger from '../../logger';
 /**
  * Handles the select custodian button click event.
@@ -130,20 +130,30 @@ export async function onConnectTokenClick({
     event.name?.replace(HomePagePrefixes.ConnectToken, '') ?? '';
   const selectedCustodian = custodianMetadata.find(
     (custodian) => custodian.name === custodianName,
-  );
+  ) as CustodianMetadata;
+
+  if (!selectedCustodian) {
+    throw new Error('Custodian not found');
+  }
+
   const state = await getInterfaceState(id);
-  const { apiUrl, token } = state.addTokenForm as any;
+  const { apiUrl, token } = state.addTokenForm as {
+    apiUrl: string;
+    token: string;
+  };
+
+  let custodianApiUrl = apiUrl;
+  if (!custodianApiUrl.length) {
+    custodianApiUrl = selectedCustodian?.apiBaseUrl ?? '';
+  }
 
   const onboardingRequest: OnBoardingRpcRequest = {
-    custodianType: `ECA${
-      selectedCustodian?.apiVersion.toString() ?? ''
-    }` as CustodianType,
-    custodianEnvironment: selectedCustodian?.name ?? '',
-    custodianApiUrl: selectedCustodian?.apiBaseUrl ?? '',
-    custodianDisplayName: selectedCustodian?.displayName ?? '',
-    apiUrl: apiUrl as string,
-    token: token as string,
-    refreshTokenUrl: selectedCustodian?.refreshTokenUrl ?? '',
+    custodianType: selectedCustodian.apiVersion,
+    custodianEnvironment: selectedCustodian.name ?? '',
+    custodianApiUrl,
+    custodianDisplayName: selectedCustodian.displayName ?? '',
+    token,
+    refreshTokenUrl: selectedCustodian.refreshTokenUrl ?? '',
   };
 
   await handleOnboarding(onboardingRequest);

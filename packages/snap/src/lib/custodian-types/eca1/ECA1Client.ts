@@ -17,6 +17,7 @@ import type { ECA1GetTransactionLinkResponse } from './rpc-responses/ECA1GetTran
 import type { ECA1ListAccountsResponse } from './rpc-responses/ECA1ListAccountsResponse';
 import type { ECA1SignResponse } from './rpc-responses/ECA1SignResponse';
 import type { ECA1SignTypedDataResponse } from './rpc-responses/ECA1SignTypedDataResponse';
+import logger from '../../../logger';
 import factory from '../../../util/json-rpc-call';
 import { SimpleCache } from '../../simple-cache/SimpleCache';
 import type { IRefreshTokenChangeEvent } from '../../types/IRefreshTokenChangeEvent';
@@ -137,7 +138,7 @@ export class ECA1Client extends EventEmitter {
         responseJson.refresh_token !== this.#refreshToken
       ) {
         const newRefreshToken = responseJson.refresh_token as string;
-        console.log(
+        logger.debug(
           `ECA1Client: Refresh token changed to ${newRefreshToken.substring(
             0,
             5,

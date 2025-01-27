@@ -173,7 +173,6 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
       maxPriorityFeePerGas: result.maxPriorityFeePerGas ?? null,
       nonce: result.nonce,
       transactionHash: result.hash,
-      reason: result.status.reason,
       to: result.to,
       custodianPublishesTransaction: true,
     };

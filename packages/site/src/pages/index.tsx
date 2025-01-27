@@ -499,7 +499,6 @@ const Index = () => {
             params: [
               {
                 chainId: '0xaa36a7',
-                nonce: '0x0',
                 maxPriorityFeePerGas: '0x59682f00',
                 maxFeePerGas: '0x45dbe936c',
                 gasLimit: '0xc8f7',

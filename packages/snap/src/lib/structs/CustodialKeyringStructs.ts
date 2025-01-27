@@ -8,7 +8,7 @@ import {
   nullable,
   boolean,
   enums,
-} from 'superstruct';
+} from '@metamask/superstruct';
 
 import { CustodianType } from '../types/CustodianType';
 
@@ -32,7 +32,6 @@ export const TransactionDetails = object({
   maxFeePerGas: optional(nullable(string())),
   maxPriorityFeePerGas: optional(nullable(string())),
   nonce: optional(nullable(string())), // Optional because non-submitted transactions have no nonce
-  reason: optional(nullable(string())), // Optional because only JSON-RPC transactions have a reason
 
   // Immutable params can be return from the custodian API but they are not needed to update transactions
 
@@ -82,7 +81,6 @@ export const OnBoardingRpcRequest = object({
   custodianEnvironment: string(),
   custodianApiUrl: string(),
   custodianDisplayName: string(),
-  apiUrl: string(),
   token: string(),
   refreshTokenUrl: string(),
 });
@@ -130,6 +128,7 @@ export type SignedMessageRequest =
 
 // FIXME: Create a struct for this!
 export type CustodialSnapRequest<RequestType> = {
+  lastUpdated: number;
   keyringRequest: KeyringRequest;
   fulfilled: boolean;
   rejected: boolean;

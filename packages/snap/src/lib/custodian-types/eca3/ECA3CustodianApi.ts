@@ -193,7 +193,6 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       maxPriorityFeePerGas: result.transaction.maxPriorityFeePerGas ?? null,
       nonce: result.transaction.nonce,
       transactionHash: result.transaction.hash,
-      reason: result.transaction.status.reason,
       to: result.transaction.to,
       signedRawTransaction: result.transaction.signedRawTransaction ?? null,
       chainId: result.metadata.chainId,

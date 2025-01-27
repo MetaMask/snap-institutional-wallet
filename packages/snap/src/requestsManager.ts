@@ -1,67 +1,56 @@
 import { emitSnapKeyringEvent, KeyringEvent } from '@metamask/keyring-api';
 import type { Json } from '@metamask/snaps-sdk';
+import { assert } from '@metamask/superstruct';
 
+import { renderErrorMessage } from './features/error-message/render';
 import { TransactionHelper } from './lib/helpers/transaction';
-import type {
-  SignedMessageRequest,
-  TransactionRequest,
-  CustodialSnapRequest,
+import {
+  type SignedMessageRequest,
+  type TransactionRequest,
+  type CustodialSnapRequest,
+  TransactionDetails,
 } from './lib/structs/CustodialKeyringStructs';
 import type { ICustodianApi } from './lib/types';
-import type { KeyringState } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import logger from './logger';
-import { saveState } from './stateManagement';
+import type { KeyringStateManager } from './stateManagement';
 
 type KeyringFacade = {
   getCustodianApiForAddress: (address: string) => Promise<ICustodianApi>;
-  getAccount: (accountId: string) => Promise<CustodialKeyringAccount>;
+  getAccount: (
+    accountId: string,
+  ) => Promise<CustodialKeyringAccount | undefined>;
 };
 
 export class RequestManager {
-  #state: KeyringState;
-
   #keyringFacade: KeyringFacade;
 
-  constructor(state: KeyringState, keyringFacade: KeyringFacade) {
-    this.#state = state;
+  #stateManager: KeyringStateManager;
+
+  constructor(stateManager: KeyringStateManager, keyringFacade: KeyringFacade) {
+    this.#stateManager = stateManager;
     this.#keyringFacade = keyringFacade;
   }
 
-  listRequests(): CustodialSnapRequest<
-    SignedMessageRequest | TransactionRequest
-  >[] {
-    return Object.values(this.#state.requests);
-  }
-
-  async addPendingRequest(
+  async upsertRequest(
     request: CustodialSnapRequest<SignedMessageRequest | TransactionRequest>,
   ): Promise<void> {
-    // @audit no runtime type enforcement/input validation
-    this.#state.requests[request.keyringRequest.id] = request; // @audit overwrite requests? cross domain, race. all actions here should prob be limited to origins own requests (id is prob uuid; is this leaked to other origins?)
-    await saveState(this.#state); // @audit race?
+    return this.#stateManager.upsertRequest(request);
   }
 
-  async removePendingRequest(id: string): Promise<void> {
-    delete this.#state.requests[id]; // @audit insecure; may remove Record props? dblcheck
-    await saveState(this.#state); // @audit race?
+  async listRequests(): Promise<
+    CustodialSnapRequest<SignedMessageRequest | TransactionRequest>[]
+  > {
+    return this.#stateManager.listRequests();
+  }
+
+  async clearAllRequests(): Promise<void> {
+    return this.#stateManager.clearAllRequests();
   }
 
   async getChainIdFromPendingRequest(id: string): Promise<string> {
-    if (!this.#state.requests[id]) {
-      // @audit - maybe use map instead? this inhertis from object.prototype and might be true for "toString" and other protos.
-      throw new Error(`Request ${id} not found`);
-    }
-
-    const requestParams =
-      this.#state.requests[id]?.keyringRequest.request.params; // @audit superstruct assert input val runtime type enforcement
-
-    if (!Array.isArray(requestParams) || requestParams.length === 0) {
-      throw new Error(`Request ${id} has invalid params`);
-    }
-
-    const transactionRequest = requestParams[0] as EthSignTransactionRequest;
+    const transactionRequest = await this.getRequestParams(id);
     if (!transactionRequest.chainId) {
       throw new Error(`Request ${id} has no chainId`);
     }
@@ -69,13 +58,23 @@ export class RequestManager {
     return transactionRequest.chainId;
   }
 
-  async clearAllRequests(): Promise<void> {
-    this.#state.requests = {}; // @audit race?
-    await saveState(this.#state);
+  async getRequestParams(id: string): Promise<EthSignTransactionRequest> {
+    const request = await this.#stateManager.getRequest(id);
+    if (!request) {
+      throw new Error(`Request ${id} not found`);
+    }
+
+    const requestParams = request.keyringRequest.request.params;
+
+    if (!Array.isArray(requestParams) || requestParams.length === 0) {
+      throw new Error(`Request ${id} has invalid params`);
+    }
+
+    return requestParams[0] as EthSignTransactionRequest;
   }
 
   async poll(): Promise<void> {
-    const pendingRequests = this.listRequests().filter(
+    const pendingRequests = (await this.listRequests()).filter(
       (request) => !request.fulfilled,
     );
 
@@ -119,7 +118,14 @@ export class RequestManager {
     request: CustodialSnapRequest<TransactionRequest>,
   ): Promise<void> {
     const { account } = request.keyringRequest;
-    const { address } = await this.#keyringFacade.getAccount(account);
+    const keyringAccount = await this.#keyringFacade.getAccount(account);
+
+    if (!keyringAccount) {
+      throw new Error(`Account ${account} not found`);
+    }
+
+    const { address } = keyringAccount;
+
     const custodianApi = await this.#keyringFacade.getCustodianApiForAddress(
       address,
     );
@@ -131,12 +137,14 @@ export class RequestManager {
       custodianTransactionId,
     );
 
+    assert(transactionResponse, TransactionDetails);
+
     if (
       transactionResponse?.transactionStatus.finished &&
       !transactionResponse.transactionStatus.success
     ) {
       await this.emitRejectedEvent(requestId);
-      await this.removePendingRequest(requestId);
+      await this.#stateManager.removeRequest(requestId);
       return;
     }
 
@@ -151,15 +159,77 @@ export class RequestManager {
         transactionResponse,
         chainId,
       );
+      // Check that the transaction was not altered by the custodian
+      // Do not do this for externally published transactions
+      if (transactionResponse.signedRawTransaction) {
+        const validationResult = TransactionHelper.validateTransaction(
+          await this.getRequestParams(requestId),
+          transactionResponse,
+        );
+
+        if (!validationResult.isValid) {
+          // First show a dialog with the error message
+          if (validationResult.error) {
+            const errorMessage = `Transaction ${custodianTransactionId} was signed by custodian but failed validation: ${validationResult.error}`;
+            await renderErrorMessage(errorMessage);
+          }
+          await this.emitRejectedEvent(requestId);
+          await this.#stateManager.removeRequest(requestId);
+          return;
+        }
+      }
 
       const updatedTransaction = {
         ...request,
         fulfilled: true,
         result: signature,
+        lastUpdated: Date.now(),
       };
-      Object.assign(request, updatedTransaction);
+      await this.#stateManager.upsertRequest(updatedTransaction);
       await this.emitApprovedEvent(requestId, signature);
-      await this.removePendingRequest(requestId);
+      await this.#stateManager.removeRequest(requestId);
+    } else if (transactionResponse) {
+      // Check for any changes to request.transaction relative the response
+      // Restrict to the status, gasPrice, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce
+      const updatedTransaction: CustodialSnapRequest<TransactionRequest> = {
+        ...request,
+        transaction: {
+          ...request.transaction,
+          transactionStatus: {
+            finished: transactionResponse.transactionStatus.finished ?? false,
+            success: transactionResponse.transactionStatus.success ?? false,
+            displayText:
+              transactionResponse.transactionStatus.displayText ?? '',
+            submitted: transactionResponse.transactionStatus.submitted ?? false,
+            reason: transactionResponse.transactionStatus.reason ?? '',
+          },
+          ...(transactionResponse.gasPrice && {
+            gasPrice: transactionResponse.gasPrice,
+          }),
+          ...(transactionResponse.maxFeePerGas && {
+            maxFeePerGas: transactionResponse.maxFeePerGas,
+          }),
+          ...(transactionResponse.maxPriorityFeePerGas && {
+            maxPriorityFeePerGas: transactionResponse.maxPriorityFeePerGas,
+          }),
+          ...(transactionResponse.gasLimit && {
+            gasLimit: transactionResponse.gasLimit,
+          }),
+          ...(transactionResponse.nonce && {
+            nonce: transactionResponse.nonce,
+          }),
+          ...(transactionResponse.to && { to: transactionResponse.to }),
+          ...(transactionResponse.value && {
+            value: transactionResponse.value,
+          }),
+          ...(transactionResponse.data && { data: transactionResponse.data }),
+          ...(transactionResponse.chainId && {
+            chainId: transactionResponse.chainId,
+          }),
+          ...(transactionResponse.from && { from: transactionResponse.from }),
+        },
+      };
+      await this.#stateManager.upsertRequest(updatedTransaction);
     }
   }
 
@@ -168,7 +238,14 @@ export class RequestManager {
     request: CustodialSnapRequest<SignedMessageRequest>,
   ): Promise<void> {
     const { account } = request.keyringRequest;
-    const { address } = await this.#keyringFacade.getAccount(account);
+    const keyringAccount = await this.#keyringFacade.getAccount(account);
+
+    if (!keyringAccount) {
+      throw new Error(`Account ${account} not found`);
+    }
+
+    const { address } = keyringAccount;
+
     const custodianApi = await this.#keyringFacade.getCustodianApiForAddress(
       address,
     );
@@ -183,9 +260,10 @@ export class RequestManager {
         const updatedSignedMessage = {
           ...request,
           fulfilled: true,
-          result: signedMessageResponse.signature,
+          signature: signedMessageResponse.signature,
+          lastUpdated: Date.now(),
         };
-        Object.assign(request, updatedSignedMessage);
+        await this.#stateManager.upsertRequest(updatedSignedMessage);
         await this.emitApprovedEvent(
           requestId,
           signedMessageResponse.signature,
@@ -193,7 +271,7 @@ export class RequestManager {
       } else {
         await this.emitRejectedEvent(requestId);
       }
-      await this.removePendingRequest(requestId);
+      await this.#stateManager.removeRequest(requestId);
     }
   }
 
@@ -212,7 +290,7 @@ export class RequestManager {
 
       if (error.message.includes(`Request '${id}' not found`)) {
         logger.info(`Request '${id}' not found, removing from state`);
-        await this.removePendingRequest(id);
+        await this.#stateManager.removeRequest(id);
       } else {
         throw error;
       }
@@ -227,7 +305,7 @@ export class RequestManager {
     } catch (error: any) {
       if (error.message.includes(`Request '${id}' not found`)) {
         logger.info(`Request '${id}' not found, removing from state`);
-        await this.removePendingRequest(id);
+        await this.#stateManager.removeRequest(id);
       } else {
         throw error;
       }

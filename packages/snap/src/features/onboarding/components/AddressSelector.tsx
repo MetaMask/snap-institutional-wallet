@@ -10,7 +10,8 @@ import {
   Link,
 } from '@metamask/snaps-sdk/jsx';
 
-import { getAccountLink, truncateAddress } from '../../../util';
+import { getAccountLink } from '../../../util/get-account-link';
+import { truncateAddress } from '../../../util/truncate-address';
 import type { OnboardingAccount } from '../types';
 import { FormPrefixes, OnboardingNames } from '../types';
 
