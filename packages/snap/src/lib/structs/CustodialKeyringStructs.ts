@@ -1,6 +1,5 @@
 import type { KeyringRequest } from '@metamask/keyring-api';
-import type { Infer } from 'superstruct';
-// eslint-disable-next-line import/no-extraneous-dependencies
+import type { Infer } from '@metamask/superstruct';
 import {
   literal,
   object,
@@ -101,7 +100,6 @@ export type CreateAccountOptions = Infer<typeof CreateAccountOptions>;
 export const TransactionRequest = object({
   type: literal('transaction'),
   transaction: TransactionDetails,
-  signature: SignedMessageDetails,
 });
 
 export type TransactionRequest = Infer<typeof TransactionRequest>;
@@ -110,7 +108,7 @@ export const PersonalSignMessageRequest = object({
   type: literal('message'),
   message: SignedMessageDetails,
   subType: literal('personalSign'),
-  signature: string(),
+  signature: nullable(string()),
 });
 
 export type PersonalSignMessageRequest = Infer<

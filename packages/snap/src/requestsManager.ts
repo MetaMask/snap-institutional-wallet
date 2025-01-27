@@ -80,31 +80,36 @@ export class RequestManager {
     );
 
     for (const request of pendingRequests) {
-      if (request.type === 'message') {
-        // @audit switch(); default nop
-        try {
-          await this.pollSignedMessage(
-            request.keyringRequest.id,
-            request as CustodialSnapRequest<SignedMessageRequest>,
-          );
-        } catch (error: any) {
-          logger.info(
-            `Error polling signed message request ${request.keyringRequest.id}`,
-          );
-          logger.error(error); // @audit infoleak?
-        }
-      } else if (request.type === 'transaction') {
-        try {
-          await this.pollTransaction(
-            request.keyringRequest.id,
-            request as CustodialSnapRequest<TransactionRequest>,
-          );
-        } catch (error: any) {
-          logger.info(
-            `Error polling transaction request ${request.keyringRequest.id}`,
-          );
-          logger.error(error); // @audit - infoleak
-        }
+      switch (request.type) {
+        case 'message':
+          try {
+            await this.pollSignedMessage(
+              request.keyringRequest.id,
+              request as CustodialSnapRequest<SignedMessageRequest>,
+            );
+          } catch (error: any) {
+            logger.info(
+              `Error polling signed message request ${request.keyringRequest.id}`,
+            );
+            logger.error(error); // @audit infoleak?
+          }
+          break;
+        case 'transaction':
+          try {
+            await this.pollTransaction(
+              request.keyringRequest.id,
+              request as CustodialSnapRequest<TransactionRequest>,
+            );
+          } catch (error: any) {
+            logger.info(
+              `Error polling transaction request ${request.keyringRequest.id}`,
+            );
+            logger.error(error); // @audit - infoleak
+          }
+          break;
+        default:
+          // logger.debug(`Unknown request type: ${request.type}`);
+          break;
       } // @audit what happens to other txtypes? are they kept forever? should they be cleaned up and error reported?
     }
   }

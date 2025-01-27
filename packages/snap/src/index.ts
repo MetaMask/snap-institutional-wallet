@@ -14,7 +14,7 @@ import type {
   OnKeyringRequestHandler,
   OnRpcRequestHandler,
 } from '@metamask/snaps-types';
-import { assert } from 'superstruct';
+import { assert } from '@metamask/superstruct';
 
 import config from './config';
 import { getHomePageContext } from './features/homepage/context';

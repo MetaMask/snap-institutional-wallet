@@ -1,6 +1,6 @@
 import { Common, Hardfork } from '@ethereumjs/common';
 
-import type { ITransactionDetails } from './lib/types';
+import type { TransactionDetails } from './lib/structs/CustodialKeyringStructs';
 import type { Wallet } from './lib/types/CustodialKeyring';
 
 /**
@@ -69,7 +69,7 @@ export const formatTransactionData = (
 };
 
 export const createCommon = (
-  transaction: ITransactionDetails,
+  transaction: TransactionDetails,
   chainId: string,
 ): Common => {
   return Common.custom(

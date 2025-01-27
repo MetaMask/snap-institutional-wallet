@@ -8,11 +8,11 @@ import {
 } from '@metamask/keyring-api';
 import type {
   Keyring,
-  KeyringRequest,
   SubmitRequestResponse,
+  KeyringRequest,
 } from '@metamask/keyring-api';
+import { assert } from '@metamask/superstruct';
 import { type Json } from '@metamask/utils';
-import { assert } from 'superstruct';
 import { v4 as uuid } from 'uuid';
 
 import { TOKEN_EXPIRED_EVENT } from './lib/custodian-types/constants';
@@ -24,14 +24,15 @@ import type {
   SignedMessageRequest,
   CustodialSnapRequest,
   TransactionRequest,
+  OnBoardingRpcRequest,
 } from './lib/structs/CustodialKeyringStructs';
+import { KeyringRequestStruct } from './lib/structs/KeyringRequestStruct';
 import type { CustodianDeepLink, IRefreshTokenChangeEvent } from './lib/types';
 import type { KeyringState, Wallet } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap } from './lib/types/CustodianType';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
-import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
 import { saveState } from './stateManagement';
 import {
   isUniqueAddress,
@@ -269,6 +270,8 @@ export class CustodialKeyring implements Keyring {
   async #asyncSubmitRequest(
     request: KeyringRequest, // @audit runtime input val; type enforcement
   ): Promise<SubmitRequestResponse> {
+    assert(request, KeyringRequestStruct);
+
     const custodianId = await this.#handleSigningRequest(
       request.request.method,
       request.request.params ?? [],
@@ -428,7 +431,6 @@ export class CustodialKeyring implements Keyring {
         fulfilled: false,
         rejected: false,
         transaction: response,
-        signature: null,
       });
 
       return response.custodianTransactionId;
