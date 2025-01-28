@@ -4,11 +4,17 @@ import { acquireLock } from './lock';
 
 jest.mock('async-mutex', () => {
   return {
-    Mutex: jest.fn(),
+    Mutex: jest.fn().mockImplementation(() => ({
+      // Mock implementation of Mutex if needed
+    })),
   };
 });
 
 describe('acquireLock', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('acquires lock', () => {
     acquireLock();
     expect(Mutex).toHaveBeenCalledTimes(0);

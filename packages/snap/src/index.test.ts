@@ -3,6 +3,7 @@ import { handleKeyringRequest } from '@metamask/keyring-api';
 
 import { onRpcRequest, onKeyringRequest, onCronjob } from '.';
 import { getKeyring, getRequestManager } from './context';
+import { renderOnboarding } from './features/onboarding/render';
 import { CustodianType } from './lib/types/CustodianType';
 import { InternalMethod, originPermissions } from './permissions';
 
@@ -29,13 +30,17 @@ jest.mock('./lib/custodian-types/eca3/ECA3CustodianApi', () => {
 
 // Mock the onboarding renderer
 jest.mock('./features/onboarding/render', () => ({
-  renderOnboarding: jest.fn().mockResolvedValue([
+  renderOnboarding: jest.fn().mockImplementation(async () => [
     {
       address: '0x123',
       name: 'Test Account',
     },
   ]),
 }));
+
+const mockRenderOnboarding = renderOnboarding as jest.MockedFunction<
+  typeof renderOnboarding
+>;
 
 describe('index', () => {
   const mockKeyring = {
@@ -62,6 +67,14 @@ describe('index', () => {
       'https://example.com',
       new Set([InternalMethod.Onboard, 'keyring_listAccounts']),
     );
+
+    // Reset the mock implementation for each test
+    mockRenderOnboarding.mockImplementation(async () => [
+      {
+        address: '0x123',
+        name: 'Test Account',
+      },
+    ]);
   });
 
   describe('onRpcRequest', () => {
@@ -123,6 +136,11 @@ describe('index', () => {
           name: 'Test Account',
           details: mockRequest,
         });
+        expect(mockRenderOnboarding).toHaveBeenCalledWith(
+          expect.objectContaining({
+            accounts: [],
+          }),
+        );
       });
 
       it('should throw error for unsupported custodian type', async () => {
@@ -149,6 +167,40 @@ describe('index', () => {
           'Expected one of `"ECA3","ECA1","BitGo","Cactus"`, but received: "UNSUPPORTED"',
         );
       });
+    });
+
+    it('should filter out existing accounts', async () => {
+      const existingAccount = {
+        address: '0x123',
+        name: 'Existing Account',
+      };
+
+      mockKeyring.listAccounts.mockResolvedValueOnce([existingAccount]);
+      mockKeyring.createAccount.mockResolvedValueOnce({} as any);
+
+      await onRpcRequest({
+        origin: 'https://example.com',
+        request: {
+          method: InternalMethod.Onboard,
+          params: {
+            custodianType: CustodianType.ECA3,
+            token: 'mock-token',
+            refreshTokenUrl: 'https://example.com/refresh',
+            custodianApiUrl: 'https://example.com/api',
+            custodianEnvironment: 'test',
+            custodianDisplayName: 'Test Custodian',
+          },
+          id: 1,
+          jsonrpc: '2.0',
+        },
+      });
+
+      // the renderOnboarding function should only be shown the non-existing accounts
+      expect(mockRenderOnboarding).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accounts: [],
+        }),
+      );
     });
   });
 

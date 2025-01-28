@@ -30,6 +30,10 @@ type MockExecuteTransactionInput = {
 };
 
 describe('SnapStateManager', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const createMockStateManager = <State, StateDataInput>(
     createLock?: boolean,
     encrypted?: boolean,
@@ -38,8 +42,8 @@ describe('SnapStateManager', () => {
     class MockSnapStateManager extends SnapStateManager<State> {
       constructor() {
         super({
-          createLock: createLock ?? false,
-          encrypted: encrypted ?? false,
+          ...(createLock !== undefined && { createLock }),
+          ...(encrypted !== undefined && { encrypted }),
         });
       }
 

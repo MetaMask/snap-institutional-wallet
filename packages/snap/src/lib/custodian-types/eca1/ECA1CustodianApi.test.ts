@@ -289,7 +289,6 @@ describe('ECA1CustodianApi', () => {
         gasPrice: mockECA1GetTransactionByIdResponse.result.gasPrice,
         maxFeePerGas: null,
         maxPriorityFeePerGas: null,
-        reason: '',
         nonce: mockECA1GetTransactionByIdResponse.result.nonce,
         transactionHash: mockECA1GetTransactionByIdResponse.result.hash,
         to: mockECA1GetTransactionByIdResponse.result.to,
