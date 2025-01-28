@@ -1,4 +1,7 @@
-import { onRpcRequest } from '.';
+import type { JsonRpcRequest } from '@metamask/keyring-api';
+import { handleKeyringRequest } from '@metamask/keyring-api';
+
+import { onRpcRequest, onKeyringRequest, onCronjob } from '.';
 import { getKeyring, getRequestManager } from './context';
 import { CustodianType } from './lib/types/CustodianType';
 import { InternalMethod, originPermissions } from './permissions';
@@ -45,6 +48,7 @@ describe('index', () => {
     listRequests: jest.fn().mockResolvedValue([]),
     upsertRequest: jest.fn(),
     clearAllRequests: jest.fn(),
+    poll: jest.fn(),
   };
 
   beforeEach(() => {
@@ -56,7 +60,7 @@ describe('index', () => {
     // Set up permissions for example.com
     originPermissions.set(
       'https://example.com',
-      new Set([InternalMethod.Onboard]),
+      new Set([InternalMethod.Onboard, 'keyring_listAccounts']),
     );
   });
 
@@ -145,6 +149,112 @@ describe('index', () => {
           'Expected one of `"ECA3","ECA1","BitGo","Cactus"`, but received: "UNSUPPORTED"',
         );
       });
+    });
+  });
+
+  describe('onKeyringRequest', () => {
+    it('should throw UnauthorizedError for unauthorized origin', async () => {
+      await expect(
+        onKeyringRequest({
+          origin: 'unauthorized-origin',
+          request: {
+            method: 'keyring_listAccounts',
+            params: {},
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        }),
+      ).rejects.toThrow(
+        "Origin 'unauthorized-origin' is not allowed to call 'keyring_listAccounts'",
+      );
+    });
+
+    it('should handle keyring request successfully', async () => {
+      const mockRequest = {
+        method: 'keyring_listAccounts',
+        params: {},
+        id: 1,
+        jsonrpc: '2.0',
+      };
+
+      await onKeyringRequest({
+        origin: 'https://example.com',
+        request: mockRequest as JsonRpcRequest,
+      });
+
+      expect(handleKeyringRequest).toHaveBeenCalledWith(
+        mockKeyring,
+        mockRequest,
+      );
+    });
+  });
+
+  describe('onCronjob', () => {
+    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+
+    beforeEach(() => {
+      setTimeoutSpy.mockImplementation((fn) => {
+        fn();
+        return 0 as any;
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should handle execute method', async () => {
+      await onCronjob({
+        request: {
+          method: 'execute',
+          id: 1,
+          jsonrpc: '2.0',
+        },
+      });
+
+      expect(mockRequestManager.poll).toHaveBeenCalled();
+      expect(setTimeoutSpy).toHaveBeenCalledTimes(5); // 5 delays between 6 polls
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 10000);
+    });
+
+    it('should throw error for unsupported method', async () => {
+      await expect(
+        onCronjob({
+          request: {
+            method: 'unsupported',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        }),
+      ).rejects.toThrow('Method not found.');
+
+      expect(setTimeoutSpy).not.toHaveBeenCalled();
+    });
+
+    it('should poll multiple times with correct delay', async () => {
+      await onCronjob({
+        request: {
+          method: 'execute',
+          id: 1,
+          jsonrpc: '2.0',
+        },
+      });
+
+      expect(mockRequestManager.poll).toHaveBeenCalledTimes(6);
+      expect(setTimeoutSpy).toHaveBeenCalledTimes(5); // 5 delays between 6 polls
+      expect(setTimeoutSpy).toHaveBeenLastCalledWith(
+        expect.any(Function),
+        10000,
+      );
+
+      // Verify all setTimeout calls were with 10 second delay
+      for (let i = 0; i < 5; i++) {
+        expect(setTimeoutSpy).toHaveBeenNthCalledWith(
+          i + 1,
+          expect.any(Function),
+          10000,
+        );
+      }
     });
   });
 });
