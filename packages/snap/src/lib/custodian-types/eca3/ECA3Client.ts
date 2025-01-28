@@ -23,6 +23,7 @@ import type { ECA3ListAccountsSignedResponse } from './rpc-responses/ECA3ListAcc
 import type { ECA3ReplaceTransactionResponse } from './rpc-responses/ECA3ReplaceTransactionResponse';
 import type { ECA3SignResponse } from './rpc-responses/ECA3SignResponse';
 import type { ECA3SignTypedDataResponse } from './rpc-responses/ECA3SignTypedDataResponse';
+import logger from '../../../logger';
 import factory from '../../../util/json-rpc-call';
 import type { IRefreshTokenChangeEvent } from '../../types';
 import type { JsonRpcResult } from '../../types/JsonRpcResult';
@@ -146,7 +147,7 @@ export class ECA3Client extends EventEmitter {
         responseJson.refresh_token !== this.#refreshToken
       ) {
         const newRefreshToken = responseJson.refresh_token as string;
-        console.log(
+        logger.debug(
           `ECA3Client: Refresh token changed to ${newRefreshToken.substring(
             0,
             5,

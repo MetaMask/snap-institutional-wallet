@@ -12,8 +12,6 @@ import type {
   IEthereumAccountCustodianDetails,
   ILegacyTXParams,
   IRefreshTokenAuthDetails,
-  ISignedMessageDetails,
-  ITransactionDetails,
   SignedMessageMetadata,
   SignedTypedMessageMetadata,
   IRefreshTokenChangeEvent,
@@ -26,6 +24,10 @@ import type {
   ECA3ReplaceTransactionGasParams,
   ECA3ReplaceTransactionParams,
 } from './rpc-payloads/ECA3ReplaceTransactionPayload';
+import type {
+  SignedMessageDetails,
+  TransactionDetails,
+} from '../../structs/CustodialKeyringStructs';
 import type { CreateTransactionMetadata } from '../../types/CreateTransactionMetadata';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 import type { ReplaceTransactionParams } from '../../types/ReplaceTransactionParams';
@@ -110,7 +112,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   async createTransaction(
     txParams: IEIP1559TxParams | ILegacyTXParams,
     txMeta: CreateTransactionMetadata,
-  ): Promise<ITransactionDetails> {
+  ): Promise<TransactionDetails> {
     const fromAddress = txParams.from;
 
     const accounts = await this.getEthereumAccountsByAddress(fromAddress);
@@ -172,7 +174,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   async getTransaction(
     _from: string,
     custodianTransactionId: string,
-  ): Promise<ITransactionDetails | null> {
+  ): Promise<TransactionDetails | null> {
     const { result } = await this.#client.getTransaction([
       custodianTransactionId,
     ]);
@@ -191,7 +193,6 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
       maxPriorityFeePerGas: result.transaction.maxPriorityFeePerGas ?? null,
       nonce: result.transaction.nonce,
       transactionHash: result.transaction.hash,
-      reason: result.transaction.status.reason,
       to: result.transaction.to,
       signedRawTransaction: result.transaction.signedRawTransaction ?? null,
       chainId: result.metadata.chainId,
@@ -238,7 +239,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
   async getSignedMessage(
     _address: string,
     custodianSignedMessageId: string,
-  ): Promise<ISignedMessageDetails | null> {
+  ): Promise<SignedMessageDetails | null> {
     const { result } = await this.#client.getSignedMessage([
       custodianSignedMessageId,
     ]);
@@ -309,7 +310,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
     data: TypedMessage<MessageTypes>,
     version: string,
     signedTypedMessageMetadata: SignedTypedMessageMetadata,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
     if (!accounts.length) {
@@ -339,7 +340,7 @@ export class ECA3CustodianApi extends EventEmitter implements ICustodianApi {
     address: string,
     message: string,
     signedMessageMetadata: SignedMessageMetadata,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
     if (!accounts.length) {

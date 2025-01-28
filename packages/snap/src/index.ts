@@ -1,19 +1,24 @@
+import type { JsonRpcRequest } from '@metamask/keyring-api';
 import {
   MethodNotSupportedError,
   handleKeyringRequest,
 } from '@metamask/keyring-api';
-import type {
-  UserInputEvent,
-  OnCronjobHandler,
-  OnUserInputHandler,
-  OnHomePageHandler,
+import {
+  type UserInputEvent,
+  type OnCronjobHandler,
+  type OnUserInputHandler,
+  type OnHomePageHandler,
+  UnauthorizedError,
 } from '@metamask/snaps-sdk';
 import type {
   Json,
   OnKeyringRequestHandler,
   OnRpcRequestHandler,
 } from '@metamask/snaps-types';
+import { assert } from '@metamask/superstruct';
 
+import config from './config';
+import { getKeyring, getRequestManager } from './context';
 import { getHomePageContext } from './features/homepage/context';
 import {
   eventHandles as homePageEvents,
@@ -23,66 +28,13 @@ import { renderHomePage } from './features/homepage/render';
 import { eventHandlers as onboardingEvents } from './features/onboarding/events';
 import { renderOnboarding } from './features/onboarding/render';
 import type { OnboardingAccount } from './features/onboarding/types';
-import { CustodialKeyring } from './keyring';
+import type { CreateAccountOptions } from './lib/structs/CustodialKeyringStructs';
+import { OnBoardingRpcRequest } from './lib/structs/CustodialKeyringStructs';
 import type { SnapContext } from './lib/types/Context';
-import type { CustodialSnapRequest } from './lib/types/CustodialKeyring';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
-import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
 import logger from './logger';
 import { InternalMethod, originPermissions } from './permissions';
-import { RequestManager } from './requestsManager';
-import { getState } from './stateManagement';
-
-let keyring: CustodialKeyring;
-let requestManager: RequestManager;
-
-// Allow the keyring to call certain methods on the request manager
-const requestManagerFacade = {
-  addPendingRequest: async (request: CustodialSnapRequest<any>) => {
-    requestManager = await getRequestManager();
-    return requestManager.addPendingRequest(request);
-  },
-  listRequests: async () => {
-    requestManager = await getRequestManager();
-    return requestManager.listRequests();
-  },
-};
-
-// Allow the request manager to call certain methods on the keyring
-const keyringFacade = {
-  getCustodianApiForAddress: async (address: string) => {
-    keyring = await getKeyring();
-    return keyring.getCustodianApiForAddress(address);
-  },
-  getAccount: async (accountId: string) => {
-    keyring = await getKeyring();
-    return keyring.getAccount(accountId);
-  },
-};
-
-/**
- * Return the keyring instance. If it doesn't exist, create it.
- */
-async function getKeyring(): Promise<CustodialKeyring> {
-  if (!keyring) {
-    const state = await getState();
-    if (!keyring) {
-      keyring = new CustodialKeyring(state, requestManagerFacade);
-    }
-  }
-  return keyring;
-}
-
-/**
- * Return the request manager instance. If it doesn't exist, create it.
- */
-async function getRequestManager(): Promise<RequestManager> {
-  if (!requestManager) {
-    // eslint-disable-next-line require-atomic-updates
-    requestManager = new RequestManager(await getState(), keyringFacade);
-  }
-  return requestManager;
-}
+// @audit - this file needs unittests
 
 /**
  * Verify if the caller can call the requested method.
@@ -92,12 +44,14 @@ async function getRequestManager(): Promise<RequestManager> {
  * @returns True if the caller is allowed to call the method, false otherwise.
  */
 function hasPermission(origin: string, method: string): boolean {
-  return originPermissions.get(origin)?.includes(method) ?? false;
+  return originPermissions.get(origin)?.has(method) ?? false;
 }
 
 export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
+  assert(request, OnBoardingRpcRequest);
+
   const CustodianApiClass = CustodianApiMap[request.custodianType];
-  keyring = await getKeyring();
+  const keyring = await getKeyring();
 
   if (!Object.values(CustodianType).includes(request.custodianType)) {
     throw new Error(`Custodian type ${request.custodianType} not supported`);
@@ -142,7 +96,7 @@ export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
     return [];
   }
 
-  const accountsToAdd = result.map((account) => ({
+  const accountsToAdd: CreateAccountOptions[] = result.map((account) => ({
     address: account.address,
     name: account.name,
     details: { ...request },
@@ -159,43 +113,64 @@ export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
   return accountsToAdd;
 };
 
+/**
+ * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
+ *
+ * @param args - The request handler args as object.
+ * @param args.origin - The origin of the request, e.g., the website that
+ * invoked the snap.
+ * @param args.request - A validated JSON-RPC request object.
+ * @returns A promise that resolves to the result of the RPC request.
+ * @throws If the request method is not valid for this snap.
+ */
 export const onRpcRequest: OnRpcRequestHandler = async ({
   origin,
   request,
-}) => {
+}: {
+  origin: string;
+  request: JsonRpcRequest;
+}): Promise<void | CreateAccountOptions[]> => {
   logger.debug(
-    `RPC request (origin="${origin}"):`,
+    `RPC request (origin="${origin}"): method="${request.method}"`,
     JSON.stringify(request, undefined, 2),
   );
 
   // Check if origin is allowed to call method.
   if (!hasPermission(origin, request.method)) {
-    throw new Error(
+    // eslint-disable-next-line @typescript-eslint/no-throw-literal
+    throw new UnauthorizedError(
       `Origin '${origin}' is not allowed to call '${request.method}'`,
     );
   }
-
+  // `@audit-info` try-catch wrap and throw SnapError (https://docs.metamask.io/snaps/how-to/communicate-errors/#import-and-throw-errors) instead of internal exception.
   // Handle custom methods.
   switch (request.method) {
     case InternalMethod.Onboard: {
-      return await handleOnboarding(request.params as OnBoardingRpcRequest);
+      assert(request.params, OnBoardingRpcRequest);
+      return await handleOnboarding(request.params);
     }
 
     case InternalMethod.ClearAllRequests: {
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      const requestManager = await getRequestManager();
-      return await requestManager.clearAllRequests();
+      if (config.dev) {
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        const requestManager = await getRequestManager();
+        return await requestManager.clearAllRequests();
+      }
+      throw new MethodNotSupportedError(request.method);
     }
 
     default: {
-      throw new MethodNotSupportedError(request.method);
+      throw new MethodNotSupportedError(request.method); // @audit-info or MethodNotFoundError 👉 https://docs.metamask.io/snaps/how-to/communicate-errors/#import-and-throw-errors
     }
   }
 };
 
 export const onKeyringRequest: OnKeyringRequestHandler = async ({
-  origin,
+  origin, // @audit specify ts types
   request,
+}: {
+  origin: string;
+  request: JsonRpcRequest;
 }) => {
   logger.debug(
     `Keyring request (origin="${origin}"):`,
@@ -204,13 +179,14 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
 
   // Check if origin is allowed to call method.
   if (!hasPermission(origin, request.method)) {
+    // @audit - enforce runtime type/input validation! user superstruct from metamask
     throw new Error(
       `Origin '${origin}' is not allowed to call '${request.method}'`,
     );
   }
 
   // Handle keyring methods.
-  return handleKeyringRequest(await getKeyring(), request);
+  return handleKeyringRequest(await getKeyring(), request); // @audit - handleKeyringRequest is async, might req. await? (else returns promise of promise? dblcheck with MM team)
 };
 
 // Improved polling function
@@ -225,10 +201,12 @@ const pollRequests = async (): Promise<void> => {
 };
 
 export const onCronjob: OnCronjobHandler = async ({ request }) => {
-  switch (request.method) {
+  switch (
+    request.method // @audit-info this is execute every minute * * * * *  acc. to manifest
+  ) {
     case 'execute': {
       const startTime = Date.now();
-      const timeoutDuration = 60000; // 1 minute in milliseconds
+      const timeoutDuration = 60000; // 1 minute in milliseconds //@audit will this work with mm snap scheduling?
 
       // Run pollTransactions 6 times with 10-second intervals
       for (let i = 0; i < 6; i++) {
@@ -237,10 +215,10 @@ export const onCronjob: OnCronjobHandler = async ({ request }) => {
           return;
         }
 
-        await pollRequests();
+        await pollRequests(); // @audit - what if there is nothing to poll?
         // If this isn't the last iteration, wait 10 seconds
         if (i < 5) {
-          await new Promise((resolve) => setTimeout(resolve, 10000));
+          await new Promise((resolve) => setTimeout(resolve, 10000)); // @audit-info sleep(10sec)
         }
       }
       return;
@@ -288,6 +266,8 @@ export const onUserInput: OnUserInputHandler = async ({
     return;
   }
 
+  const keyring = await getKeyring();
+
   const snapContext: SnapContext = {
     keyring,
   };
@@ -296,7 +276,7 @@ export const onUserInput: OnUserInputHandler = async ({
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  keyring = await getKeyring();
+  const keyring = await getKeyring();
   const context = await getHomePageContext({ keyring });
   return { id: await renderHomePage(context) };
 };

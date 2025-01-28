@@ -1,6 +1,6 @@
 ## API
 
-As a custodian, you must build an API for the custodial wallet snap to interact with. You should then submit a PR to this repository adding the details of your API to the `custodianMetadata.ts` file.
+As a custodian, you must build an API for the institutional wallet snap to interact with. You should then submit a PR to this repository adding the details of your API to the `custodianMetadata.ts` file.
 
 Custodians must expose the following endpoints:
 

@@ -1,46 +1,48 @@
 import type { MessageTypes, TypedMessage } from '@metamask/eth-sig-util';
 import { SignTypedDataVersion } from '@metamask/eth-sig-util';
-import {
-  emitSnapKeyringEvent,
-  EthAccountType,
-  EthMethod,
-  KeyringEvent,
-} from '@metamask/keyring-api';
 import type {
   Keyring,
   KeyringRequest,
   SubmitRequestResponse,
 } from '@metamask/keyring-api';
+import {
+  emitSnapKeyringEvent,
+  EthAccountType,
+  EthMethod,
+  KeyringEvent,
+  KeyringRequestStruct,
+} from '@metamask/keyring-api';
+import { MethodNotFoundError } from '@metamask/snaps-sdk';
+import { assert, string } from '@metamask/superstruct';
 import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 
+import config from './config';
 import { TOKEN_EXPIRED_EVENT } from './lib/custodian-types/constants';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
 import { SignedMessageHelper } from './lib/helpers/signedmessage';
 import { TransactionHelper } from './lib/helpers/transaction';
-import type { CustodianDeepLink, IRefreshTokenChangeEvent } from './lib/types';
+import { CreateAccountOptions } from './lib/structs/CustodialKeyringStructs';
 import type {
-  KeyringState,
-  Wallet,
-  CreateAccountOptions,
-  CustodialSnapRequest,
   SignedMessageRequest,
+  CustodialSnapRequest,
   TransactionRequest,
-} from './lib/types/CustodialKeyring';
+  OnBoardingRpcRequest,
+} from './lib/structs/CustodialKeyringStructs';
+import type { CustodianDeepLink, IRefreshTokenChangeEvent } from './lib/types';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap } from './lib/types/CustodianType';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
-import type { OnBoardingRpcRequest } from './lib/types/OnBoardingRpcRequest';
-import { saveState } from './stateManagement';
-import {
-  isUniqueAddress,
-  throwError,
-  convertHexChainIdToCaip2Decimal,
-} from './util';
+import logger from './logger';
+import type { KeyringStateManager } from './stateManagement';
+import { throwError } from './util';
+import { convertHexChainIdToCaip2Decimal } from './util/convert-hex-chain-id-to-caip2-decimal';
+import { isUniqueAddress } from './util/is-unique-address';
+import { runSensitive } from './util/run-sensitive';
 
 type RequestManagerFacade = {
-  addPendingRequest: (
+  upsertRequest: (
     request: CustodialSnapRequest<SignedMessageRequest | TransactionRequest>,
   ) => Promise<void>;
   listRequests: () => Promise<
@@ -49,36 +51,35 @@ type RequestManagerFacade = {
 };
 
 export class CustodialKeyring implements Keyring {
-  #state: KeyringState;
-
   #custodianApi: Record<string, ICustodianApi>; // maps address to memoized custodian api
 
   #requestManagerFacade: RequestManagerFacade;
 
-  constructor(state: KeyringState, requestManagerFacade: RequestManagerFacade) {
-    this.#state = state;
+  #stateManager: KeyringStateManager;
+
+  constructor(
+    stateManager: KeyringStateManager,
+    requestManagerFacade: RequestManagerFacade,
+  ) {
+    this.#stateManager = stateManager;
     this.#custodianApi = {};
     this.#requestManagerFacade = requestManagerFacade;
   }
 
   async listAccounts(): Promise<CustodialKeyringAccount[]> {
-    return Object.values(this.#state.wallets).map((wallet) => wallet.account);
+    return this.#stateManager.listAccounts();
   }
 
-  async getAccount(id: string): Promise<CustodialKeyringAccount> {
-    return (
-      this.#state.wallets[id]?.account ??
-      throwError(`Account '${id}' not found`)
-    );
+  async getAccount(id: string): Promise<CustodialKeyringAccount | undefined> {
+    return (await this.#stateManager.getAccount(id)) ?? undefined;
   }
 
-  async accountExists(id: string): Promise<boolean> {
-    return this.#state.wallets[id] !== undefined;
-  }
-
+  // NB: external input
   async createAccount(
     options: CreateAccountOptions,
   ): Promise<CustodialKeyringAccount> {
+    assert(options, CreateAccountOptions);
+
     // Try to get the options from the custodian metadata
     const custodian = custodianMetadata.find(
       (item) => item.apiBaseUrl === options.details.custodianApiUrl,
@@ -86,7 +87,9 @@ export class CustodialKeyring implements Keyring {
 
     const { address, name } = options;
 
-    if (!isUniqueAddress(address, Object.values(this.#state.wallets))) {
+    const wallets = await this.#stateManager.listWallets();
+
+    if (!isUniqueAddress(address, wallets)) {
       throw new Error(`Account address already in use: ${address}`);
     }
 
@@ -109,13 +112,17 @@ export class CustodialKeyring implements Keyring {
         ],
         type: EthAccountType.Eoa,
       };
+
+      // This event actually *asks* the client to create the account
+      // If the client adds it, the account is now in the client and we should
+      // reflect it in the snap state
+      // If the client does not accept it, the following code is not reached
       await this.#emitEvent(KeyringEvent.AccountCreated, {
         account,
         accountNameSuggestion: name ?? 'Custodial Account',
         displayConfirmation: false, // This will only work when the snap is preinstalled
       });
-      this.#state.wallets[account.id] = { account, details: options.details };
-      await this.#saveState();
+      await this.#stateManager.addWallet({ account, details: options.details });
       return account;
     } catch (error) {
       throw new Error((error as Error).message);
@@ -123,92 +130,97 @@ export class CustodialKeyring implements Keyring {
   }
 
   async filterAccountChains(id: string, chains: string[]): Promise<string[]> {
-    const { address } = await this.getAccount(id);
-    const custodianApi = this.getCustodianApiForAddress(address);
+    const account = await this.getAccount(id);
+
+    if (!account) {
+      throw new Error(`Account '${id}' not found`);
+    }
+
+    const custodianApi = await this.getCustodianApiForAddress(account.address);
     const supportedChains = await custodianApi.getSupportedChains();
     return chains.filter((chain) =>
       supportedChains.includes(convertHexChainIdToCaip2Decimal(chain)),
     );
   }
 
-  async updateAccount(account: CustodialKeyringAccount): Promise<void> {
-    const wallet =
-      this.#state.wallets[account.id] ??
-      throwError(`Account '${account.id}' not found`);
-
-    const newAccount: CustodialKeyringAccount = {
-      ...wallet.account,
-      ...account,
-      // Restore read-only properties.
-      address: wallet.account.address,
-      options: { ...wallet.account.options, ...account.options },
-    };
-
-    try {
-      await this.#emitEvent(KeyringEvent.AccountUpdated, {
-        account: newAccount,
-      });
-      wallet.account = newAccount;
-      await this.#saveState();
-    } catch (error) {
-      throwError((error as Error).message);
-    }
+  async updateAccount(_account: CustodialKeyringAccount): Promise<void> {
+    throw new MethodNotFoundError() as Error;
   }
 
   async deleteAccount(id: string): Promise<void> {
     try {
-      await this.#emitEvent(KeyringEvent.AccountDeleted, { id });
-      delete this.#state.wallets[id];
-      await this.#saveState();
+      await this.#stateManager.withTransaction(async () => {
+        await this.#stateManager.removeAccounts([id]);
+        await this.#emitEvent(KeyringEvent.AccountDeleted, { id });
+      });
     } catch (error) {
+      logger.error(error);
       throwError((error as Error).message);
     }
   }
 
-  async removeAccounts(ids: string[]): Promise<void> {
-    await Promise.all(ids.map((id) => delete this.#state.wallets[id]));
-    await this.#saveState();
-  }
-
-  // Maintain compatibility with the keyring api
+  // Maintain compatibility with the keyring api, return the request in the original form that we received (i.e. the keyringRequest)
   async listRequests(): Promise<KeyringRequest[]> {
-    const requests = await this.#requestManagerFacade.listRequests();
-    return requests.map((request) => request.keyringRequest);
+    if (config.dev) {
+      const requests = await this.#requestManagerFacade.listRequests();
+      return requests.map((request) => request.keyringRequest);
+    }
+    return [];
   }
 
-  // Maintain compatibility with the keyring api
+  // Maintain compatibility with the keyring api, return the request in the original form that we received (i.e. the keyringRequest)
   async getRequest(id: string): Promise<KeyringRequest> {
-    const requests = await this.#requestManagerFacade.listRequests();
-    const request = requests.find((req) => req.keyringRequest.id === id);
-    if (!request) {
-      throw new Error(`Request '${id}' not found`);
+    assert(id, string());
+
+    if (config.dev) {
+      const requests = await this.#requestManagerFacade.listRequests();
+      const request = requests.find((req) => req.keyringRequest.id === id);
+      if (!request) {
+        throw new Error(`Request '${id}' not found`);
+      }
+      return request.keyringRequest;
     }
-    return request.keyringRequest;
+    throw new Error('Method not implemented.'); // Not in permissions, but required by the keyring api
   }
 
   async submitRequest(request: KeyringRequest): Promise<SubmitRequestResponse> {
-    return this.#asyncSubmitRequest(request);
+    // These requests may come from dapps, so in production we should use runSensitive
+
+    if (config.dev) {
+      return this.#asyncSubmitRequest(request);
+    }
+    // Allow errors to be exposed here, because
+    // the issue is likely to be with the request
+
+    assert(request, KeyringRequestStruct);
+
+    // But not here, because the issue is likely to be with the snap or the custodian api
+    return runSensitive(
+      async () => this.#asyncSubmitRequest(request),
+      'An unexpected error occurred',
+    );
   }
 
-  // Don't allow approving requests from the keyring api
   async approveRequest(_id: string): Promise<void> {
-    throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.'); // Not in permissions, but required by the keyring api
   }
 
-  // Don't allow rejecting requests from the keyring api
   async rejectRequest(_id: string): Promise<void> {
-    throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.'); // Not in permissions, but required by the keyring api
   }
 
-  getCustodianApiForAddress(address: string): ICustodianApi {
+  async getCustodianApiForAddress(address: string): Promise<ICustodianApi> {
     if (!this.#custodianApi[address]) {
-      const wallet = this.#getWalletByAddress(address);
+      const wallet = await this.#stateManager.getWalletByAddress(address);
+      if (!wallet) {
+        throw new Error(`Wallet for account ${address} does not exist`);
+      }
       const custodianApi = this.#getCustodianApi(wallet.details);
       this.#custodianApi[address] = custodianApi;
       custodianApi.on(
         TOKEN_EXPIRED_EVENT,
         (payload: IRefreshTokenChangeEvent) => {
-          this.#handleTokenChangedEvent(payload).catch(console.error);
+          this.#handleTokenChangedEvent(payload).catch(logger.error);
         },
       );
     }
@@ -230,22 +242,28 @@ export class CustodialKeyring implements Keyring {
     payload: IRefreshTokenChangeEvent,
   ): Promise<void> {
     // Find all the wallets with the old refresh token
-    const wallets = Object.values(this.#state.wallets).filter(
+    const wallets = await this.#stateManager.listWallets();
+    const walletsToUpdate = wallets.filter(
       (wallet) =>
         wallet.details.token === payload.oldRefreshToken &&
         wallet.details.custodianApiUrl === payload.apiUrl,
     );
     // Update the custodian api for each wallet
-    wallets.forEach((wallet) => {
+    walletsToUpdate.forEach((wallet) => {
       wallet.details.token = payload.newRefreshToken;
     });
 
     // Delete the custodian api from the cache for each address
-    wallets.forEach((wallet) => {
+    walletsToUpdate.forEach((wallet) => {
       delete this.#custodianApi[wallet.account.address];
     });
 
-    await this.#saveState();
+    for (const wallet of walletsToUpdate) {
+      await this.#stateManager.updateWalletDetails(
+        wallet.account.id,
+        wallet.details,
+      );
+    }
   }
 
   async #asyncSubmitRequest(
@@ -257,7 +275,13 @@ export class CustodialKeyring implements Keyring {
       request,
     );
 
-    const { address } = await this.getAccount(request.account);
+    const account = await this.getAccount(request.account);
+
+    if (!account) {
+      throw new Error(`Account '${request.account}' not found`);
+    }
+
+    const { address } = account;
 
     // Distinguish between a transaction link and a message link
 
@@ -265,34 +289,34 @@ export class CustodialKeyring implements Keyring {
 
     try {
       if (request.request.method === EthMethod.SignTransaction) {
-        deepLink = (await this.getCustodianApiForAddress(
-          address,
-        ).getTransactionLink(custodianId)) as CustodianDeepLink;
+        const custodianApi = await this.getCustodianApiForAddress(address);
+        deepLink = (await custodianApi.getTransactionLink(
+          custodianId,
+        )) as CustodianDeepLink;
       } else {
-        deepLink = (await this.getCustodianApiForAddress(
-          address,
-        ).getSignedMessageLink(custodianId)) as CustodianDeepLink;
+        // @audit - explicitly check for methods in account config; throw methodNotFound if not exists
+        const custodianApi = await this.getCustodianApiForAddress(address);
+        deepLink = (await custodianApi.getSignedMessageLink(
+          custodianId,
+        )) as CustodianDeepLink;
       }
     } catch (error) {
+      deepLink = {
+        text: 'Complete in Custodian App',
+        id: custodianId,
+        url: '',
+        action: 'view',
+      };
       console.error('Error getting deep link', error);
     }
 
     return {
       pending: true,
       redirect: {
-        message: deepLink?.text ?? 'Complete in Custodian App',
-        ...(deepLink?.url ? { url: deepLink.url } : {}),
+        message: deepLink.text,
+        url: deepLink.url,
       },
     };
-  }
-
-  #getWalletByAddress(address: string): Wallet {
-    const match = Object.values(this.#state.wallets).find(
-      (wallet) =>
-        wallet.account.address.toLowerCase() === address.toLowerCase(),
-    );
-
-    return match ?? throwError(`Account '${address}' not found`);
   }
 
   async #handleSigningRequest(
@@ -300,10 +324,12 @@ export class CustodialKeyring implements Keyring {
     params: Json,
     keyringRequest: KeyringRequest,
   ): Promise<string> {
-    switch (method) {
+    switch (
+      method // @audit input validation
+    ) {
       case EthMethod.PersonalSign: {
         const [message, from] = params as [string, string];
-        const custodianApi = this.getCustodianApiForAddress(from);
+        const custodianApi = await this.getCustodianApiForAddress(from);
 
         const details = await SignedMessageHelper.signPersonalMessage(
           from,
@@ -311,7 +337,7 @@ export class CustodialKeyring implements Keyring {
           custodianApi,
         );
 
-        await this.#requestManagerFacade.addPendingRequest({
+        await this.#requestManagerFacade.upsertRequest({
           keyringRequest,
           type: 'message',
           subType: 'personalSign',
@@ -319,6 +345,7 @@ export class CustodialKeyring implements Keyring {
           rejected: false,
           message: details,
           signature: null,
+          lastUpdated: Date.now(),
         });
         return details.id;
       }
@@ -331,14 +358,14 @@ export class CustodialKeyring implements Keyring {
 
       case EthMethod.SignTypedDataV3: {
         const [from, data] = params as [string, TypedMessage<MessageTypes>];
-        const custodianApi = this.getCustodianApiForAddress(from);
+        const custodianApi = await this.getCustodianApiForAddress(from);
         const details = await SignedMessageHelper.signTypedData(
           from,
           data,
           custodianApi,
           { version: SignTypedDataVersion.V3 },
         );
-        await this.#requestManagerFacade.addPendingRequest({
+        await this.#requestManagerFacade.upsertRequest({
           keyringRequest,
           type: 'message',
           subType: 'v3',
@@ -346,20 +373,21 @@ export class CustodialKeyring implements Keyring {
           rejected: false,
           message: details,
           signature: null,
+          lastUpdated: Date.now(),
         });
         return details.id;
       }
 
       case EthMethod.SignTypedDataV4: {
         const [from, data] = params as [string, TypedMessage<MessageTypes>];
-        const custodianApi = this.getCustodianApiForAddress(from);
+        const custodianApi = await this.getCustodianApiForAddress(from);
         const details = await SignedMessageHelper.signTypedData(
           from,
           data,
           custodianApi,
           { version: SignTypedDataVersion.V3 },
         );
-        await this.#requestManagerFacade.addPendingRequest({
+        await this.#requestManagerFacade.upsertRequest({
           keyringRequest,
           type: 'message',
           subType: 'v4',
@@ -367,6 +395,7 @@ export class CustodialKeyring implements Keyring {
           rejected: false,
           message: details,
           signature: null,
+          lastUpdated: Date.now(),
         });
         return details.id;
       }
@@ -381,10 +410,15 @@ export class CustodialKeyring implements Keyring {
     tx: EthSignTransactionRequest,
     keyringRequest: KeyringRequest,
   ): Promise<string> {
+    // validation happens at handleSigningRequest
     try {
-      const custodianApi = this.getCustodianApiForAddress(tx.from);
+      const custodianApi = await this.getCustodianApiForAddress(tx.from);
       const payload = TransactionHelper.createTransactionPayload(tx);
-      const wallet = this.#getWalletByAddress(tx.from);
+      const wallet = await this.#stateManager.getWalletByAddress(tx.from);
+
+      if (!wallet) {
+        throw new Error(`Account '${tx.from}' not found`);
+      }
 
       const custodianPublishesTransaction =
         wallet.account.options.custodian.deferPublication;
@@ -394,13 +428,13 @@ export class CustodialKeyring implements Keyring {
         custodianPublishesTransaction,
       });
 
-      await this.#requestManagerFacade.addPendingRequest({
+      await this.#requestManagerFacade.upsertRequest({
         keyringRequest,
         type: 'transaction',
         fulfilled: false,
         rejected: false,
+        lastUpdated: Date.now(),
         transaction: response,
-        signature: null,
       });
 
       return response.custodianTransactionId;
@@ -410,10 +444,6 @@ export class CustodialKeyring implements Keyring {
         `Failed to sign transaction: ${(error as Error).message}`,
       );
     }
-  }
-
-  async #saveState(): Promise<void> {
-    await saveState(this.#state);
   }
 
   async #emitEvent(

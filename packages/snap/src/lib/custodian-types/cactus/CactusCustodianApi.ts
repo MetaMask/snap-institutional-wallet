@@ -6,6 +6,10 @@ import type { ICactusEthereumAccountCustodianDetails } from './interfaces/ICactu
 import { mapTransactionStatus } from '../../../util/map-status';
 import { SimpleCache } from '../../simple-cache';
 import type {
+  SignedMessageDetails,
+  TransactionDetails,
+} from '../../structs/CustodialKeyringStructs';
+import type {
   ICustodianApi,
   CustodianDeepLink,
   IEIP1559TxParams,
@@ -13,8 +17,6 @@ import type {
   ILegacyTXParams,
   IMetamaskContractMetadata,
   IRefreshTokenAuthDetails,
-  ISignedMessageDetails,
-  ITransactionDetails,
 } from '../../types';
 import type { CreateTransactionMetadata } from '../../types/CreateTransactionMetadata';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
@@ -85,7 +87,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
   async createTransaction(
     txParams: IEIP1559TxParams | ILegacyTXParams,
     txMeta: CreateTransactionMetadata,
-  ): Promise<ITransactionDetails> {
+  ): Promise<TransactionDetails> {
     const result = await this.#client.createTransaction(
       { chainId: Number(txMeta.chainId), note: txMeta.note ?? '' },
       txParams,
@@ -108,7 +110,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
   async getTransaction(
     _from: string,
     custodianTransactionId: string,
-  ): Promise<ITransactionDetails | null> {
+  ): Promise<TransactionDetails | null> {
     const result = await this.#client.getTransaction(custodianTransactionId);
 
     // Cactus API sometimes returns 200 but gives us nothing
@@ -133,7 +135,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
   async getSignedMessage(
     address: string,
     custodianSignedMessageId: string,
-  ): Promise<ISignedMessageDetails | null> {
+  ): Promise<SignedMessageDetails | null> {
     const result = await this.#client.getSignedMessage(
       custodianSignedMessageId,
     );
@@ -160,7 +162,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
     address: string,
     message: TypedMessage<MessageTypes>,
     version: string,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const result = await this.#client.signTypedData_v4(
       address,
       message,
@@ -179,7 +181,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
   async signPersonalMessage(
     address: string,
     message: string,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const result = await this.#client.signPersonalMessage(address, message);
 
     return {

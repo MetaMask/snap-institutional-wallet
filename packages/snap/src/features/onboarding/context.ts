@@ -1,4 +1,4 @@
-import type { OnBoardingRpcRequest } from '../../lib/types/OnBoardingRpcRequest';
+import type { OnBoardingRpcRequest } from '../../lib/structs/CustodialKeyringStructs';
 
 export type OnboardingAccount = { address: string; name: string };
 

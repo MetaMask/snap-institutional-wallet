@@ -1,9 +1,4 @@
-enum CustodianApiVersions {
-  BitGo = -2,
-  Cactus = -1,
-  JSONRPC = 1, // ECA-1
-  ECA3 = 3, // ECA-3
-}
+import { CustodianType } from '../types/CustodianType';
 
 export type CustodianMetadata = {
   apiBaseUrl: string;
@@ -12,7 +7,7 @@ export type CustodianMetadata = {
   legacyName?: string;
   displayName: string | null;
   enabled: boolean | null;
-  apiVersion: CustodianApiVersions;
+  apiVersion: CustodianType;
   custodianPublishesTransaction: boolean;
   iconUrl: string | null;
   isManualTokenInputSupported: boolean;
@@ -27,13 +22,13 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'BitGo Test',
     enabled: false,
     apiBaseUrl: 'https://app.bitgo-test.com/defi/v2',
-    apiVersion: CustodianApiVersions.BitGo,
+    apiVersion: CustodianType.BitGo,
     custodianPublishesTransaction: false,
     iconUrl:
       'https://dashboard.metamask-institutional.io/custodian-icons/bitgo-icon.svg',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://app.bitgo-test.com',
-    allowedOnboardingDomains: ['app.bitgo-test.com'],
+    allowedOnboardingDomains: ['app.bitgo-test.com'], // @audit - remove dev/test domains
   },
   {
     refreshTokenUrl: null,
@@ -42,7 +37,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'BitGo',
     enabled: true,
     apiBaseUrl: 'https://app.bitgo.com/defi/v2',
-    apiVersion: CustodianApiVersions.BitGo,
+    apiVersion: CustodianType.BitGo,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://dashboard.metamask-institutional.io/custodian-icons/bitgo-icon.svg',
@@ -55,7 +50,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     name: 'cactus',
     displayName: 'Cactus Custody',
     enabled: true,
-    apiVersion: CustodianApiVersions.Cactus,
+    apiVersion: CustodianType.Cactus,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://dashboard.metamask-institutional.io/custodian-icons/cactus-icon.svg',
@@ -71,7 +66,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'GK8 ECA-1',
     enabled: true,
     apiBaseUrl: 'http://localhost:8090',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl: 'https://www.gk8.io/wp-content/uploads/2021/04/6-layers-4.svg',
     isManualTokenInputSupported: true,
@@ -84,7 +79,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'GK8 ECA-3',
     enabled: true,
     apiBaseUrl: 'http://localhost:8090',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: true,
     iconUrl: 'https://www.gk8.io/wp-content/uploads/2021/04/6-layers-4.svg',
     isManualTokenInputSupported: true,
@@ -98,7 +93,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Safe',
     enabled: false,
     apiBaseUrl: 'https://safe-mmi.staging.gnosisdev.com/api',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://raw.githubusercontent.com/safe-global/safe-react/dev/public/resources/logo.svg',
@@ -112,7 +107,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Safe',
     enabled: true,
     apiBaseUrl: 'https://safe-mmi.safe.global/api',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://raw.githubusercontent.com/safe-global/safe-react/dev/public/resources/logo.svg',
@@ -126,7 +121,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Gnosis Safe Staging',
     enabled: false,
     apiBaseUrl: 'https://safe-mmi.staging.5afe.dev/api',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://raw.githubusercontent.com/safe-global/safe-react/dev/public/resources/logo.svg',
@@ -141,7 +136,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Saturn Custody',
     enabled: false,
     apiBaseUrl: 'https://saturn-custody.metamask-institutional.io/eth',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl: 'https://saturn-custody-ui.metamask-institutional.io/saturn.svg',
     isManualTokenInputSupported: false,
@@ -154,7 +149,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'MPCVault',
     enabled: true,
     apiBaseUrl: 'https://api.mpcvault.com/mmi',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://metamask-institutional.io/custodian-icons/mpcvault-icon.svg',
@@ -169,7 +164,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Neptune Custody',
     enabled: false,
     apiBaseUrl: 'https://neptune-custody.metamask-institutional.io/eth',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     iconUrl:
       'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
@@ -183,12 +178,12 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Zodia Preprod',
     enabled: false,
     apiBaseUrl: 'https://api-preprod.uat.zodia.io',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['ui-preprod-v2.uat.zodia.io'],
+    allowedOnboardingDomains: ['zodia.io'],
   },
   {
     refreshTokenUrl: 'https://mmi.fireblocks.io/v1/auth/access',
@@ -196,7 +191,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Fireblocks',
     enabled: true,
     apiBaseUrl: 'https://mmi.fireblocks.io',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://metamask-institutional.io/custodian-icons/fireblocks-icon.svg',
@@ -210,12 +205,12 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Zodia',
     enabled: true,
     apiBaseUrl: 'https://zapi.custody.zodia.io',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['zodia.io', 'v2.custody.zodia.io'],
+    allowedOnboardingDomains: ['zodia.io'],
   },
   {
     refreshTokenUrl: 'https://api.sit.zodia.io/oauth/token',
@@ -223,12 +218,12 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Zodia SIT',
     enabled: false,
     apiBaseUrl: 'https://api.sit.zodia.io',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['sit.zodia.io', 'ui-v2.sit.zodia.io'],
+    allowedOnboardingDomains: ['sit.zodia.io'], // @audit dev host
   },
   {
     refreshTokenUrl:
@@ -237,8 +232,8 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Saturn Custody',
     enabled: false,
     apiBaseUrl: 'https://saturn-custody.dev.metamask-institutional.io/eth',
-    apiVersion: CustodianApiVersions.JSONRPC,
-    custodianPublishesTransaction: true,
+    apiVersion: CustodianType.ECA1,
+    custodianPublishesTransaction: false,
     iconUrl:
       'https://saturn-custody-ui.dev.metamask-institutional.io/saturn.svg',
     isManualTokenInputSupported: false,
@@ -253,12 +248,12 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Zodia QA',
     enabled: false,
     apiBaseUrl: 'https://api-qa.qa.zodia.io',
-    apiVersion: CustodianApiVersions.JSONRPC,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['qa.zodia.io', 'ui-v2.qa.zodia.io'],
+    allowedOnboardingDomains: ['qa.zodia.io'],
   },
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
@@ -266,7 +261,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'GK8',
     enabled: false,
     apiBaseUrl: 'http://localhost:8090',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: true,
     iconUrl: 'https://www.gk8.io/wp-content/uploads/2021/04/6-layers-4.svg',
     isManualTokenInputSupported: true,
@@ -279,7 +274,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'MPCVault',
     enabled: false,
     apiBaseUrl: 'https://api.dev.mpcvault.com/mmi',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     iconUrl:
       'https://dev.metamask-institutional.io/custodian-icons/mpcvault-icon.svg',
@@ -293,7 +288,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Cubist Gamma',
     enabled: false,
     apiBaseUrl: 'https://gamma.signer.cubist.dev/v0/mmi',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     iconUrl:
       'https://assets-global.website-files.com/638a2693daaf8527290065a3/651802cf8d04ec5f1a09ce86_Logo.svg',
@@ -306,7 +301,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Cubist Test',
     enabled: false,
     apiBaseUrl: 'https://dg5z0qnzb9s65.cloudfront.net/v0/mmi',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     iconUrl:
       'https://assets-global.website-files.com/638a2693daaf8527290065a3/651802cf8d04ec5f1a09ce86_Logo.svg',
@@ -320,7 +315,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Neptune Custody Dev',
     enabled: true,
     apiBaseUrl: 'https://neptune-custody.dev.metamask-institutional.io/eth',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     iconUrl:
       'https://dev.metamask-institutional.io/custodian-icons/neptune-icon.svg',
@@ -333,7 +328,7 @@ export const custodianMetadata: CustodianMetadata[] = [
   {
     refreshTokenUrl: 'http://localhost:3330/oauth/token',
     apiBaseUrl: 'http://localhost:3330',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     name: 'local-dev',
     displayName: 'Local Dev',
@@ -346,7 +341,7 @@ export const custodianMetadata: CustodianMetadata[] = [
   {
     refreshTokenUrl: 'http://localhost:3330/oauth/token',
     apiBaseUrl: 'http://localhost:3330',
-    apiVersion: CustodianApiVersions.ECA3,
+    apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     name: 'local-dev',
     displayName: 'Local Dev',

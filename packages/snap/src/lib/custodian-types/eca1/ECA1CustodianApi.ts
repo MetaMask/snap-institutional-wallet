@@ -9,6 +9,10 @@ import { hexlify } from '../../../util/hexlify';
 import { mapTransactionStatus } from '../../../util/map-status';
 import { SimpleCache } from '../../simple-cache/SimpleCache';
 import type {
+  SignedMessageDetails,
+  TransactionDetails,
+} from '../../structs/CustodialKeyringStructs';
+import type {
   CustodianDeepLink,
   IRefreshTokenChangeEvent,
   SignedMessageMetadata,
@@ -19,8 +23,6 @@ import type { ICustodianApi } from '../../types/ICustodianApi';
 import type { IEthereumAccount } from '../../types/IEthereumAccount';
 import type { IEthereumAccountCustodianDetails } from '../../types/IEthereumAccountCustodianDetails';
 import type { IRefreshTokenAuthDetails } from '../../types/IRefreshTokenAuthDetails';
-import type { ISignedMessageDetails } from '../../types/ISignedMessageDetails';
-import type { ITransactionDetails } from '../../types/ITransactionDetails';
 import type { ILegacyTXParams, IEIP1559TxParams } from '../../types/ITXParams';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
 import { REFRESH_TOKEN_CHANGE_EVENT, TOKEN_EXPIRED_EVENT } from '../constants';
@@ -96,7 +98,7 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
   async createTransaction(
     txParams: IEIP1559TxParams | ILegacyTXParams,
     txMeta: CreateTransactionMetadata,
-  ): Promise<ITransactionDetails> {
+  ): Promise<TransactionDetails> {
     const accounts = await this.getEthereumAccountsByAddress(txParams.from);
 
     if (!accounts.length || !accounts[0]?.address) {
@@ -152,7 +154,7 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
   async getTransaction(
     _from: string,
     custodianTransactionId: string,
-  ): Promise<ITransactionDetails | null> {
+  ): Promise<TransactionDetails | null> {
     const { result } = await this.#client.getTransaction([
       custodianTransactionId,
     ]);
@@ -171,7 +173,6 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
       maxPriorityFeePerGas: result.maxPriorityFeePerGas ?? null,
       nonce: result.nonce,
       transactionHash: result.hash,
-      reason: result.status.reason,
       to: result.to,
       custodianPublishesTransaction: true,
     };
@@ -181,7 +182,7 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
   async getSignedMessage(
     _address: string,
     custodianSignedMessageId: string,
-  ): Promise<ISignedMessageDetails | null> {
+  ): Promise<SignedMessageDetails | null> {
     const { result } = await this.#client.getSignedMessage([
       custodianSignedMessageId,
     ]);
@@ -251,7 +252,7 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
     message: TypedMessage<MessageTypes>,
     version: string,
     _signedTypedMessageMetadata: SignedTypedMessageMetadata,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
     if (!accounts.length) {
@@ -278,7 +279,7 @@ export class ECA1CustodianApi extends EventEmitter implements ICustodianApi {
     address: string,
     message: string,
     _signedMessageMetadata: SignedMessageMetadata,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const accounts = await this.getEthereumAccountsByAddress(address);
 
     if (!accounts.length) {

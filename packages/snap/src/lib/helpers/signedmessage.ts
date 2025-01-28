@@ -1,8 +1,8 @@
 import type { MessageTypes, TypedMessage } from '@metamask/eth-sig-util';
 import { SignTypedDataVersion } from '@metamask/eth-sig-util';
 
+import type { SignedMessageDetails } from '../structs/CustodialKeyringStructs';
 import type { ICustodianApi } from '../types/ICustodianApi';
-import type { ISignedMessageDetails } from '../types/ISignedMessageDetails';
 
 export class SignedMessageHelper {
   static async signTypedData(
@@ -12,7 +12,7 @@ export class SignedMessageHelper {
     opts: { version: SignTypedDataVersion } = {
       version: SignTypedDataVersion.V4,
     },
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     if (!data) {
       throw new Error('Typed data is required');
     }
@@ -31,7 +31,7 @@ export class SignedMessageHelper {
     from: string,
     request: string,
     custodianApi: ICustodianApi,
-  ): Promise<ISignedMessageDetails> {
+  ): Promise<SignedMessageDetails> {
     const response = await custodianApi.signPersonalMessage(from, request, {
       chainId: '0x420',
     });

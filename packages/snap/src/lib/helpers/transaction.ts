@@ -2,11 +2,12 @@ import type { TypedTransaction } from '@ethereumjs/tx';
 import { TransactionFactory } from '@ethereumjs/tx';
 
 import logger from '../../logger';
-import { createCommon, formatTransactionData } from '../../util';
+import { createCommon } from '../../util/create-common';
+import { formatTransactionData } from '../../util/format-transaction-data';
 import { hexlify } from '../../util/hexlify';
 import { TRANSACTION_TYPES } from '../constants';
+import type { TransactionDetails } from '../structs/CustodialKeyringStructs';
 import type { EthSignTransactionRequest } from '../types/EthSignTransactionRequest';
-import type { ITransactionDetails } from '../types/ITransactionDetails';
 import type { IEIP1559TxParams, ILegacyTXParams } from '../types/ITXParams';
 
 export class TransactionHelper {
@@ -37,7 +38,7 @@ export class TransactionHelper {
   }
 
   static async getTransactionSignature(
-    transaction: ITransactionDetails,
+    transaction: TransactionDetails,
     chainId: string,
   ): Promise<{ v: string; r: string; s: string }> {
     if (transaction.signedRawTransaction) {
@@ -73,7 +74,7 @@ export class TransactionHelper {
   }
 
   static getTypedTransaction(
-    transactionDetails: ITransactionDetails,
+    transactionDetails: TransactionDetails,
     chainId: string,
   ): TypedTransaction {
     if (!transactionDetails.signedRawTransaction) {
@@ -105,7 +106,7 @@ export class TransactionHelper {
 
   static validateTransaction(
     request: EthSignTransactionRequest,
-    transactionDetails: ITransactionDetails,
+    transactionDetails: TransactionDetails,
   ): {
     isValid: boolean;
     error?: string;
