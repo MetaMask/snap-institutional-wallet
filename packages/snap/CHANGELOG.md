@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0]
+### Changed
+- chore: Adjust permissions and refactor checks to support bitgo ([#32](https://github.com/MetaMask/snap-institutional-wallet/pull/32))
+- chore: Audit remediation ([#31](https://github.com/MetaMask/snap-institutional-wallet/pull/31))
+
 ## [0.2.10]
 ### Removed
 - chore: remove saturn and neptune dev ([#29](https://github.com/MetaMask/snap-institutional-wallet/pull/29))
@@ -18,7 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.10...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.10...v0.3.0
 [0.2.10]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/MetaMask/snap-institutional-wallet/releases/tag/v0.2.8
