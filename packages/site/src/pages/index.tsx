@@ -177,6 +177,24 @@ const Index = () => {
     },
 
     {
+      name: 'Inject local neptune token',
+      description: 'Onboard to the local neptune test custodian',
+      inputs: [],
+      action: {
+        callback: async () =>
+          await injectToken(
+            'http://localhost:3009/eth',
+            'http://localhost:3009/oauth/token',
+            'ECA3',
+            'Local Neptune',
+            'neptune-custody-local',
+          ),
+        label: 'Inject Token',
+      },
+      successMessage: 'Import successful',
+    },
+
+    {
       name: 'Inject saturn token',
       description: 'Onboard to the saturn test custodian',
       inputs: [],

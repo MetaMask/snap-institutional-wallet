@@ -42,6 +42,7 @@ describe('RequestManager', () => {
         success: false,
         displayText: '',
         submitted: false,
+        signed: false,
       },
       custodianTransactionId: 'mock-id',
       custodianPublishesTransaction: false,

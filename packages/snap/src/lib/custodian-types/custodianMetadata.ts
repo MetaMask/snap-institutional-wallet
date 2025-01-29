@@ -309,21 +309,18 @@ export const custodianMetadata: CustodianMetadata[] = [
     allowedOnboardingDomains: [], // Cubist does not support onboarding via a web page
   },
   {
-    refreshTokenUrl:
-      'https://neptune-custody.dev.metamask-institutional.io/oauth/token',
-    name: 'neptune-custody-dev',
-    displayName: 'Neptune Custody Dev',
+    refreshTokenUrl: 'http://localhost:3009/oauth/token',
+    name: 'neptune-custody-local',
+    displayName: 'Neptune Custody Local',
     enabled: true,
-    apiBaseUrl: 'https://neptune-custody.dev.metamask-institutional.io/eth',
+    apiBaseUrl: 'http://localhost:3009/eth',
     apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     iconUrl:
       'https://dev.metamask-institutional.io/custodian-icons/neptune-icon.svg',
     isManualTokenInputSupported: false,
-    onboardingUrl: 'https://neptune-custody-ui.dev.metamask-institutional.io',
-    allowedOnboardingDomains: [
-      'neptune-custody-ui.dev.metamask-institutional.io',
-    ],
+    onboardingUrl: 'http://localhost:3005',
+    allowedOnboardingDomains: ['localhost:3005'],
   },
   {
     refreshTokenUrl: 'http://localhost:3330/oauth/token',
