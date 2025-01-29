@@ -9,11 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0]
 
-### Uncategorized
-
-- chore: miscellaneous bitgo fixes ([#32](https://github.com/MetaMask/snap-institutional-wallet/pull/32))
-- chore: audit remediation step 1 ([#31](https://github.com/MetaMask/snap-institutional-wallet/pull/31))
-
 ## [0.2.10]
 
 ## [0.2.9]
