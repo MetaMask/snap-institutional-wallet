@@ -16,8 +16,9 @@ export const TransactionStatus = object({
   finished: boolean(),
   success: boolean(),
   displayText: string(),
-  reason: optional(string()),
+  reason: optional(nullable(string())),
   submitted: boolean(),
+  signed: boolean(),
 });
 
 export type TransactionStatus = Infer<typeof TransactionStatus>;
@@ -66,7 +67,7 @@ export const SignedMessageStatus = object({
   signed: boolean(),
   success: boolean(),
   displayText: string(),
-  reason: optional(string()),
+  reason: optional(nullable(string())),
 });
 
 export type SignedMessageStatus = Infer<typeof SignedMessageStatus>;

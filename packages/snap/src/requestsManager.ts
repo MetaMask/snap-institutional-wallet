@@ -3,6 +3,10 @@ import type { Json } from '@metamask/snaps-sdk';
 import { assert } from '@metamask/superstruct';
 
 import { renderErrorMessage } from './features/error-message/render';
+import {
+  MAX_TRANSACTION_AGE,
+  MAX_SIGNED_MESSAGE_AGE,
+} from './lib/custodian-types/constants';
 import { TransactionHelper } from './lib/helpers/transaction';
 import {
   type SignedMessageRequest,
@@ -132,6 +136,18 @@ export class RequestManager {
 
     const { custodianTransactionId } = request.transaction;
 
+    // Check if lastUpdates is older than MAX_TRANSACTION_AGE
+    if (request.lastUpdated < Date.now() - MAX_TRANSACTION_AGE) {
+      logger.info(
+        `Transaction ${custodianTransactionId} last updated more than ${MAX_TRANSACTION_AGE}ms (last updated ${
+          Date.now() - request.lastUpdated
+        }ms ago), removing request`,
+      );
+      await this.emitRejectedEvent(requestId);
+      await this.#stateManager.removeRequest(requestId);
+      return;
+    }
+
     const transactionResponse = await custodianApi.getTransaction(
       address,
       custodianTransactionId,
@@ -202,6 +218,7 @@ export class RequestManager {
               transactionResponse.transactionStatus.displayText ?? '',
             submitted: transactionResponse.transactionStatus.submitted ?? false,
             reason: transactionResponse.transactionStatus.reason ?? '',
+            signed: transactionResponse.transactionStatus.signed ?? false,
           },
           ...(transactionResponse.gasPrice && {
             gasPrice: transactionResponse.gasPrice,
@@ -249,6 +266,20 @@ export class RequestManager {
     const custodianApi = await this.#keyringFacade.getCustodianApiForAddress(
       address,
     );
+
+    // Check if lastUpdates is older than MAX_TRANSACTION_AGE
+    if (request.lastUpdated < Date.now() - MAX_SIGNED_MESSAGE_AGE) {
+      logger.info(
+        `Signed Message ${
+          request.message.id
+        } last updated more than ${MAX_SIGNED_MESSAGE_AGE}ms (last updated ${
+          Date.now() - request.lastUpdated
+        }ms ago), removing request`,
+      );
+      await this.emitRejectedEvent(requestId);
+      await this.#stateManager.removeRequest(requestId);
+      return;
+    }
 
     const signedMessageResponse = await custodianApi.getSignedMessage(
       address,

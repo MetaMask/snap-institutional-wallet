@@ -18,6 +18,7 @@ import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 
 import config from './config';
+import { renderInfoMessage } from './features/info-message/rendex';
 import { TOKEN_EXPIRED_EVENT } from './lib/custodian-types/constants';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
 import { SignedMessageHelper } from './lib/helpers/signedmessage';
@@ -93,13 +94,23 @@ export class CustodialKeyring implements Keyring {
       throw new Error(`Account address already in use: ${address}`);
     }
 
+    // Some custodians (mostly ECA-1) still publish transactions
+    // If the custodian publishes transactions, we defer publication
+    // i.e. the client does not publish the transaction, it waits for the custodian to do it
+
+    let deferPublication = false; // ECA-3 default
+
+    if (custodian?.custodianPublishesTransaction) {
+      deferPublication = true;
+    }
+
     try {
       const account: CustodialKeyringAccount = {
         id: uuid(),
         options: {
           custodian: {
             displayName: options.details.custodianDisplayName,
-            deferPublication: custodian?.custodianPublishesTransaction ?? true,
+            deferPublication,
           },
           accountName: name,
         },
@@ -310,12 +321,9 @@ export class CustodialKeyring implements Keyring {
       console.error('Error getting deep link', error);
     }
 
+    await renderInfoMessage(`${deepLink.text} Transaction ID: ${deepLink.id}`);
     return {
       pending: true,
-      redirect: {
-        message: deepLink.text,
-        url: deepLink.url,
-      },
     };
   }
 
