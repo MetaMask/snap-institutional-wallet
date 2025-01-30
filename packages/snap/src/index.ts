@@ -34,7 +34,6 @@ import type { SnapContext } from './lib/types/Context';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import logger from './logger';
 import { InternalMethod, originPermissions } from './permissions';
-// @audit - this file needs unittests
 
 /**
  * Verify if the caller can call the requested method.
