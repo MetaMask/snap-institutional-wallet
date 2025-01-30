@@ -6,7 +6,7 @@ export const mockECA3SignPayload: ECA3SignedMessagePayload = [
     message: '0x48656c6c6f20776f726c64',
   },
   {
-    chainId: '0x1',
+    chainId: '0x123',
     originUrl: 'metamask',
     note: '',
   },

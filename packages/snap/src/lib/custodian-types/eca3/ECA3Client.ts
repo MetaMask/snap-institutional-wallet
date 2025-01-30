@@ -249,7 +249,7 @@ export class ECA3Client extends EventEmitter {
 
   async getTransaction(
     getTransactionPayload: ECA3GetTransactionByIdPayload,
-  ): Promise<JsonRpcResult<ECA3GetTransactionByIdResponse>> {
+  ): Promise<JsonRpcResult<ECA3GetTransactionByIdResponse | null>> {
     const accessToken = await this.getAccessToken();
 
     return this.#call(

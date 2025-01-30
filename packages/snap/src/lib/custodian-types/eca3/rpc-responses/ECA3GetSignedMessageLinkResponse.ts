@@ -1,5 +1,5 @@
 export type ECA3GetSignedMessageLinkResponse = {
-  transactionId: string;
+  signedMessageId: string;
   url: string;
   text: string;
   action: string;
