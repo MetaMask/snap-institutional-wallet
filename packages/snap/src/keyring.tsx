@@ -52,7 +52,7 @@ type RequestManagerFacade = {
 };
 
 export class CustodialKeyring implements Keyring {
-  #custodianApi: Record<string, ICustodianApi>; // maps address to memoized custodian api
+  #custodianApi: Map<string, ICustodianApi>;
 
   #requestManagerFacade: RequestManagerFacade;
 
@@ -63,7 +63,7 @@ export class CustodialKeyring implements Keyring {
     requestManagerFacade: RequestManagerFacade,
   ) {
     this.#stateManager = stateManager;
-    this.#custodianApi = {};
+    this.#custodianApi = new Map<string, ICustodianApi>();
     this.#requestManagerFacade = requestManagerFacade;
   }
 
@@ -221,13 +221,13 @@ export class CustodialKeyring implements Keyring {
   }
 
   async getCustodianApiForAddress(address: string): Promise<ICustodianApi> {
-    if (!this.#custodianApi[address]) {
+    if (!this.#custodianApi.has(address)) {
       const wallet = await this.#stateManager.getWalletByAddress(address);
       if (!wallet) {
         throw new Error(`Wallet for account ${address} does not exist`);
       }
       const custodianApi = this.#getCustodianApi(wallet.details);
-      this.#custodianApi[address] = custodianApi;
+      this.#custodianApi.set(address, custodianApi);
       custodianApi.on(
         TOKEN_EXPIRED_EVENT,
         (payload: IRefreshTokenChangeEvent) => {
@@ -235,7 +235,7 @@ export class CustodialKeyring implements Keyring {
         },
       );
     }
-    return this.#custodianApi[address] as ICustodianApi;
+    return this.#custodianApi.get(address) as ICustodianApi;
   }
 
   #getCustodianApi(details: OnBoardingRpcRequest): ICustodianApi {
@@ -259,20 +259,21 @@ export class CustodialKeyring implements Keyring {
         wallet.details.token === payload.oldRefreshToken &&
         wallet.details.custodianApiUrl === payload.apiUrl,
     );
-    // Update the custodian api for each wallet
-    walletsToUpdate.forEach((wallet) => {
-      wallet.details.token = payload.newRefreshToken;
-    });
-
-    // Delete the custodian api from the cache for each address
-    walletsToUpdate.forEach((wallet) => {
-      delete this.#custodianApi[wallet.account.address];
-    });
 
     for (const wallet of walletsToUpdate) {
+      // Create new details object with updated token
+      const updatedDetails = {
+        ...wallet.details,
+        token: payload.newRefreshToken,
+      };
+
+      // Clear cache
+      this.#custodianApi.delete(wallet.account.address);
+
+      // Update state with new details
       await this.#stateManager.updateWalletDetails(
         wallet.account.id,
-        wallet.details,
+        updatedDetails,
       );
     }
   }
