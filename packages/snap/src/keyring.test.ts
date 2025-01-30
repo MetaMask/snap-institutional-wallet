@@ -9,14 +9,14 @@ import type { ICustodianApi } from './lib/types/ICustodianApi';
 jest.mock('./lib/custodian-types/custodianMetadata', () => ({
   custodianMetadata: {
     BitGo: {
-      enabled: false,
+      production: false,
       apiBaseUrl: 'https://mock-url.com',
       apiVersion: 'BitGo',
       custodianPublishesTransaction: true,
       iconUrl: 'https://mock-url.com/icon.svg',
     },
     ECA3: {
-      enabled: true,
+      production: true,
       apiBaseUrl: 'https://mock-url.com',
       apiVersion: 'ECA3',
       custodianPublishesTransaction: false,

@@ -2,6 +2,7 @@ import { emitSnapKeyringEvent, KeyringEvent } from '@metamask/keyring-api';
 import type { Json } from '@metamask/snaps-sdk';
 import { assert } from '@metamask/superstruct';
 
+import config from './config';
 import { renderErrorMessage } from './features/error-message/render';
 import {
   MAX_TRANSACTION_AGE,
@@ -94,7 +95,9 @@ export class RequestManager {
             logger.info(
               `Error polling signed message request ${request.keyringRequest.id}`,
             );
-            logger.error(error); // @audit infoleak?
+            if (config.dev) {
+              logger.error(error);
+            }
           }
           break;
         case 'transaction':
@@ -107,13 +110,21 @@ export class RequestManager {
             logger.info(
               `Error polling transaction request ${request.keyringRequest.id}`,
             );
-            logger.error(error); // @audit - infoleak
+            if (config.dev) {
+              logger.error(error);
+            }
           }
           break;
         default:
-          // logger.debug(`Unknown request type: ${request.type}`);
+          logger.debug(
+            `Unknown request type: ${String((request as any).type)}`,
+          );
+          // Delete request
+          await this.#stateManager.removeRequest(
+            (request as any).keyringRequest.id,
+          );
           break;
-      } // @audit what happens to other txtypes? are they kept forever? should they be cleaned up and error reported?
+      }
     }
   }
 
