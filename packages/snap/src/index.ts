@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-throw-literal */
 import type { JsonRpcRequest } from '@metamask/keyring-api';
-import {
-  KeyringRequestStruct,
-  MethodNotSupportedError,
-  handleKeyringRequest,
-} from '@metamask/keyring-api';
+import { handleKeyringRequest } from '@metamask/keyring-api';
 import {
   type UserInputEvent,
   type OnCronjobHandler,
