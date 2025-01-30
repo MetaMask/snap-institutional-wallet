@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Institutional accounts in MetaMask.",
   "proposedName": "Institutional Wallet",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "Sb35PVsyPPa6otnikhih02990Pt6EBRcBZARXL5mR/Q=",
+    "shasum": "2kLOK4/mWAaSYQkQZ5ABdIUtlrTQXgnrzZWFudNjN9s=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
