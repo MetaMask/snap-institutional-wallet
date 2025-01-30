@@ -618,7 +618,7 @@ const Index = () => {
             button: (
               <Select
                 value={snapId}
-                onChange={(e) => setSnapId(e.target.value)}
+                onChange={(event: any) => setSnapId(event.target.value)}
                 fullWidth
               >
                 <MenuItem value={defaultSnapOrigin}>Local Development</MenuItem>
