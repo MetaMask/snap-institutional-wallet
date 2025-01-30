@@ -1,7 +1,7 @@
 import type { JsonRpcResult } from '../../../types/JsonRpcResult';
 import type { ECA3GetTransactionByIdResponse } from '../rpc-responses/ECA3GetTransactionByIdResponse';
 
-export const mockJsonRpcGetTransactionByIdResponse: JsonRpcResult<ECA3GetTransactionByIdResponse> =
+export const mockECA3GetTransactionByIdResponse: JsonRpcResult<ECA3GetTransactionByIdResponse> =
   {
     id: 1,
     jsonrpc: '2.0',
