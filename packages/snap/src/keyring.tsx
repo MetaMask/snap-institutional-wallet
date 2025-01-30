@@ -259,20 +259,21 @@ export class CustodialKeyring implements Keyring {
         wallet.details.token === payload.oldRefreshToken &&
         wallet.details.custodianApiUrl === payload.apiUrl,
     );
-    // Update the custodian api for each wallet
-    walletsToUpdate.forEach((wallet) => {
-      wallet.details.token = payload.newRefreshToken;
-    });
-
-    // Delete the custodian api from the cache for each address
-    walletsToUpdate.forEach((wallet) => {
-      delete this.#custodianApi[wallet.account.address];
-    });
 
     for (const wallet of walletsToUpdate) {
+      // Create new details object with updated token
+      const updatedDetails = {
+        ...wallet.details,
+        token: payload.newRefreshToken,
+      };
+
+      // Clear cache
+      delete this.#custodianApi[wallet.account.address];
+
+      // Update state with new details
       await this.#stateManager.updateWalletDetails(
         wallet.account.id,
-        wallet.details,
+        updatedDetails,
       );
     }
   }
