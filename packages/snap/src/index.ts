@@ -2,6 +2,7 @@
 import type { JsonRpcRequest } from '@metamask/keyring-api';
 import {
   KeyringRequestStruct,
+  MethodNotSupportedError,
   handleKeyringRequest,
 } from '@metamask/keyring-api';
 import {
@@ -36,6 +37,7 @@ import type { SnapContext } from './lib/types/Context';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import logger from './logger';
 import { InternalMethod, originPermissions } from './permissions';
+// @audit - this file needs unittests
 
 /**
  * Verify if the caller can call the requested method.
@@ -178,7 +180,7 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
     JSON.stringify(request, undefined, 2),
   );
 
-  assert(request, KeyringRequestStruct);
+  // assert(request.params, KeyringRequestStruct);
 
   // Check if origin is allowed to call method.
   if (!hasPermission(origin, request.method)) {
