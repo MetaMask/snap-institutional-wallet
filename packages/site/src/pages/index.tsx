@@ -50,11 +50,9 @@ const Index = () => {
     'signed',
   );
 
-  const [snapId, setSnapId] = useState<string>(defaultSnapOrigin);
-
   // const [accountPayload, setAccountPayload] =
   //   useState<Pick<KeyringAccount, 'name' | 'options'>>();
-  const client = new KeyringSnapRpcClient(snapId, window.ethereum);
+  const client = new KeyringSnapRpcClient(state.snapId, window.ethereum);
 
   useEffect(() => {
     /**
@@ -95,7 +93,7 @@ const Index = () => {
     const params = {
       method: 'wallet_invokeSnap',
       params: {
-        snapId,
+        snapId: state.snapId,
         request: {
           method: 'authentication.onboard',
           params: {
@@ -131,8 +129,8 @@ const Index = () => {
 
   const handleConnectClick = async () => {
     try {
-      await connectSnap(snapId);
-      const installedSnap = await getSnap(snapId);
+      await connectSnap(state.snapId);
+      const installedSnap = await getSnap(state.snapId);
 
       dispatch({
         type: MetamaskActions.SetInstalled,
@@ -382,7 +380,7 @@ const Index = () => {
           const params = {
             method: 'wallet_invokeSnap',
             params: {
-              snapId,
+              snapId: state.snapId,
               request: {
                 method: 'snap.internal.clearAllRequests',
                 params: {},
@@ -617,8 +615,13 @@ const Index = () => {
             description: 'Choose the Snap ID to connect with',
             button: (
               <Select
-                value={snapId}
-                onChange={(event: any) => setSnapId(event.target.value)}
+                value={state.snapId}
+                onChange={(event: any) => {
+                  dispatch({
+                    type: MetamaskActions.SetSnapId,
+                    payload: event.target.value,
+                  });
+                }}
                 fullWidth
               >
                 <MenuItem value={defaultSnapOrigin}>Local Development</MenuItem>

@@ -60,7 +60,7 @@ export const Header = () => {
   const handleConnectClick = async () => {
     try {
       await connectSnap();
-      const installedSnap = await getSnap();
+      const installedSnap = await getSnap(state.snapId);
 
       dispatch({
         type: MetamaskActions.SetInstalled,
@@ -88,6 +88,11 @@ export const Header = () => {
         <div>
           <b>Snap version (expected): </b>
           {snapPackageInfo.version}
+        </div>
+
+        <div>
+          <b>Snap ID: </b>
+          {state.snapId}
         </div>
 
         {state.installedSnap ? (

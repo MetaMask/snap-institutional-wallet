@@ -1,6 +1,7 @@
 import type { Dispatch, ReactNode, Reducer } from 'react';
 import React, { createContext, useEffect, useReducer } from 'react';
 
+import { defaultSnapOrigin } from '../config';
 import type { Snap } from '../types';
 import { hasMetaMask, getSnap } from '../utils';
 
@@ -8,10 +9,12 @@ export type MetamaskState = {
   hasMetaMask: boolean;
   installedSnap?: Snap;
   error?: Error;
+  snapId: string;
 };
 
 const initialState: MetamaskState = {
   hasMetaMask: false,
+  snapId: defaultSnapOrigin,
 };
 
 type MetamaskDispatch = { type: MetamaskActions; payload: any };
@@ -26,6 +29,7 @@ export const MetaMaskContext = createContext<
 ]);
 
 export enum MetamaskActions {
+  SetSnapId = 'SetSnapId',
   SetInstalled = 'SetInstalled',
   SetMetaMaskDetected = 'SetMetaMaskDetected',
   SetError = 'SetError',
@@ -49,6 +53,12 @@ const reducer: Reducer<MetamaskState, MetamaskDispatch> = (state, action) => {
       return {
         ...state,
         error: action.payload,
+      };
+
+    case MetamaskActions.SetSnapId:
+      return {
+        ...state,
+        snapId: action.payload,
       };
 
     default:
@@ -88,7 +98,7 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
        * Detect if the snap is installed.
        */
       async function detectSnapInstalled() {
-        const installedSnap = await getSnap();
+        const installedSnap = await getSnap(state.snapId);
         dispatch({
           type: MetamaskActions.SetInstalled,
           payload: installedSnap,
