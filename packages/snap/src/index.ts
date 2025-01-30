@@ -1,14 +1,13 @@
+/* eslint-disable @typescript-eslint/no-throw-literal */
 import type { JsonRpcRequest } from '@metamask/keyring-api';
-import {
-  MethodNotSupportedError,
-  handleKeyringRequest,
-} from '@metamask/keyring-api';
+import { handleKeyringRequest } from '@metamask/keyring-api';
 import {
   type UserInputEvent,
   type OnCronjobHandler,
   type OnUserInputHandler,
   type OnHomePageHandler,
   UnauthorizedError,
+  MethodNotFoundError,
 } from '@metamask/snaps-sdk';
 import type {
   Json,
@@ -34,6 +33,7 @@ import type { SnapContext } from './lib/types/Context';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import logger from './logger';
 import { InternalMethod, originPermissions } from './permissions';
+// @audit - this file needs unittests
 
 /**
  * Verify if the caller can call the requested method.
@@ -155,17 +155,17 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         const requestManager = await getRequestManager();
         return await requestManager.clearAllRequests();
       }
-      throw new MethodNotSupportedError(request.method);
+      throw new MethodNotFoundError(request.method);
     }
 
     default: {
-      throw new MethodNotSupportedError(request.method); // @audit-info or MethodNotFoundError 👉 https://docs.metamask.io/snaps/how-to/communicate-errors/#import-and-throw-errors
+      throw new MethodNotFoundError(request.method);
     }
   }
 };
 
 export const onKeyringRequest: OnKeyringRequestHandler = async ({
-  origin, // @audit specify ts types
+  origin,
   request,
 }: {
   origin: string;
@@ -176,16 +176,17 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
     JSON.stringify(request, undefined, 2),
   );
 
+  // assert(request.params, KeyringRequestStruct);
+
   // Check if origin is allowed to call method.
   if (!hasPermission(origin, request.method)) {
-    // @audit - enforce runtime type/input validation! user superstruct from metamask
     throw new Error(
       `Origin '${origin}' is not allowed to call '${request.method}'`,
     );
   }
 
-  // Handle keyring methods.
-  return handleKeyringRequest(await getKeyring(), request); // @audit - handleKeyringRequest is async, might req. await? (else returns promise of promise? dblcheck with MM team)
+  const keyring = await getKeyring();
+  return handleKeyringRequest(keyring, request);
 };
 
 // Improved polling function

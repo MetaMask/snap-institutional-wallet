@@ -70,7 +70,7 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
           solution
         </Text>
         {custodianMetadata
-          .filter((custodian) => custodian.enabled)
+          .filter((custodian) => custodian.production)
           .map((custodian) => (
             <Section
               key={custodian.name}

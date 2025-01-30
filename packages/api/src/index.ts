@@ -13,13 +13,13 @@ import type http from 'http';
 import custodianRequests from './custodian/requests';
 import { methodMapping } from './method-mapping';
 import doc from './openrpc.json';
+import clearRequestsHandler from './routes/clearRequestsHandler';
 import listRequestsHandler from './routes/listRequestsHandler';
 import tokenHandler from './routes/token-handler';
 import type { UpdateSignedMessageRequest } from './routes/updateSignedMessageHandler';
 import updateSignedMessageHandler from './routes/updateSignedMessageHandler';
 import type { UpdateTransactionRequest } from './routes/updateTransactionHandler';
 import updateTransactionHandler from './routes/updateTransactionHandler';
-import clearRequestsHandler from './routes/clearRequestsHandler';
 
 dotenv.config();
 

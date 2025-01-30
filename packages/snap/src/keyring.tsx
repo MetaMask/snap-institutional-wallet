@@ -299,6 +299,11 @@ export class CustodialKeyring implements Keyring {
 
     let deepLink: CustodianDeepLink | null = null;
 
+    // Custodians may not support all methods
+    // but we don't store this anywhere, because they can implement them later
+    // We rely on the custodian api to throw an error if the deeplink method is not supported
+    // and generate a default message if that is the case
+
     try {
       if (request.request.method === EthMethod.SignTransaction) {
         const custodianApi = await this.getCustodianApiForAddress(address);
@@ -306,7 +311,6 @@ export class CustodialKeyring implements Keyring {
           custodianId,
         )) as CustodianDeepLink;
       } else {
-        // @audit - explicitly check for methods in account config; throw methodNotFound if not exists
         const custodianApi = await this.getCustodianApiForAddress(address);
         deepLink = (await custodianApi.getSignedMessageLink(
           custodianId,
@@ -333,9 +337,7 @@ export class CustodialKeyring implements Keyring {
     params: Json,
     keyringRequest: KeyringRequest,
   ): Promise<string> {
-    switch (
-      method // @audit input validation
-    ) {
+    switch (method) {
       case EthMethod.PersonalSign: {
         const [message, from] = params as [string, string];
         const custodianApi = await this.getCustodianApiForAddress(from);

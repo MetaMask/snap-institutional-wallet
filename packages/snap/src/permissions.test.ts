@@ -16,6 +16,7 @@ describe('Permissions', () => {
       jest.mock('./lib/custodian-types/custodianMetadata', () => ({
         custodianMetadata: [
           {
+            production: true,
             allowedOnboardingDomains: ['example.com', 'test.com'],
           },
         ],

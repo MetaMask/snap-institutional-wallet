@@ -27,9 +27,14 @@ originPermissions.set(metamask, metamaskPermissions);
 custodianMetadata.forEach((custodian) => {
   if (custodian.allowedOnboardingDomains) {
     // exclude localhost
+
+    if (!config.dev && !custodian.production) {
+      return;
+    }
+
     custodian.allowedOnboardingDomains.forEach((domain) => {
-      // @audit - includes dev endpoints that should be excluded in prod
-      originPermissions.set(domain, new Set([InternalMethod.Onboard])); // @audit - should enforce HTTPS (this is a trust module; no more insecure transports); check if https prefix, else add it
+      // Due to a quirk of the snap SDK, we need to allow the onboarding domain as a bare domain
+      originPermissions.set(domain, new Set([InternalMethod.Onboard]));
       originPermissions.set(
         `https://${domain}`,
         new Set([InternalMethod.Onboard]),
@@ -51,9 +56,9 @@ const localhostPermissions = new Set([
   KeyringRpcMethod.GetRequest,
   // Custom methods
   InternalMethod.Onboard,
-  InternalMethod.ClearAllRequests, // @audit-ok only local dev
+  InternalMethod.ClearAllRequests,
 ]);
 
 if (config.dev) {
-  originPermissions.set('http://localhost:8000', localhostPermissions); // @audit-ok - remove for prod
+  originPermissions.set('http://localhost:8000', localhostPermissions);
 }
