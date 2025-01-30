@@ -1,5 +1,6 @@
 import type { KeyringAccount, KeyringRequest } from '@metamask/keyring-api';
 import { KeyringSnapRpcClient } from '@metamask/keyring-api';
+import { Select, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import React, { useContext, useEffect, useState } from 'react';
 
@@ -20,8 +21,6 @@ import { MetaMaskContext, MetamaskActions } from '../hooks';
 import { InputType } from '../types';
 import type { KeyringState } from '../utils';
 import { connectSnap, getSnap } from '../utils';
-
-const snapId = defaultSnapOrigin;
 
 const initialState: {
   pendingRequests: KeyringRequest[];
@@ -50,6 +49,8 @@ const Index = () => {
   const [transactionIntent, setTransactionIntent] = useState<string | null>(
     'signed',
   );
+
+  const [snapId, setSnapId] = useState<string>(defaultSnapOrigin);
 
   // const [accountPayload, setAccountPayload] =
   //   useState<Pick<KeyringAccount, 'name' | 'options'>>();
@@ -94,7 +95,7 @@ const Index = () => {
     const params = {
       method: 'wallet_invokeSnap',
       params: {
-        snapId: 'local:http://localhost:8080',
+        snapId,
         request: {
           method: 'authentication.onboard',
           params: {
@@ -130,8 +131,8 @@ const Index = () => {
 
   const handleConnectClick = async () => {
     try {
-      await connectSnap();
-      const installedSnap = await getSnap();
+      await connectSnap(snapId);
+      const installedSnap = await getSnap(snapId);
 
       dispatch({
         type: MetamaskActions.SetInstalled,
@@ -168,8 +169,11 @@ const Index = () => {
       action: {
         callback: async () =>
           await injectToken(
-            'https://neptune-custody.dev.metamask-institutional.io/eth',
-            'https://neptune-custody.dev.metamask-institutional.io/oauth/token',
+            'https://neptune-custody.metamask-institutional.io/eth',
+            'https://neptune-custody.metamask-institutional.io/oauth/token',
+            'ECA3',
+            'Neptune Custody',
+            'neptune-custody-prod',
           ),
         label: 'Inject Token',
       },
@@ -236,7 +240,7 @@ const Index = () => {
     },
     {
       name: 'List accounts',
-      description: 'List all account managed by the SSK',
+      description: 'List all accounts managed by the snap',
       action: {
         disabled: false,
         callback: async () => {
@@ -378,7 +382,7 @@ const Index = () => {
           const params = {
             method: 'wallet_invokeSnap',
             params: {
-              snapId: 'local:http://localhost:8080',
+              snapId,
               request: {
                 method: 'snap.internal.clearAllRequests',
                 params: {},
@@ -604,6 +608,27 @@ const Index = () => {
             disabled={!state.hasMetaMask}
           />
         )}
+      </CardContainer>
+
+      <CardContainer>
+        <Card
+          content={{
+            title: 'Snap ID',
+            description: 'Choose the Snap ID to connect with',
+            button: (
+              <Select
+                value={snapId}
+                onChange={(e) => setSnapId(e.target.value)}
+                fullWidth
+              >
+                <MenuItem value={defaultSnapOrigin}>Local Development</MenuItem>
+                <MenuItem value="npm:@metamask/institutional-wallet-snap">
+                  NPM Package
+                </MenuItem>
+              </Select>
+            ),
+          }}
+        />
       </CardContainer>
 
       <StyledBox sx={{ flexGrow: 1 }}>

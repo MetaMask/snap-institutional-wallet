@@ -15,7 +15,34 @@ export type CustodianMetadata = {
   allowedOnboardingDomains?: string[];
 };
 
-export const custodianMetadata: CustodianMetadata[] = [
+// Enforce custodianPublishesTransaction to be true or false for ECA3 but true for everything else
+
+type ECA3CustodianMetadata = CustodianMetadata & {
+  apiVersion: CustodianType.ECA3;
+  custodianPublishesTransaction: true | false;
+};
+
+type ECA1CustodianMetadata = CustodianMetadata & {
+  apiVersion: CustodianType.ECA1;
+  custodianPublishesTransaction: true;
+};
+
+type BitGoCustodianMetadata = CustodianMetadata & {
+  apiVersion: CustodianType.BitGo;
+  custodianPublishesTransaction: true;
+};
+
+type CactusCustodianMetadata = CustodianMetadata & {
+  apiVersion: CustodianType.Cactus;
+  custodianPublishesTransaction: true;
+};
+
+export const custodianMetadata: (
+  | ECA3CustodianMetadata
+  | ECA1CustodianMetadata
+  | BitGoCustodianMetadata
+  | CactusCustodianMetadata
+)[] = [
   {
     refreshTokenUrl: null,
     name: 'bitgo-test',
@@ -23,12 +50,12 @@ export const custodianMetadata: CustodianMetadata[] = [
     enabled: false,
     apiBaseUrl: 'https://app.bitgo-test.com/defi/v2',
     apiVersion: CustodianType.BitGo,
-    custodianPublishesTransaction: false,
+    custodianPublishesTransaction: true,
     iconUrl:
       'https://dashboard.metamask-institutional.io/custodian-icons/bitgo-icon.svg',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://app.bitgo-test.com',
-    allowedOnboardingDomains: ['app.bitgo-test.com'], // @audit - remove dev/test domains
+    allowedOnboardingDomains: ['app.bitgo-test.com'],
   },
   {
     refreshTokenUrl: null,
@@ -183,7 +210,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['zodia.io'],
+    allowedOnboardingDomains: ['ui-preprod-v2.uat.zodia.io'],
   },
   {
     refreshTokenUrl: 'https://mmi.fireblocks.io/v1/auth/access',
@@ -191,7 +218,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     displayName: 'Fireblocks',
     enabled: true,
     apiBaseUrl: 'https://mmi.fireblocks.io',
-    apiVersion: CustodianType.ECA3,
+    apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl:
       'https://metamask-institutional.io/custodian-icons/fireblocks-icon.svg',
@@ -210,7 +237,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['zodia.io'],
+    allowedOnboardingDomains: ['zodia.io', 'v2.custody.zodia.io'],
   },
   {
     refreshTokenUrl: 'https://api.sit.zodia.io/oauth/token',
@@ -223,24 +250,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['sit.zodia.io'], // @audit dev host
-  },
-  {
-    refreshTokenUrl:
-      'https://saturn-custody.dev.metamask-institutional.io/oauth/token',
-    name: 'saturn-dev',
-    displayName: 'Saturn Custody',
-    enabled: false,
-    apiBaseUrl: 'https://saturn-custody.dev.metamask-institutional.io/eth',
-    apiVersion: CustodianType.ECA1,
-    custodianPublishesTransaction: false,
-    iconUrl:
-      'https://saturn-custody-ui.dev.metamask-institutional.io/saturn.svg',
-    isManualTokenInputSupported: false,
-    onboardingUrl: 'https://saturn-custody-ui.dev.metamask-institutional.io',
-    allowedOnboardingDomains: [
-      'saturn-custody-ui.dev.metamask-institutional.io',
-    ],
+    allowedOnboardingDomains: ['sit.zodia.io', 'ui-v2.sit.zodia.io'],
   },
   {
     refreshTokenUrl: 'https://api-qa.qa.zodia.io/oauth/token',
@@ -253,7 +263,7 @@ export const custodianMetadata: CustodianMetadata[] = [
     iconUrl: 'https://zodia.io/wp-content/uploads/2023/01/cropped-ico.png',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://zodia.io',
-    allowedOnboardingDomains: ['qa.zodia.io'],
+    allowedOnboardingDomains: ['qa.zodia.io', 'ui-v2.qa.zodia.io'],
   },
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
@@ -309,20 +319,6 @@ export const custodianMetadata: CustodianMetadata[] = [
     allowedOnboardingDomains: [], // Cubist does not support onboarding via a web page
   },
   {
-    refreshTokenUrl: 'http://localhost:3009/oauth/token',
-    name: 'neptune-custody-local',
-    displayName: 'Neptune Custody Local',
-    enabled: true,
-    apiBaseUrl: 'http://localhost:3009/eth',
-    apiVersion: CustodianType.ECA3,
-    custodianPublishesTransaction: false,
-    iconUrl:
-      'https://dev.metamask-institutional.io/custodian-icons/neptune-icon.svg',
-    isManualTokenInputSupported: false,
-    onboardingUrl: 'http://localhost:3005',
-    allowedOnboardingDomains: ['localhost:3005'],
-  },
-  {
     refreshTokenUrl: 'http://localhost:3330/oauth/token',
     apiBaseUrl: 'http://localhost:3330',
     apiVersion: CustodianType.ECA3,
@@ -334,17 +330,5 @@ export const custodianMetadata: CustodianMetadata[] = [
       'https://dev.metamask-institutional.io/custodian-icons/neptune-icon.svg',
     isManualTokenInputSupported: true,
     allowedOnboardingDomains: ['localhost:8000', 'http://localhost:8000'],
-  },
-  {
-    refreshTokenUrl: 'http://localhost:3330/oauth/token',
-    apiBaseUrl: 'http://localhost:3330',
-    apiVersion: CustodianType.ECA3,
-    custodianPublishesTransaction: false,
-    name: 'local-dev',
-    displayName: 'Local Dev',
-    enabled: false,
-    iconUrl:
-      'https://dev.metamask-institutional.io/custodian-icons/neptune-icon.svg',
-    isManualTokenInputSupported: true,
   },
 ];
