@@ -235,7 +235,7 @@ export const custodianMetadata: (
     apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl:
-    'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
+      'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://local.waterballoons.xyz:4200',
     allowedOnboardingDomains: ['local.waterballoons.xyz:4200'],
@@ -249,7 +249,7 @@ export const custodianMetadata: (
     apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl:
-    'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
+      'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://dev10-console.waterballoons.xyz',
     allowedOnboardingDomains: ['dev10-console.waterballoons.xyz'],
@@ -263,7 +263,7 @@ export const custodianMetadata: (
     apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
     iconUrl:
-    'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
+      'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://dev4-console.waterballoons.xyz',
     allowedOnboardingDomains: ['dev4-console.waterballoons.xyz'],
