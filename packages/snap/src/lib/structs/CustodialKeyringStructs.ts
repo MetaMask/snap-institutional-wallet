@@ -134,3 +134,18 @@ export type CustodialSnapRequest<RequestType> = {
   fulfilled: boolean;
   rejected: boolean;
 } & RequestType;
+
+// Since we don't have access to the metamask tranasction ID,
+// and the client only has access to the transaction parameters,
+// we need to use the immutable transaction parameters to identify the request
+export const MutableTransactionSearchParameters = object({
+  from: string(),
+  to: string(),
+  value: string(),
+  data: string(),
+  chainId: string(),
+});
+
+export type MutableTransactionSearchParameters = Infer<
+  typeof MutableTransactionSearchParameters
+>;

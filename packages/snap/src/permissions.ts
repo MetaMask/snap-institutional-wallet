@@ -6,6 +6,7 @@ import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
 export enum InternalMethod {
   Onboard = 'authentication.onboard',
   ClearAllRequests = 'snap.internal.clearAllRequests',
+  GetMutableTransactionParameters = 'transactions.getMutableTransactionParameters',
 }
 
 const metamaskPermissions = new Set([
@@ -16,6 +17,7 @@ const metamaskPermissions = new Set([
   KeyringRpcMethod.ListRequests,
   KeyringRpcMethod.GetRequest,
   KeyringRpcMethod.SubmitRequest,
+  InternalMethod.GetMutableTransactionParameters,
 ]);
 
 const metamask = 'metamask';

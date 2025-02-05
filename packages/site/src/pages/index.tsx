@@ -203,11 +203,11 @@ const Index = () => {
       action: {
         callback: async () =>
           await injectToken(
-            'https://saturn-custody.dev.metamask-institutional.io/eth',
-            'https://saturn-custody.dev.metamask-institutional.io/oauth/token',
+            'https://saturn-custody.metamask-institutional.io/eth',
+            'https://saturn-custody.metamask-institutional.io/oauth/token',
             'ECA1',
             'Saturn Custody',
-            'saturn-dev',
+            'saturn-prod',
           ),
         label: 'Inject Token',
       },
