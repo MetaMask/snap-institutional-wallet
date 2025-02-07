@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "TqDCDx49f9Xpx6iI1TNmrTNYznnos37AOu3tjypCOBk=",
+    "shasum": "vYeE9gSrrxIYJNa1mTOFVcxN/Hp92Iw/rEMk7snugOE=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -34,7 +34,12 @@
     "https://console.mpcvault.com": {},
     "https://app.bitgo.com": {},
     "https://app.bitgo-test.com": {},
-    "https://apps-portal.safe.global": {}
+    "https://apps-portal.safe.global": {},
+    "https://alpha.mycactus.io": {},
+    "https://pre.mycactus.com": {},
+    "https://www.mycactus.dev": {},
+    "https://debug.mycactus.com:1443": {},
+    "https://www.mycactus.com": {}
   },
   "initialPermissions": {
     "snap_notify": {},
