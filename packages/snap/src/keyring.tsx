@@ -1,3 +1,4 @@
+import { toChecksumAddress } from '@ethereumjs/util';
 import type { MessageTypes, TypedMessage } from '@metamask/eth-sig-util';
 import { SignTypedDataVersion } from '@metamask/eth-sig-util';
 import type {
@@ -29,6 +30,7 @@ import type {
   CustodialSnapRequest,
   TransactionRequest,
   OnBoardingRpcRequest,
+  ConnectionStatusRpcRequest,
 } from './lib/structs/CustodialKeyringStructs';
 import type { CustodianDeepLink, IRefreshTokenChangeEvent } from './lib/types';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
@@ -111,6 +113,7 @@ export class CustodialKeyring implements Keyring {
           custodian: {
             displayName: options.details.custodianDisplayName,
             deferPublication,
+            importOrigin: options.origin,
           },
           accountName: name,
         },
@@ -221,13 +224,16 @@ export class CustodialKeyring implements Keyring {
   }
 
   async getCustodianApiForAddress(address: string): Promise<ICustodianApi> {
-    if (!this.#custodianApi.has(address)) {
-      const wallet = await this.#stateManager.getWalletByAddress(address);
+    const checksumAddress = toChecksumAddress(address);
+    if (!this.#custodianApi.has(checksumAddress)) {
+      const wallet = await this.#stateManager.getWalletByAddress(
+        checksumAddress,
+      );
       if (!wallet) {
         throw new Error(`Wallet for account ${address} does not exist`);
       }
       const custodianApi = this.#getCustodianApi(wallet.details);
-      this.#custodianApi.set(address, custodianApi);
+      this.#custodianApi.set(checksumAddress, custodianApi);
       custodianApi.on(
         TOKEN_EXPIRED_EVENT,
         (payload: IRefreshTokenChangeEvent) => {
@@ -235,7 +241,7 @@ export class CustodialKeyring implements Keyring {
         },
       );
     }
-    return this.#custodianApi.get(address) as ICustodianApi;
+    return this.#custodianApi.get(checksumAddress) as ICustodianApi;
   }
 
   #getCustodianApi(details: OnBoardingRpcRequest): ICustodianApi {
@@ -249,6 +255,28 @@ export class CustodialKeyring implements Keyring {
     return custodianApi;
   }
 
+  // Used by a custodian to check the status of a connection
+  // by checking if a given token is present for a given
+  // custodian type, environment and api url
+  // Only returns accounts that match the origin which imported them
+  async getConnectedAccounts(
+    details: ConnectionStatusRpcRequest,
+    origin: string,
+  ): Promise<CustodialKeyringAccount[]> {
+    const wallets = await this.#stateManager.listWallets();
+    const matchingWallets = wallets.filter((wallet) => {
+      return (
+        wallet.details.token === details.token &&
+        wallet.details.custodianApiUrl === details.custodianApiUrl &&
+        wallet.details.custodianType === details.custodianType &&
+        wallet.details.custodianEnvironment === details.custodianEnvironment &&
+        wallet.account.options.importOrigin === origin
+      );
+    });
+    return matchingWallets.map((wallet) => wallet.account);
+  }
+
+  // Handles a token changed event from a custodian
   async #handleTokenChangedEvent(
     payload: IRefreshTokenChangeEvent,
   ): Promise<void> {

@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "vYeE9gSrrxIYJNa1mTOFVcxN/Hp92Iw/rEMk7snugOE=",
+    "shasum": "5X8S3GFJm+aaCZNmDsWTXDmo6JwbZQZCKRlzQjVGzTc=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -24,6 +24,7 @@
     "https://ui-v2.sit.zodia.io": {},
     "https://ui-v2.qa.zodia.io": {},
     "https://ui-preprod-v2.qa.zodia.io": {},
+    "https://ui-preprod-v2.uat.zodia.io": {},
     "https://v2.custody.zodia.io": {},
     "https://console.fireblocks.io": {},
     "https://local.waterballoons.xyz:4200": {},
@@ -38,7 +39,7 @@
     "https://alpha.mycactus.io": {},
     "https://pre.mycactus.com": {},
     "https://www.mycactus.dev": {},
-    "https://debug.mycactus.com:1443": {},
+    "https://debug.mycactus.dev:1443": {},
     "https://www.mycactus.com": {}
   },
   "initialPermissions": {
@@ -62,6 +63,7 @@
         "https://ui-v2.sit.zodia.io",
         "https://ui-v2.qa.zodia.io",
         "https://ui-preprod-v2.qa.zodia.io",
+        "https://ui-preprod-v2.uat.zodia.io",
         "https://v2.custody.zodia.io",
         "https://console.fireblocks.io",
         "https://local.waterballoons.xyz:4200",
@@ -72,7 +74,12 @@
         "https://console.mpcvault.com",
         "https://app.bitgo.com",
         "https://app.bitgo-test.com",
-        "https://apps-portal.safe.global"
+        "https://apps-portal.safe.global",
+        "https://alpha.mycactus.io",
+        "https://pre.mycactus.com",
+        "https://www.mycactus.dev",
+        "https://debug.mycactus.dev:1443",
+        "https://www.mycactus.com"
       ]
     },
     "endowment:cronjob": {

@@ -88,10 +88,27 @@ export const OnBoardingRpcRequest = object({
 
 export type OnBoardingRpcRequest = Infer<typeof OnBoardingRpcRequest>;
 
+export const ConnectionStatusRpcRequest = object({
+  custodianType: enums([
+    CustodianType.ECA3,
+    CustodianType.ECA1,
+    CustodianType.BitGo,
+    CustodianType.Cactus,
+  ]),
+  custodianEnvironment: string(),
+  custodianApiUrl: string(),
+  token: string(),
+});
+
+export type ConnectionStatusRpcRequest = Infer<
+  typeof ConnectionStatusRpcRequest
+>;
+
 export const CreateAccountOptions = object({
   name: string(),
   address: string(),
   details: OnBoardingRpcRequest,
+  origin: string(),
 });
 
 export type CreateAccountOptions = Infer<typeof CreateAccountOptions>;

@@ -15,6 +15,7 @@ import {
 import type { OnBoardingRpcRequest } from '../../lib/structs/CustodialKeyringStructs';
 import type { SnapContext } from '../../lib/types/Context';
 import logger from '../../logger';
+import { renderErrorMessage } from '../error-message/render';
 /**
  * Handles the select custodian button click event.
  * @param options - The options for the event.
@@ -137,26 +138,36 @@ export async function onConnectTokenClick({
   }
 
   const state = await getInterfaceState(id);
-  const { apiUrl, token } = state.addTokenForm as {
-    apiUrl: string;
-    token: string;
-  };
 
-  let custodianApiUrl = apiUrl;
-  if (!custodianApiUrl.length) {
-    custodianApiUrl = selectedCustodian?.apiBaseUrl ?? '';
+  try {
+    const { apiUrl, token } = state.addTokenForm as {
+      apiUrl: string;
+      token: string;
+    };
+
+    let custodianApiUrl = apiUrl;
+    if (!custodianApiUrl.length) {
+      custodianApiUrl = selectedCustodian?.apiBaseUrl ?? '';
+    }
+
+    const onboardingRequest: OnBoardingRpcRequest = {
+      custodianType: selectedCustodian.apiVersion,
+      custodianEnvironment: selectedCustodian.name ?? '',
+      custodianApiUrl,
+      custodianDisplayName: selectedCustodian.displayName ?? '',
+      token,
+      refreshTokenUrl: selectedCustodian.refreshTokenUrl ?? '',
+    };
+
+    await handleOnboarding(onboardingRequest, 'metamask');
+  } catch (error: unknown) {
+    logger.error('Error onboarding', error);
+    if (error instanceof Error) {
+      await renderErrorMessage(error.message);
+    } else {
+      await renderErrorMessage('An unknown error occurred');
+    }
   }
-
-  const onboardingRequest: OnBoardingRpcRequest = {
-    custodianType: selectedCustodian.apiVersion,
-    custodianEnvironment: selectedCustodian.name ?? '',
-    custodianApiUrl,
-    custodianDisplayName: selectedCustodian.displayName ?? '',
-    token,
-    refreshTokenUrl: selectedCustodian.refreshTokenUrl ?? '',
-  };
-
-  await handleOnboarding(onboardingRequest);
 }
 
 export const eventHandles = {
