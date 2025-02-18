@@ -6,6 +6,8 @@ import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
 export enum InternalMethod {
   Onboard = 'authentication.onboard',
   ClearAllRequests = 'snap.internal.clearAllRequests',
+  GetMutableTransactionParameters = 'transactions.getMutableTransactionParameters',
+  GetConnectedAccounts = 'authentication.getConnectedAccounts',
 }
 
 const metamaskPermissions = new Set([
@@ -16,6 +18,7 @@ const metamaskPermissions = new Set([
   KeyringRpcMethod.ListRequests,
   KeyringRpcMethod.GetRequest,
   KeyringRpcMethod.SubmitRequest,
+  InternalMethod.GetMutableTransactionParameters,
 ]);
 
 const metamask = 'metamask';
@@ -37,7 +40,7 @@ custodianMetadata.forEach((custodian) => {
       originPermissions.set(domain, new Set([InternalMethod.Onboard]));
       originPermissions.set(
         `https://${domain}`,
-        new Set([InternalMethod.Onboard]),
+        new Set([InternalMethod.Onboard, InternalMethod.GetConnectedAccounts]),
       );
     });
   }
@@ -57,6 +60,7 @@ const localhostPermissions = new Set([
   // Custom methods
   InternalMethod.Onboard,
   InternalMethod.ClearAllRequests,
+  InternalMethod.GetConnectedAccounts,
 ]);
 
 if (config.dev) {

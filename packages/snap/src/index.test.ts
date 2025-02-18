@@ -135,6 +135,7 @@ describe('index', () => {
           address: '0x123',
           name: 'Test Account',
           details: mockRequest,
+          origin: 'https://example.com',
         });
         expect(mockRenderOnboarding).toHaveBeenCalledWith(
           expect.objectContaining({

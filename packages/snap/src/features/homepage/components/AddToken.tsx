@@ -38,7 +38,7 @@ export const AddToken: SnapComponent<AddTokenProps> = ({
           <Field
             label={`${selectedCustodian?.displayName ?? 'Custodian'} API URL`}
           >
-            <Input name="apiUrl" placeholder={selectedCustodian?.apiBaseUrl} />
+            <Input name="apiUrl" value={selectedCustodian?.apiBaseUrl} />
           </Field>
         </Form>
       </Box>

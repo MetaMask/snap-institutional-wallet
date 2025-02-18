@@ -29,6 +29,7 @@ describe('KeyringStateManager', () => {
       custodian: {
         displayName: 'Test Custodian',
         deferPublication: false,
+        importOrigin: 'test-origin',
       },
     },
     methods: [EthMethod.SignTransaction, EthMethod.PersonalSign],

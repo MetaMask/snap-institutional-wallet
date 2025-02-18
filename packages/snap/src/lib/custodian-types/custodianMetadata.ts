@@ -84,7 +84,13 @@ export const custodianMetadata: (
     isManualTokenInputSupported: false,
     apiBaseUrl: 'https://api.mycactus.com/custody/v1/mmi-api',
     onboardingUrl: 'https://www.mycactus.com',
-    allowedOnboardingDomains: ['www.mycactus.com'],
+    allowedOnboardingDomains: [
+      'www.mycactus.com',
+      'www.mycactus.dev',
+      'pre.mycactus.com',
+      'debug.mycactus.com:1443',
+      'alpha.mycactus.io',
+    ],
   },
 
   {

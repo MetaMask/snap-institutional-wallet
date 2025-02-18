@@ -18,6 +18,7 @@ describe('isUniqueAddress', () => {
               custodian: {
                 displayName: 'custodian',
                 deferPublication: false,
+                importOrigin: 'test-origin',
               },
             },
             methods: [],

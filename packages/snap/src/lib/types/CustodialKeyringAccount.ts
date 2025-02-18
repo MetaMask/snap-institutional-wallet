@@ -4,6 +4,7 @@ export type CustodialKeyringAccountOptions = {
   custodian: {
     displayName: string;
     deferPublication: boolean;
+    importOrigin: string;
   };
   accountName?: string;
 };
