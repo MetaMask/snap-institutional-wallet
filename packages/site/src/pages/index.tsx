@@ -247,7 +247,7 @@ const Index = () => {
       inputs: [],
       action: {
         callback: async () =>
-          return getConnectedAccounts(
+          getConnectedAccounts(
             defaultCustodianApiUrl,
             'ECA3',
             'local-dev',

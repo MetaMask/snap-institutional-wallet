@@ -105,7 +105,13 @@ describe('CustodialKeyring', () => {
 
   describe('filterAccountChains', () => {
     it('should filter supported chains', async () => {
-      const mockAccount = { id: '1', address: '0x123' };
+      const mockAccount = {
+        id: '1',
+        address: '0x123',
+        options: {
+          custodian: { importOrigin: 'test-origin' },
+        },
+      };
       const mockWallet = {
         account: mockAccount,
         details: {
@@ -171,6 +177,7 @@ describe('CustodialKeyring', () => {
           custodian: {
             displayName: 'Test Custodian',
             deferPublication: false,
+            importOrigin: 'test-origin',
           },
         },
       };
@@ -277,7 +284,11 @@ describe('CustodialKeyring', () => {
           account: {
             id: '1',
             address: mockAddress,
-            options: { importOrigin: 'test-origin' },
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
           },
           details: {
             token: 'oldToken',
@@ -290,7 +301,11 @@ describe('CustodialKeyring', () => {
           account: {
             id: '2',
             address: '0x456',
-            options: { importOrigin: 'test-origin' },
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
           },
           details: {
             token: 'oldToken',
@@ -303,7 +318,11 @@ describe('CustodialKeyring', () => {
           account: {
             id: '3',
             address: '0x789',
-            options: { importOrigin: 'test-origin' },
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
           },
           details: {
             token: 'differentToken',
@@ -391,7 +410,11 @@ describe('CustodialKeyring', () => {
           account: {
             id: '1',
             address: '0x123',
-            options: { importOrigin: 'test-origin' },
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
           },
           details: {
             token: 'token',
@@ -424,7 +447,11 @@ describe('CustodialKeyring', () => {
         account: {
           id: '1',
           address: '0x123',
-          options: { importOrigin: 'test-origin' },
+          options: {
+            custodian: {
+              importOrigin: 'test-origin',
+            },
+          },
         },
         details: {
           token: 'token',

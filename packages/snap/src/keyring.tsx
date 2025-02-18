@@ -264,13 +264,14 @@ export class CustodialKeyring implements Keyring {
     origin: string,
   ): Promise<CustodialKeyringAccount[]> {
     const wallets = await this.#stateManager.listWallets();
+
     const matchingWallets = wallets.filter((wallet) => {
       return (
         wallet.details.token === details.token &&
         wallet.details.custodianApiUrl === details.custodianApiUrl &&
         wallet.details.custodianType === details.custodianType &&
         wallet.details.custodianEnvironment === details.custodianEnvironment &&
-        wallet.account.options.importOrigin === origin
+        wallet.account.options.custodian.importOrigin === origin
       );
     });
     return matchingWallets.map((wallet) => wallet.account);
