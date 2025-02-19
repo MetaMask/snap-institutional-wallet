@@ -3,6 +3,7 @@ import type { Json } from '@metamask/snaps-sdk';
 import { assert } from '@metamask/superstruct';
 
 import config from './config';
+import type { EncryptedStateManager } from './encryptedStateManagement';
 import { renderErrorMessage } from './features/error-message/render';
 import {
   MAX_TRANSACTION_AGE,
@@ -20,7 +21,7 @@ import type { ICustodianApi } from './lib/types';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import logger from './logger';
-import type { KeyringStateManager } from './stateManagement';
+import type { UnencryptedStateManager } from './unencryptedStateManagement';
 
 type KeyringFacade = {
   getCustodianApiForAddress: (address: string) => Promise<ICustodianApi>;
@@ -32,27 +33,34 @@ type KeyringFacade = {
 export class RequestManager {
   #keyringFacade: KeyringFacade;
 
-  #stateManager: KeyringStateManager;
+  #encryptedStateManager: EncryptedStateManager;
 
-  constructor(stateManager: KeyringStateManager, keyringFacade: KeyringFacade) {
-    this.#stateManager = stateManager;
+  #unencryptedStateManager: UnencryptedStateManager;
+
+  constructor(
+    encryptedStateManager: EncryptedStateManager,
+    unencryptedStateManager: UnencryptedStateManager,
+    keyringFacade: KeyringFacade,
+  ) {
+    this.#encryptedStateManager = encryptedStateManager;
+    this.#unencryptedStateManager = unencryptedStateManager;
     this.#keyringFacade = keyringFacade;
   }
 
   async upsertRequest(
     request: CustodialSnapRequest<SignedMessageRequest | TransactionRequest>,
   ): Promise<void> {
-    return this.#stateManager.upsertRequest(request);
+    return this.#encryptedStateManager.upsertRequest(request);
   }
 
   async listRequests(): Promise<
     CustodialSnapRequest<SignedMessageRequest | TransactionRequest>[]
   > {
-    return this.#stateManager.listRequests();
+    return this.#encryptedStateManager.listRequests();
   }
 
   async clearAllRequests(): Promise<void> {
-    return this.#stateManager.clearAllRequests();
+    return this.#encryptedStateManager.clearAllRequests();
   }
 
   async getChainIdFromPendingRequest(id: string): Promise<string> {
@@ -109,7 +117,7 @@ export class RequestManager {
   }
 
   async getRequestParams(id: string): Promise<EthSignTransactionRequest> {
-    const request = await this.#stateManager.getRequest(id);
+    const request = await this.#encryptedStateManager.getRequest(id);
     if (!request) {
       throw new Error(`Request ${id} not found`);
     }
@@ -124,6 +132,16 @@ export class RequestManager {
   }
 
   async poll(): Promise<void> {
+    const numberOfAccounts =
+      await this.#unencryptedStateManager.getNumberOfAccounts();
+
+    // If there are no accounts, there are no requests to poll
+    // So we don't need to unlock the client
+
+    if (numberOfAccounts === 0) {
+      return;
+    }
+
     const pendingRequests = (await this.listRequests()).filter(
       (request) => !request.fulfilled,
     );
@@ -165,7 +183,7 @@ export class RequestManager {
             `Unknown request type: ${String((request as any).type)}`,
           );
           // Delete request
-          await this.#stateManager.removeRequest(
+          await this.#encryptedStateManager.removeRequest(
             (request as any).keyringRequest.id,
           );
           break;
@@ -200,7 +218,7 @@ export class RequestManager {
         }ms ago), removing request`,
       );
       await this.emitRejectedEvent(requestId);
-      await this.#stateManager.removeRequest(requestId);
+      await this.#encryptedStateManager.removeRequest(requestId);
       return;
     }
 
@@ -217,7 +235,7 @@ export class RequestManager {
     ) {
       await this.emitRejectedEvent(requestId);
       logger.info('Removing failed transaction request', requestId);
-      await this.#stateManager.removeRequest(requestId);
+      await this.#encryptedStateManager.removeRequest(requestId);
       return;
     }
 
@@ -247,7 +265,7 @@ export class RequestManager {
             await renderErrorMessage(errorMessage);
           }
           await this.emitRejectedEvent(requestId);
-          await this.#stateManager.removeRequest(requestId);
+          await this.#encryptedStateManager.removeRequest(requestId);
           return;
         }
       }
@@ -258,14 +276,14 @@ export class RequestManager {
         result: signature,
         lastUpdated: Date.now(),
       };
-      await this.#stateManager.upsertRequest(updatedTransaction);
+      await this.#encryptedStateManager.upsertRequest(updatedTransaction);
       await this.emitApprovedEvent(requestId, signature);
     } else if (transactionResponse) {
       const updatedTransaction = this.#updateTransactionRequest(
         request,
         transactionResponse,
       );
-      await this.#stateManager.upsertRequest(updatedTransaction);
+      await this.#encryptedStateManager.upsertRequest(updatedTransaction);
     }
   }
 
@@ -296,7 +314,7 @@ export class RequestManager {
         }ms ago), removing request`,
       );
       await this.emitRejectedEvent(requestId);
-      await this.#stateManager.removeRequest(requestId);
+      await this.#encryptedStateManager.removeRequest(requestId);
       return;
     }
 
@@ -313,7 +331,7 @@ export class RequestManager {
           signature: signedMessageResponse.signature,
           lastUpdated: Date.now(),
         };
-        await this.#stateManager.upsertRequest(updatedSignedMessage);
+        await this.#encryptedStateManager.upsertRequest(updatedSignedMessage);
         await this.emitApprovedEvent(
           requestId,
           signedMessageResponse.signature,
@@ -321,7 +339,7 @@ export class RequestManager {
       } else {
         await this.emitRejectedEvent(requestId);
       }
-      await this.#stateManager.removeRequest(requestId);
+      await this.#encryptedStateManager.removeRequest(requestId);
     }
   }
 
@@ -340,7 +358,7 @@ export class RequestManager {
 
       if (error.message.includes(`Request '${id}' not found`)) {
         logger.info(`Request '${id}' not found, removing from state`);
-        await this.#stateManager.removeRequest(id);
+        await this.#encryptedStateManager.removeRequest(id);
       } else {
         throw error;
       }
@@ -355,7 +373,7 @@ export class RequestManager {
     } catch (error: any) {
       if (error.message.includes(`Request '${id}' not found`)) {
         logger.info(`Request '${id}' not found, removing from state`);
-        await this.#stateManager.removeRequest(id);
+        await this.#encryptedStateManager.removeRequest(id);
       } else {
         throw error;
       }

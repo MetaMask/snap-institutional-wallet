@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+import type { EncryptedStateManager } from './encryptedStateManagement';
 import type {
   CustodialSnapRequest,
   SignedMessageRequest,
   TransactionRequest,
 } from './lib/structs/CustodialKeyringStructs';
 import { RequestManager } from './requestsManager';
-import type { KeyringStateManager } from './stateManagement';
+import type { UnencryptedStateManager } from './unencryptedStateManagement';
 
 type KeyringFacade = {
   getCustodianApiForAddress: jest.Mock;
@@ -51,24 +52,33 @@ describe('RequestManager', () => {
     rejected: false,
   });
 
-  let stateManager: jest.Mocked<KeyringStateManager>;
+  let encryptedStateManager: jest.Mocked<EncryptedStateManager>;
+  let unencryptedStateManager: jest.Mocked<UnencryptedStateManager>;
   let keyringFacade: jest.Mocked<KeyringFacade>;
   let requestManager: RequestManager;
 
   beforeEach(() => {
-    stateManager = {
+    encryptedStateManager = {
       upsertRequest: jest.fn(),
       listRequests: jest.fn(),
       clearAllRequests: jest.fn(),
       getRequest: jest.fn(),
-    } as unknown as jest.Mocked<KeyringStateManager>;
+    } as unknown as jest.Mocked<EncryptedStateManager>;
+
+    unencryptedStateManager = {
+      getNumberOfAccounts: jest.fn(),
+    } as unknown as jest.Mocked<UnencryptedStateManager>;
 
     keyringFacade = {
       getCustodianApiForAddress: jest.fn(),
       getAccount: jest.fn(),
     } as unknown as jest.Mocked<KeyringFacade>;
 
-    requestManager = new RequestManager(stateManager, keyringFacade);
+    requestManager = new RequestManager(
+      encryptedStateManager,
+      unencryptedStateManager,
+      keyringFacade,
+    );
   });
 
   describe('upsertRequest', () => {
@@ -76,8 +86,8 @@ describe('RequestManager', () => {
       const request = createMockRequest('test-id');
       await requestManager.upsertRequest(request);
 
-      expect(stateManager.upsertRequest).toHaveBeenCalledWith(request);
-      expect(stateManager.upsertRequest).toHaveBeenCalledTimes(1);
+      expect(encryptedStateManager.upsertRequest).toHaveBeenCalledWith(request);
+      expect(encryptedStateManager.upsertRequest).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -87,12 +97,12 @@ describe('RequestManager', () => {
         createMockRequest('test-id-1'),
         createMockRequest('test-id-2'),
       ];
-      stateManager.listRequests.mockResolvedValue(mockRequests);
+      encryptedStateManager.listRequests.mockResolvedValue(mockRequests);
 
       const result = await requestManager.listRequests();
 
       expect(result).toStrictEqual(mockRequests);
-      expect(stateManager.listRequests).toHaveBeenCalledTimes(1);
+      expect(encryptedStateManager.listRequests).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -100,25 +110,25 @@ describe('RequestManager', () => {
     it('should forward clear all requests to state manager', async () => {
       await requestManager.clearAllRequests();
 
-      expect(stateManager.clearAllRequests).toHaveBeenCalledTimes(1);
+      expect(encryptedStateManager.clearAllRequests).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('getChainIdFromPendingRequest', () => {
     it('should return chainId from request params', async () => {
       const request = createMockRequest('test-id', '0x1');
-      stateManager.getRequest.mockResolvedValue(request);
+      encryptedStateManager.getRequest.mockResolvedValue(request);
 
       const result = await requestManager.getChainIdFromPendingRequest(
         'test-id',
       );
 
       expect(result).toBe('0x1');
-      expect(stateManager.getRequest).toHaveBeenCalledWith('test-id');
+      expect(encryptedStateManager.getRequest).toHaveBeenCalledWith('test-id');
     });
 
     it('should throw error if request not found', async () => {
-      stateManager.getRequest.mockResolvedValue(null);
+      encryptedStateManager.getRequest.mockResolvedValue(null);
 
       await expect(
         requestManager.getChainIdFromPendingRequest('test-id'),
@@ -127,7 +137,7 @@ describe('RequestManager', () => {
 
     it('should throw error if request has no chainId', async () => {
       const request = createMockRequest('test-id');
-      stateManager.getRequest.mockResolvedValue(request);
+      encryptedStateManager.getRequest.mockResolvedValue(request);
 
       await expect(
         requestManager.getChainIdFromPendingRequest('test-id'),
@@ -138,7 +148,7 @@ describe('RequestManager', () => {
   describe('getRequestParams', () => {
     it('should return request params', async () => {
       const request = createMockRequest('test-id', '0x1');
-      stateManager.getRequest.mockResolvedValue(request);
+      encryptedStateManager.getRequest.mockResolvedValue(request);
 
       const result = await requestManager.getRequestParams('test-id');
 
@@ -151,7 +161,7 @@ describe('RequestManager', () => {
     });
 
     it('should throw error if request not found', async () => {
-      stateManager.getRequest.mockResolvedValue(null);
+      encryptedStateManager.getRequest.mockResolvedValue(null);
 
       await expect(requestManager.getRequestParams('test-id')).rejects.toThrow(
         'Request test-id not found',
@@ -169,7 +179,7 @@ describe('RequestManager', () => {
           },
         },
       };
-      stateManager.getRequest.mockResolvedValue(invalidRequest as any);
+      encryptedStateManager.getRequest.mockResolvedValue(invalidRequest as any);
 
       await expect(requestManager.getRequestParams('test-id')).rejects.toThrow(
         'Request test-id has invalid params',

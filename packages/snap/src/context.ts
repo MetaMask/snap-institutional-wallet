@@ -1,13 +1,14 @@
+import { EncryptedStateManager } from './encryptedStateManagement';
 import { CustodialKeyring } from './keyring';
 import type { CustodialSnapRequest } from './lib/structs/CustodialKeyringStructs';
 import { RequestManager } from './requestsManager';
-import { KeyringStateManager } from './stateManagement';
+import { UnencryptedStateManager } from './unencryptedStateManagement';
 
 let keyring: CustodialKeyring;
 let requestManager: RequestManager;
 
-const stateManager = new KeyringStateManager();
-
+const encryptedStateManager = new EncryptedStateManager();
+const unencryptedStateManager = new UnencryptedStateManager();
 // Allow the keyring to call certain methods on the request manager
 const requestManagerFacade = {
   upsertRequest: async (request: CustodialSnapRequest<any>) => {
@@ -33,10 +34,17 @@ const keyringFacade = {
 };
 
 /**
- * Return the state manager instance. If it doesn't exist, create it.
+ * Returns the encrypted state manager instance.
  */
-export async function getStateManager(): Promise<KeyringStateManager> {
-  return stateManager;
+export async function getEncryptedStateManager(): Promise<EncryptedStateManager> {
+  return encryptedStateManager;
+}
+
+/**
+ * Returns the unencrypted state manager instance.
+ */
+export async function getUnencryptedStateManager(): Promise<UnencryptedStateManager> {
+  return unencryptedStateManager;
 }
 
 /**
@@ -44,7 +52,11 @@ export async function getStateManager(): Promise<KeyringStateManager> {
  */
 export async function getKeyring(): Promise<CustodialKeyring> {
   if (!keyring) {
-    keyring = new CustodialKeyring(stateManager, requestManagerFacade);
+    keyring = new CustodialKeyring(
+      encryptedStateManager,
+      unencryptedStateManager,
+      requestManagerFacade,
+    );
   }
   return keyring;
 }
@@ -54,7 +66,7 @@ export async function getKeyring(): Promise<CustodialKeyring> {
  */
 export async function getRequestManager(): Promise<RequestManager> {
   if (!requestManager) {
-    requestManager = new RequestManager(stateManager, keyringFacade);
+    requestManager = new RequestManager(encryptedStateManager, keyringFacade);
   }
   return requestManager;
 }

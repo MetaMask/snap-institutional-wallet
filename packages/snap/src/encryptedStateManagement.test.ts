@@ -1,22 +1,22 @@
 import { EthAccountType, EthMethod } from '@metamask/keyring-api';
 
+import { EncryptedStateManager } from './encryptedStateManagement';
 import type {
   CustodialSnapRequest,
   OnBoardingRpcRequest,
   PersonalSignMessageRequest,
 } from './lib/structs/CustodialKeyringStructs';
-import type { Wallet, SnapState } from './lib/types/CustodialKeyring';
+import type { Wallet, EncryptedState } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianType } from './lib/types/CustodianType';
 import * as snapUtil from './snap-state-manager/snap-util';
-import { KeyringStateManager } from './stateManagement';
 
 describe('KeyringStateManager', () => {
   const createMockStateManager = () => {
     const getDataSpy = jest.spyOn(snapUtil, 'getStateData');
     const setDataSpy = jest.spyOn(snapUtil, 'setStateData');
     return {
-      instance: new KeyringStateManager(),
+      instance: new EncryptedStateManager(),
       getDataSpy,
       setDataSpy,
     };
@@ -48,7 +48,7 @@ describe('KeyringStateManager', () => {
     },
   });
 
-  const createInitState = (count = 1): SnapState => {
+  const createInitState = (count = 1): EncryptedState => {
     const wallets: Record<string, Wallet> = {};
     const walletIds: string[] = [];
 

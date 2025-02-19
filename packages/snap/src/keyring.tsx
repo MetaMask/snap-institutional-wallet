@@ -19,6 +19,7 @@ import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 
 import config from './config';
+import type { EncryptedStateManager } from './encryptedStateManagement';
 import { renderInfoMessage } from './features/info-message/rendex';
 import { TOKEN_EXPIRED_EVENT } from './lib/custodian-types/constants';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
@@ -38,7 +39,7 @@ import { CustodianApiMap } from './lib/types/CustodianType';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
 import logger from './logger';
-import type { KeyringStateManager } from './stateManagement';
+import type { UnencryptedStateManager } from './unencryptedStateManagement';
 import { throwError } from './util';
 import { convertHexChainIdToCaip2Decimal } from './util/convert-hex-chain-id-to-caip2-decimal';
 import { isUniqueAddress } from './util/is-unique-address';
@@ -58,23 +59,27 @@ export class CustodialKeyring implements Keyring {
 
   #requestManagerFacade: RequestManagerFacade;
 
-  #stateManager: KeyringStateManager;
+  #encryptedStateManager: EncryptedStateManager;
+
+  #unencryptedStateManager: UnencryptedStateManager;
 
   constructor(
-    stateManager: KeyringStateManager,
+    encryptedStateManager: EncryptedStateManager,
+    unencryptedStateManager: UnencryptedStateManager,
     requestManagerFacade: RequestManagerFacade,
   ) {
-    this.#stateManager = stateManager;
+    this.#encryptedStateManager = encryptedStateManager;
+    this.#unencryptedStateManager = unencryptedStateManager;
     this.#custodianApi = new Map<string, ICustodianApi>();
     this.#requestManagerFacade = requestManagerFacade;
   }
 
   async listAccounts(): Promise<CustodialKeyringAccount[]> {
-    return this.#stateManager.listAccounts();
+    return this.#encryptedStateManager.listAccounts();
   }
 
   async getAccount(id: string): Promise<CustodialKeyringAccount | undefined> {
-    return (await this.#stateManager.getAccount(id)) ?? undefined;
+    return (await this.#encryptedStateManager.getAccount(id)) ?? undefined;
   }
 
   // NB: external input
@@ -90,7 +95,7 @@ export class CustodialKeyring implements Keyring {
 
     const { address, name } = options;
 
-    const wallets = await this.#stateManager.listWallets();
+    const wallets = await this.#encryptedStateManager.listWallets();
 
     if (!isUniqueAddress(address, wallets)) {
       throw new Error(`Account address already in use: ${address}`);
@@ -136,7 +141,15 @@ export class CustodialKeyring implements Keyring {
         accountNameSuggestion: name ?? 'Custodial Account',
         displayConfirmation: false, // This will only work when the snap is preinstalled
       });
-      await this.#stateManager.addWallet({ account, details: options.details });
+      await this.#encryptedStateManager.addWallet({
+        account,
+        details: options.details,
+      });
+      await this.#unencryptedStateManager.setNumberOfAccounts(
+        (
+          await this.#encryptedStateManager.listAccounts()
+        ).length,
+      );
       return account;
     } catch (error) {
       throw new Error((error as Error).message);
@@ -163,8 +176,8 @@ export class CustodialKeyring implements Keyring {
 
   async deleteAccount(id: string): Promise<void> {
     try {
-      await this.#stateManager.withTransaction(async () => {
-        await this.#stateManager.removeAccounts([id]);
+      await this.#encryptedStateManager.withTransaction(async () => {
+        await this.#encryptedStateManager.removeAccounts([id]);
         await this.#emitEvent(KeyringEvent.AccountDeleted, { id });
       });
     } catch (error) {
@@ -226,7 +239,7 @@ export class CustodialKeyring implements Keyring {
   async getCustodianApiForAddress(address: string): Promise<ICustodianApi> {
     const checksumAddress = toChecksumAddress(address);
     if (!this.#custodianApi.has(checksumAddress)) {
-      const wallet = await this.#stateManager.getWalletByAddress(
+      const wallet = await this.#encryptedStateManager.getWalletByAddress(
         checksumAddress,
       );
       if (!wallet) {
@@ -263,7 +276,7 @@ export class CustodialKeyring implements Keyring {
     details: ConnectionStatusRpcRequest,
     origin: string,
   ): Promise<CustodialKeyringAccount[]> {
-    const wallets = await this.#stateManager.listWallets();
+    const wallets = await this.#encryptedStateManager.listWallets();
 
     const matchingWallets = wallets.filter((wallet) => {
       return (
@@ -282,7 +295,7 @@ export class CustodialKeyring implements Keyring {
     payload: IRefreshTokenChangeEvent,
   ): Promise<void> {
     // Find all the wallets with the old refresh token
-    const wallets = await this.#stateManager.listWallets();
+    const wallets = await this.#encryptedStateManager.listWallets();
     const walletsToUpdate = wallets.filter(
       (wallet) =>
         wallet.details.token === payload.oldRefreshToken &&
@@ -300,7 +313,7 @@ export class CustodialKeyring implements Keyring {
       this.#custodianApi.delete(wallet.account.address);
 
       // Update state with new details
-      await this.#stateManager.updateWalletDetails(
+      await this.#encryptedStateManager.updateWalletDetails(
         wallet.account.id,
         updatedDetails,
       );
@@ -454,7 +467,9 @@ export class CustodialKeyring implements Keyring {
     try {
       const custodianApi = await this.getCustodianApiForAddress(tx.from);
       const payload = TransactionHelper.createTransactionPayload(tx);
-      const wallet = await this.#stateManager.getWalletByAddress(tx.from);
+      const wallet = await this.#encryptedStateManager.getWalletByAddress(
+        tx.from,
+      );
 
       if (!wallet) {
         throw new Error(`Account '${tx.from}' not found`);

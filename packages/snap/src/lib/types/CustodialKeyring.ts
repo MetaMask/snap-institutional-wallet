@@ -6,13 +6,17 @@ import type {
   OnBoardingRpcRequest,
 } from '../structs/CustodialKeyringStructs';
 
-export type SnapState = {
+export type EncryptedState = {
   walletIds: string[];
   wallets: Record<string, Wallet>;
   requests: Record<
     string,
     CustodialSnapRequest<SignedMessageRequest | TransactionRequest>
   >;
+};
+
+export type State = {
+  numberOfAccounts: number;
 };
 
 export type Wallet = {

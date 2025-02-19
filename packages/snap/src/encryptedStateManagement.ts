@@ -4,7 +4,7 @@ import type {
   SignedMessageRequest,
   TransactionRequest,
 } from './lib/structs/CustodialKeyringStructs';
-import type { SnapState, Wallet } from './lib/types/CustodialKeyring';
+import type { EncryptedState, Wallet } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import logger from './logger';
 import { SnapStateManager } from './snap-state-manager/SnapStateManager';
@@ -26,9 +26,9 @@ export function compactError<ErrorInstance extends Error>(
   return new ErrCtor(error.message);
 }
 
-export class KeyringStateManager extends SnapStateManager<SnapState> {
-  protected override async get(): Promise<SnapState> {
-    return super.get().then((state: SnapState) => {
+export class EncryptedStateManager extends SnapStateManager<EncryptedState> {
+  protected override async get(): Promise<EncryptedState> {
+    return super.get().then((state: EncryptedState) => {
       if (!state) {
         // eslint-disable-next-line no-param-reassign
         state = {
@@ -66,7 +66,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
 
   async addWallet(wallet: Wallet): Promise<void> {
     try {
-      await this.update(async (state: SnapState) => {
+      await this.update(async (state: EncryptedState) => {
         const { id, address } = wallet.account;
         if (
           this.isAccountExist(state, id) ||
@@ -87,7 +87,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
 
   async updateAccount(account: CustodialKeyringAccount): Promise<void> {
     try {
-      await this.update(async (state: SnapState) => {
+      await this.update(async (state: EncryptedState) => {
         if (!this.isAccountExist(state, account.id)) {
           throw new Error(`Account id ${account.id} does not exist`);
         }
@@ -118,7 +118,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
     details: OnBoardingRpcRequest,
   ): Promise<void> {
     try {
-      await this.update(async (state: SnapState) => {
+      await this.update(async (state: EncryptedState) => {
         const wallet = state.wallets[accountId];
         if (!wallet) {
           throw new Error(`Wallet for account ${accountId} does not exist`);
@@ -132,7 +132,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
 
   async removeAccounts(ids: string[]): Promise<void> {
     try {
-      await this.update(async (state: SnapState) => {
+      await this.update(async (state: EncryptedState) => {
         const removeIds = new Set<string>();
 
         for (const id of ids) {
@@ -201,7 +201,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
     request: CustodialSnapRequest<SignedMessageRequest | TransactionRequest>,
   ): Promise<void> {
     try {
-      await this.update(async (state: SnapState) => {
+      await this.update(async (state: EncryptedState) => {
         state.requests[request.keyringRequest.id] = {
           ...state.requests[request.keyringRequest.id],
           ...request,
@@ -214,7 +214,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
 
   async removeRequest(id: string): Promise<void> {
     try {
-      await this.update(async (state: SnapState) => {
+      await this.update(async (state: EncryptedState) => {
         if (state.requests[id]) {
           delete state.requests[id];
         } else {
@@ -227,16 +227,16 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
   }
 
   async clearAllRequests(): Promise<void> {
-    await this.update(async (state: SnapState) => {
+    await this.update(async (state: EncryptedState) => {
       state.requests = {};
     });
   }
 
-  protected isAccountExist(state: SnapState, id: string): boolean {
+  protected isAccountExist(state: EncryptedState, id: string): boolean {
     return Object.prototype.hasOwnProperty.call(state.wallets, id);
   }
 
-  protected isRequestExist(state: SnapState, id: string): boolean {
+  protected isRequestExist(state: EncryptedState, id: string): boolean {
     return Object.prototype.hasOwnProperty.call(state.requests, id);
   }
 }

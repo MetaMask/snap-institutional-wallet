@@ -45,7 +45,8 @@ jest.mock('./lib/types/CustodianType', () => ({
 
 describe('CustodialKeyring', () => {
   let keyring: CustodialKeyring;
-  let mockStateManager: any;
+  let mockEncryptedStateManager: any;
+  let mockUnencryptedStateManager: any;
   let mockRequestManager: any;
 
   beforeEach(() => {
@@ -53,7 +54,7 @@ describe('CustodialKeyring', () => {
     jest.clearAllMocks();
 
     // Setup mock state manager
-    mockStateManager = {
+    mockEncryptedStateManager = {
       listAccounts: jest.fn(),
       getAccount: jest.fn(),
       withTransaction: jest.fn(),
@@ -64,6 +65,10 @@ describe('CustodialKeyring', () => {
       addWallet: jest.fn(),
     };
 
+    mockUnencryptedStateManager = {
+      setNumberOfAccounts: jest.fn(),
+    };
+
     // Setup mock request manager
     mockRequestManager = {
       upsertRequest: jest.fn(),
@@ -71,32 +76,36 @@ describe('CustodialKeyring', () => {
     };
 
     // Create keyring instance
-    keyring = new CustodialKeyring(mockStateManager, mockRequestManager);
+    keyring = new CustodialKeyring(
+      mockEncryptedStateManager,
+      mockUnencryptedStateManager,
+      mockRequestManager,
+    );
   });
 
   describe('listAccounts', () => {
     it('should return accounts from state manager', async () => {
       const mockAccounts = [{ id: '1', address: '0x123' }];
-      mockStateManager.listAccounts.mockResolvedValue(mockAccounts);
+      mockEncryptedStateManager.listAccounts.mockResolvedValue(mockAccounts);
 
       const result = await keyring.listAccounts();
       expect(result).toStrictEqual(mockAccounts);
-      expect(mockStateManager.listAccounts).toHaveBeenCalled();
+      expect(mockEncryptedStateManager.listAccounts).toHaveBeenCalled();
     });
   });
 
   describe('getAccount', () => {
     it('should return account from state manager', async () => {
       const mockAccount = { id: '1', address: '0x123' };
-      mockStateManager.getAccount.mockResolvedValue(mockAccount);
+      mockEncryptedStateManager.getAccount.mockResolvedValue(mockAccount);
 
       const result = await keyring.getAccount('1');
       expect(result).toStrictEqual(mockAccount);
-      expect(mockStateManager.getAccount).toHaveBeenCalledWith('1');
+      expect(mockEncryptedStateManager.getAccount).toHaveBeenCalledWith('1');
     });
 
     it('should return undefined for non-existent account', async () => {
-      mockStateManager.getAccount.mockResolvedValue(null);
+      mockEncryptedStateManager.getAccount.mockResolvedValue(null);
 
       const result = await keyring.getAccount('nonexistent');
       expect(result).toBeUndefined();
@@ -122,8 +131,10 @@ describe('CustodialKeyring', () => {
         },
       };
 
-      mockStateManager.getAccount.mockResolvedValue(mockAccount);
-      mockStateManager.getWalletByAddress.mockResolvedValue(mockWallet);
+      mockEncryptedStateManager.getAccount.mockResolvedValue(mockAccount);
+      mockEncryptedStateManager.getWalletByAddress.mockResolvedValue(
+        mockWallet,
+      );
 
       // Mock the custodian API to return decimal chain IDs
       const mockCustodianApi = {
@@ -139,7 +150,7 @@ describe('CustodialKeyring', () => {
     });
 
     it('should throw error for non-existent account', async () => {
-      mockStateManager.getAccount.mockResolvedValue(null);
+      mockEncryptedStateManager.getAccount.mockResolvedValue(null);
 
       await expect(keyring.filterAccountChains('1', [])).rejects.toThrow(
         "Account '1' not found",
@@ -157,14 +168,16 @@ describe('CustodialKeyring', () => {
 
   describe('deleteAccount', () => {
     it('should delete account and emit event', async () => {
-      mockStateManager.withTransaction.mockImplementation((callback: any) =>
-        callback(),
+      mockEncryptedStateManager.withTransaction.mockImplementation(
+        (callback: any) => callback(),
       );
 
       await keyring.deleteAccount('1');
 
-      expect(mockStateManager.removeAccounts).toHaveBeenCalledWith(['1']);
-      expect(mockStateManager.withTransaction).toHaveBeenCalled();
+      expect(mockEncryptedStateManager.removeAccounts).toHaveBeenCalledWith([
+        '1',
+      ]);
+      expect(mockEncryptedStateManager.withTransaction).toHaveBeenCalled();
     });
   });
 
@@ -201,8 +214,10 @@ describe('CustodialKeyring', () => {
         },
       };
 
-      mockStateManager.getAccount.mockResolvedValue(mockAccount);
-      mockStateManager.getWalletByAddress.mockResolvedValue(mockWallet);
+      mockEncryptedStateManager.getAccount.mockResolvedValue(mockAccount);
+      mockEncryptedStateManager.getWalletByAddress.mockResolvedValue(
+        mockWallet,
+      );
 
       // Mock the custodian API
       const mockCustodianApi = {
@@ -250,7 +265,7 @@ describe('CustodialKeyring', () => {
         },
       ];
 
-      mockStateManager.getWalletByAddress.mockImplementation(
+      mockEncryptedStateManager.getWalletByAddress.mockImplementation(
         async (accountAddress: string) => {
           return Promise.resolve(
             mockWallets.find(
@@ -260,7 +275,7 @@ describe('CustodialKeyring', () => {
         },
       );
 
-      mockStateManager.listWallets.mockImplementation(async () => {
+      mockEncryptedStateManager.listWallets.mockImplementation(async () => {
         return Promise.resolve(mockWallets);
       });
 
@@ -335,7 +350,7 @@ describe('CustodialKeyring', () => {
 
       const updatedDetails = new Map();
 
-      mockStateManager.getWalletByAddress.mockImplementation(
+      mockEncryptedStateManager.getWalletByAddress.mockImplementation(
         async (address: string) => {
           return Promise.resolve(
             mockWallets.find((wallet) => wallet.account.address === address),
@@ -343,11 +358,11 @@ describe('CustodialKeyring', () => {
         },
       );
 
-      mockStateManager.listWallets.mockImplementation(async () => {
+      mockEncryptedStateManager.listWallets.mockImplementation(async () => {
         return Promise.resolve(mockWallets);
       });
 
-      mockStateManager.updateWalletDetails.mockImplementation(
+      mockEncryptedStateManager.updateWalletDetails.mockImplementation(
         async (id: string, details: any) => {
           updatedDetails.set(id, { ...details });
           return Promise.resolve();
@@ -426,7 +441,7 @@ describe('CustodialKeyring', () => {
         },
       ];
 
-      mockStateManager.listWallets.mockImplementation(async () => {
+      mockEncryptedStateManager.listWallets.mockImplementation(async () => {
         return Promise.resolve(mockWallets);
       });
 
@@ -502,7 +517,7 @@ describe('CustodialKeyring', () => {
           'different-origin',
         ],
       ])('%s', async (_, details, origin) => {
-        mockStateManager.listWallets.mockImplementation(async () => {
+        mockEncryptedStateManager.listWallets.mockImplementation(async () => {
           return Promise.resolve([mockWallet]);
         });
 
