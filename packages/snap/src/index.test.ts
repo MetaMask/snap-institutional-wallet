@@ -6,6 +6,7 @@ import { getKeyring, getRequestManager } from './context';
 import { renderOnboarding } from './features/onboarding/render';
 import { CustodianType } from './lib/types/CustodianType';
 import { InternalMethod, originPermissions } from './permissions';
+import { getClientStatus } from './snap-state-manager/snap-util';
 
 // Mock the context module
 jest.mock('./context', () => ({
@@ -42,6 +43,14 @@ const mockRenderOnboarding = renderOnboarding as jest.MockedFunction<
   typeof renderOnboarding
 >;
 
+// Add this mock at the top of the test file with other mocks
+jest.mock('./snap-state-manager/snap-util');
+
+// Add type assertion for the mock
+const mockGetClientStatus = getClientStatus as jest.MockedFunction<
+  typeof getClientStatus
+>;
+
 describe('index', () => {
   const mockKeyring = {
     listAccounts: jest.fn().mockResolvedValue([]),
@@ -75,6 +84,9 @@ describe('index', () => {
         name: 'Test Account',
       },
     ]);
+
+    // Set default mock return value
+    mockGetClientStatus.mockResolvedValue({ locked: false });
   });
 
   describe('onRpcRequest', () => {
@@ -254,6 +266,35 @@ describe('index', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
+    });
+
+    it('should not poll when client is locked', async () => {
+      // Override the mock for this specific test
+      mockGetClientStatus.mockResolvedValueOnce({ locked: true });
+
+      await onCronjob({
+        request: {
+          method: 'execute',
+          id: 1,
+          jsonrpc: '2.0',
+        },
+      });
+
+      expect(mockRequestManager.poll).not.toHaveBeenCalled();
+      expect(setTimeoutSpy).not.toHaveBeenCalled();
+    });
+
+    it('should poll when client is unlocked', async () => {
+      await onCronjob({
+        request: {
+          method: 'execute',
+          id: 1,
+          jsonrpc: '2.0',
+        },
+      });
+
+      expect(mockRequestManager.poll).toHaveBeenCalled();
+      expect(setTimeoutSpy).toHaveBeenCalledTimes(5); // 5 delays between 6 polls
     });
 
     it('should handle execute method', async () => {
