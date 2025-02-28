@@ -169,18 +169,58 @@ describe('CustodialKeyring', () => {
   });
 
   describe('submitRequest', () => {
-    it('should handle personal sign request', async () => {
-      const mockAccount = {
-        id: '1',
-        address: '0x123',
-        options: {
-          custodian: {
-            displayName: 'Test Custodian',
-            deferPublication: false,
-            importOrigin: 'test-origin',
-          },
+    const mockAccount = {
+      id: '1',
+      address: '0x123',
+      methods: ['personal_sign', 'eth_signTransaction'],
+      options: {
+        custodian: {
+          displayName: 'Test Custodian',
+          deferPublication: false,
+          importOrigin: 'test-origin',
+        },
+      },
+    };
+
+    beforeEach(() => {
+      mockStateManager.getAccount.mockResolvedValue(mockAccount);
+    });
+
+    it('should throw error when account is not found', async () => {
+      mockStateManager.getAccount.mockResolvedValue(null);
+
+      const mockRequest = {
+        id: 'request-1',
+        scope: 'scope-1',
+        account: 'non-existent-account',
+        request: {
+          method: 'personal_sign',
+          params: ['message', '0x123'],
         },
       };
+
+      await expect(keyring.submitRequest(mockRequest)).rejects.toThrow(
+        "Account 'non-existent-account' not found",
+      );
+    });
+
+    it('should throw error when method is not supported by account', async () => {
+      const mockRequest = {
+        id: 'request-1',
+        scope: 'scope-1',
+        account: mockAccount.id,
+        request: {
+          method: 'eth_signTypedData_v4',
+          params: ['message', mockAccount.address],
+        },
+      };
+
+      await expect(keyring.submitRequest(mockRequest)).rejects.toThrow(
+        `Method 'eth_signTypedData_v4' not supported for account '${mockAccount.address}'`,
+      );
+    });
+
+    it('should handle personal sign request when method is supported', async () => {
       const mockRequest = {
         id: 'request-1',
         scope: 'scope-1',
@@ -201,7 +241,6 @@ describe('CustodialKeyring', () => {
         },
       };
 
-      mockStateManager.getAccount.mockResolvedValue(mockAccount);
       mockStateManager.getWalletByAddress.mockResolvedValue(mockWallet);
 
       // Mock the custodian API
@@ -228,8 +267,6 @@ describe('CustodialKeyring', () => {
         }),
       );
     });
-
-    // Add more tests for other request types...
   });
 
   describe('getCustodianApiForAddress', () => {
