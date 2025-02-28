@@ -84,3 +84,5 @@ node_modules/
 
 # IntelliJ
 .idea/
+
+audit.md
