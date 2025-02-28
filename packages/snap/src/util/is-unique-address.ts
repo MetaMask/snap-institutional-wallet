@@ -1,3 +1,5 @@
+import { toChecksumAddress } from '@ethereumjs/util';
+
 import type { Wallet } from '../lib/types/CustodialKeyring';
 
 /**
@@ -8,5 +10,8 @@ import type { Wallet } from '../lib/types/CustodialKeyring';
  * @returns Returns true if no duplicate addresses are found, otherwise false.
  */
 export function isUniqueAddress(address: string, wallets: Wallet[]): boolean {
-  return !wallets.find((wallet) => wallet.account.address === address);
+  return !wallets.find(
+    (wallet) =>
+      toChecksumAddress(wallet.account.address) === toChecksumAddress(address),
+  );
 }

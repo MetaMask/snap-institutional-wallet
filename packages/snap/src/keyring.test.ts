@@ -2,7 +2,7 @@ import { MethodNotFoundError } from '@metamask/snaps-sdk';
 
 import { CustodialKeyring } from './keyring';
 import { TOKEN_EXPIRED_EVENT } from './lib/custodian-types/constants';
-import { CustodianApiMap } from './lib/types/CustodianType';
+import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
 
 // Mock dependencies
@@ -105,7 +105,13 @@ describe('CustodialKeyring', () => {
 
   describe('filterAccountChains', () => {
     it('should filter supported chains', async () => {
-      const mockAccount = { id: '1', address: '0x123' };
+      const mockAccount = {
+        id: '1',
+        address: '0x123',
+        options: {
+          custodian: { importOrigin: 'test-origin' },
+        },
+      };
       const mockWallet = {
         account: mockAccount,
         details: {
@@ -171,6 +177,7 @@ describe('CustodialKeyring', () => {
           custodian: {
             displayName: 'Test Custodian',
             deferPublication: false,
+            importOrigin: 'test-origin',
           },
         },
       };
@@ -226,11 +233,63 @@ describe('CustodialKeyring', () => {
   });
 
   describe('getCustodianApiForAddress', () => {
+    it('should normalize address', async () => {
+      const address = '0xf7bDe8609231033c69E502C08f85153f8A1548F2';
+      const addressUpper = '0xF7BDE8609231033C69E502C08F85153F8A1548F2';
+
+      const mockWallets = [
+        {
+          account: { id: '1', address },
+          details: {
+            token: 'oldToken',
+            custodianApiUrl: 'https://api.example.com',
+            custodianType: 'ECA3',
+            refreshTokenUrl: 'https://refresh.example.com',
+            importOrigin: 'test-origin',
+          },
+        },
+      ];
+
+      mockStateManager.getWalletByAddress.mockImplementation(
+        async (accountAddress: string) => {
+          return Promise.resolve(
+            mockWallets.find(
+              (wallet) => wallet.account.address === accountAddress,
+            ),
+          );
+        },
+      );
+
+      mockStateManager.listWallets.mockImplementation(async () => {
+        return Promise.resolve(mockWallets);
+      });
+
+      const mockCustodianApi: Partial<ICustodianApi> = {
+        on: jest.fn(),
+        getSupportedChains: jest.fn(),
+      };
+
+      const ECA3Mock =
+        CustodianApiMap.ECA3 as unknown as jest.Mock<ICustodianApi>;
+      ECA3Mock.mockImplementation(() => mockCustodianApi as ICustodianApi);
+
+      const result = await keyring.getCustodianApiForAddress(addressUpper);
+      expect(result).toBeDefined();
+    });
+
     it('should handle token expiry events and update wallet details', async () => {
       const mockAddress = '0x123';
       const mockWallets = [
         {
-          account: { id: '1', address: mockAddress },
+          account: {
+            id: '1',
+            address: mockAddress,
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
+          },
           details: {
             token: 'oldToken',
             custodianApiUrl: 'https://api.example.com',
@@ -239,7 +298,15 @@ describe('CustodialKeyring', () => {
           },
         },
         {
-          account: { id: '2', address: '0x456' },
+          account: {
+            id: '2',
+            address: '0x456',
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
+          },
           details: {
             token: 'oldToken',
             custodianApiUrl: 'https://api.example.com',
@@ -248,7 +315,15 @@ describe('CustodialKeyring', () => {
           },
         },
         {
-          account: { id: '3', address: '0x789' },
+          account: {
+            id: '3',
+            address: '0x789',
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
+          },
           details: {
             token: 'differentToken',
             custodianApiUrl: 'https://different.api.com',
@@ -325,6 +400,115 @@ describe('CustodialKeyring', () => {
         TOKEN_EXPIRED_EVENT,
         expect.any(Function),
       );
+    });
+  });
+
+  describe('getConnectedAccounts', () => {
+    it('should return connected accounts', async () => {
+      const mockWallets = [
+        {
+          account: {
+            id: '1',
+            address: '0x123',
+            options: {
+              custodian: {
+                importOrigin: 'test-origin',
+              },
+            },
+          },
+          details: {
+            token: 'token',
+            custodianApiUrl: 'https://api.example.com',
+            custodianType: 'ECA3',
+            refreshTokenUrl: 'https://refresh.example.com',
+            custodianEnvironment: 'test-environment',
+          },
+        },
+      ];
+
+      mockStateManager.listWallets.mockImplementation(async () => {
+        return Promise.resolve(mockWallets);
+      });
+
+      const result = await keyring.getConnectedAccounts(
+        {
+          token: 'token',
+          custodianApiUrl: 'https://api.example.com',
+          custodianType: CustodianType.ECA3,
+          custodianEnvironment: 'test-environment',
+        },
+        'test-origin',
+      );
+      expect(result).toStrictEqual([mockWallets[0]!.account]);
+    });
+
+    describe('should not return accounts if any of the details do not match', () => {
+      const mockWallet = {
+        account: {
+          id: '1',
+          address: '0x123',
+          options: {
+            custodian: {
+              importOrigin: 'test-origin',
+            },
+          },
+        },
+        details: {
+          token: 'token',
+          custodianApiUrl: 'https://api.example.com',
+          custodianType: CustodianType.ECA3,
+          custodianEnvironment: 'test-environment',
+        },
+      };
+
+      it.each([
+        [
+          'should not return accounts if the token does not match',
+          {
+            ...mockWallet.details,
+            token: 'differentToken',
+          },
+          'test-origin',
+        ],
+        [
+          'should not return accounts if the custodianApiUrl does not match',
+          {
+            ...mockWallet.details,
+            custodianApiUrl: 'https://different.api.com',
+          },
+          'test-origin',
+        ],
+        [
+          'should not return accounts if the custodianType does not match',
+          {
+            ...mockWallet.details,
+            custodianType: CustodianType.ECA1,
+          },
+          'test-origin',
+        ],
+        [
+          'should not return accounts if the custodianEnvironment does not match',
+          {
+            ...mockWallet.details,
+            custodianEnvironment: 'different-environment',
+          },
+          'test-origin',
+        ],
+        [
+          'should not return accounts if the importOrigin does not match',
+          {
+            ...mockWallet.details,
+          },
+          'different-origin',
+        ],
+      ])('%s', async (_, details, origin) => {
+        mockStateManager.listWallets.mockImplementation(async () => {
+          return Promise.resolve([mockWallet]);
+        });
+
+        const result = await keyring.getConnectedAccounts(details, origin);
+        expect(result).toStrictEqual([]);
+      });
     });
   });
 });

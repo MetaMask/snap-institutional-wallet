@@ -210,13 +210,23 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
   async getTransactionLink(
     _transactionId: string,
   ): Promise<Partial<CustodianDeepLink> | null> {
-    return null;
+    return {
+      text: 'Complete your transaction in the Cactus App',
+      id: '',
+      url: '',
+      action: 'view',
+    };
   }
 
   async getSignedMessageLink(
     _signedMessageId: string,
   ): Promise<Partial<CustodianDeepLink> | null> {
-    return null;
+    return {
+      text: 'Complete your transaction in the Cactus App',
+      id: '',
+      url: '',
+      action: 'view',
+    };
   }
 
   changeRefreshTokenAuthDetails(_authDetails: IRefreshTokenAuthDetails): void {

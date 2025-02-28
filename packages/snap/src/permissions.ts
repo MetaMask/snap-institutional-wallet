@@ -2,10 +2,13 @@ import { KeyringRpcMethod } from '@metamask/keyring-api';
 
 import config from './config';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
+import logger from './logger';
 
 export enum InternalMethod {
   Onboard = 'authentication.onboard',
   ClearAllRequests = 'snap.internal.clearAllRequests',
+  GetMutableTransactionParameters = 'transactions.getMutableTransactionParameters',
+  GetConnectedAccounts = 'authentication.getConnectedAccounts',
 }
 
 const metamaskPermissions = new Set([
@@ -16,6 +19,7 @@ const metamaskPermissions = new Set([
   KeyringRpcMethod.ListRequests,
   KeyringRpcMethod.GetRequest,
   KeyringRpcMethod.SubmitRequest,
+  InternalMethod.GetMutableTransactionParameters,
 ]);
 
 const metamask = 'metamask';
@@ -37,8 +41,17 @@ custodianMetadata.forEach((custodian) => {
       originPermissions.set(domain, new Set([InternalMethod.Onboard]));
       originPermissions.set(
         `https://${domain}`,
-        new Set([InternalMethod.Onboard]),
+        new Set([InternalMethod.Onboard, InternalMethod.GetConnectedAccounts]),
       );
+      if (domain === 'localhost:3000') {
+        logger.info(
+          `Setting ${InternalMethod.Onboard} permissions for ${domain}`,
+        );
+        originPermissions.set(
+          'http://localhost:3000',
+          new Set([InternalMethod.Onboard]),
+        );
+      }
     });
   }
 });
@@ -57,6 +70,7 @@ const localhostPermissions = new Set([
   // Custom methods
   InternalMethod.Onboard,
   InternalMethod.ClearAllRequests,
+  InternalMethod.GetConnectedAccounts,
 ]);
 
 if (config.dev) {

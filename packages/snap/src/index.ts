@@ -27,9 +27,19 @@ import { renderHomePage } from './features/homepage/render';
 import { eventHandlers as onboardingEvents } from './features/onboarding/events';
 import { renderOnboarding } from './features/onboarding/render';
 import type { OnboardingAccount } from './features/onboarding/types';
-import type { CreateAccountOptions } from './lib/structs/CustodialKeyringStructs';
-import { OnBoardingRpcRequest } from './lib/structs/CustodialKeyringStructs';
+import type {
+  CreateAccountOptions,
+  CustodialSnapRequest,
+  SignedMessageRequest,
+  TransactionRequest,
+} from './lib/structs/CustodialKeyringStructs';
+import {
+  MutableTransactionSearchParameters,
+  OnBoardingRpcRequest,
+  ConnectionStatusRpcRequest,
+} from './lib/structs/CustodialKeyringStructs';
 import type { SnapContext } from './lib/types/Context';
+import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import logger from './logger';
 import { InternalMethod, originPermissions } from './permissions';
@@ -46,7 +56,20 @@ function hasPermission(origin: string, method: string): boolean {
   return originPermissions.get(origin)?.has(method) ?? false;
 }
 
-export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
+export const handleGetConnectedAccounts = async (
+  request: ConnectionStatusRpcRequest,
+  origin: string,
+) => {
+  assert(request, ConnectionStatusRpcRequest);
+
+  const keyring = await getKeyring();
+  return keyring.getConnectedAccounts(request, origin);
+};
+
+export const handleOnboarding = async (
+  request: OnBoardingRpcRequest,
+  origin: string,
+) => {
   assert(request, OnBoardingRpcRequest);
 
   const CustodianApiClass = CustodianApiMap[request.custodianType];
@@ -99,6 +122,7 @@ export const handleOnboarding = async (request: OnBoardingRpcRequest) => {
     address: account.address,
     name: account.name,
     details: { ...request },
+    origin,
   }));
 
   for (const account of accountsToAdd) {
@@ -128,7 +152,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 }: {
   origin: string;
   request: JsonRpcRequest;
-}): Promise<void | CreateAccountOptions[]> => {
+}): Promise<
+  | void
+  | CreateAccountOptions[]
+  | CustodialSnapRequest<SignedMessageRequest | TransactionRequest>
+  | CustodialKeyringAccount[]
+> => {
   logger.debug(
     `RPC request (origin="${origin}"): method="${request.method}"`,
     JSON.stringify(request, undefined, 2),
@@ -146,7 +175,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   switch (request.method) {
     case InternalMethod.Onboard: {
       assert(request.params, OnBoardingRpcRequest);
-      return await handleOnboarding(request.params);
+      return await handleOnboarding(request.params, origin);
+    }
+
+    // Returns only accounts, not connection details
+    // implementation restricts accounts to the origin that imported them
+    case InternalMethod.GetConnectedAccounts: {
+      assert(request.params, ConnectionStatusRpcRequest);
+      return await handleGetConnectedAccounts(request.params, origin);
     }
 
     case InternalMethod.ClearAllRequests: {
@@ -156,6 +192,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         return await requestManager.clearAllRequests();
       }
       throw new MethodNotFoundError(request.method);
+    }
+
+    case InternalMethod.GetMutableTransactionParameters: {
+      assert(request.params, MutableTransactionSearchParameters);
+      const requestManager = await getRequestManager();
+      const result = await requestManager.getMutableTransactionParameters(
+        request.params,
+      );
+      if (!result) {
+        throw new Error('Request not found');
+      }
+      return result;
     }
 
     default: {
@@ -280,3 +328,6 @@ export const onHomePage: OnHomePageHandler = async () => {
   const context = await getHomePageContext({ keyring });
   return { id: await renderHomePage(context) };
 };
+
+export type InstitutionalSnapTransactionRequest =
+  CustodialSnapRequest<TransactionRequest>;
