@@ -18,6 +18,7 @@ import { assert } from '@metamask/superstruct';
 
 import config from './config';
 import { getKeyring, getRequestManager } from './context';
+import { renderErrorMessage } from './features/error-message/render';
 import { getHomePageContext } from './features/homepage/context';
 import {
   eventHandles as homePageEvents,
@@ -125,15 +126,35 @@ export const handleOnboarding = async (
     origin,
   }));
 
+  const successfullyAddedAccounts: CreateAccountOptions[] = [];
+  const failedAccounts: { account: CreateAccountOptions; error: Error }[] = [];
+
   for (const account of accountsToAdd) {
     try {
       await keyring.createAccount(account);
+      successfullyAddedAccounts.push(account);
     } catch (error) {
       logger.error('Error creating account', error);
+      failedAccounts.push({
+        account,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
     }
   }
 
-  return accountsToAdd;
+  // If any accounts failed to add, show an error message
+  if (failedAccounts.length > 0) {
+    const errorMessage = failedAccounts
+      .map(
+        ({ account, error }) =>
+          `Failed to add account ${account.address}: ${error.message}`,
+      )
+      .join('\n');
+
+    await renderErrorMessage(errorMessage);
+  }
+
+  return successfullyAddedAccounts;
 };
 
 /**
