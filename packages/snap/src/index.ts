@@ -27,6 +27,7 @@ import { renderHomePage } from './features/homepage/render';
 import { eventHandlers as onboardingEvents } from './features/onboarding/events';
 import { renderOnboarding } from './features/onboarding/render';
 import type { OnboardingAccount } from './features/onboarding/types';
+import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
 import type {
   CreateAccountOptions,
   CustodialSnapRequest,
@@ -77,6 +78,41 @@ export const handleOnboarding = async (
 
   if (!Object.values(CustodianType).includes(request.custodianType)) {
     throw new Error(`Custodian type ${request.custodianType} not supported`);
+  }
+
+  // Find matching custodian metadata
+  const custodianMeta = custodianMetadata.find(
+    (custodian) => custodian.name === request.custodianEnvironment,
+  );
+
+  // If config.dev is false, don't allow non production custodians
+  if (!config.dev && !custodianMeta?.production) {
+    throw new Error(
+      `Non-production custodians are not allowed in non-development environments`,
+    );
+  }
+
+  if (!custodianMeta) {
+    throw new Error(
+      `No metadata found for custodian type ${request.custodianType} in ${request.custodianEnvironment} environment`,
+    );
+  }
+
+  // In production mode, enforce security checks
+  if (!config.dev) {
+    // Verify origin is allowed for this custodian
+    if (
+      !custodianMeta.allowedOnboardingDomains?.some((domain) =>
+        origin.includes(domain),
+      )
+    ) {
+      throw new Error(
+        `Origin '${origin}' is not authorized to onboard accounts for custodian ${custodianMeta.displayName}`,
+      );
+    }
+
+    // Use hardcoded API URL from metadata instead of request
+    request.custodianApiUrl = custodianMeta.apiBaseUrl;
   }
 
   const custodianApi = new CustodianApiClass(

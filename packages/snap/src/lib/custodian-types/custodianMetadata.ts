@@ -5,7 +5,7 @@ export type CustodianMetadata = {
   refreshTokenUrl: string | null;
   name: string;
   legacyName?: string;
-  displayName: string | null;
+  displayName: string;
   production: boolean | null;
   apiVersion: CustodianType;
   custodianPublishesTransaction: boolean;
