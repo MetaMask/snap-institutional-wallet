@@ -18,8 +18,7 @@ class Accounts {
   public async getAccounts(): Promise<EthereumAccount[]> {
     const accounts = await keyring.getAccounts();
     return accounts.map((address: string, index: number) => ({
-      address:
-        index === 0 ? '0x9C209dEE1897bE32001F26f31c574bFa53d46922' : address,
+      address,
       name: `Account ${index}`,
       supportedChains: ['0x1'],
     }));
