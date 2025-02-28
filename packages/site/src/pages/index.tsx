@@ -113,6 +113,32 @@ const Index = () => {
     await window.ethereum.request(params);
   };
 
+  const getConnectedAccounts = async (
+    custodianApiUrl: string,
+    custodianType: string,
+    custodianEnvironment: string,
+    token: string,
+  ) => {
+    const params = {
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: state.snapId,
+        request: {
+          method: 'authentication.getConnectedAccounts',
+          params: {
+            custodianApiUrl,
+            custodianType,
+            custodianEnvironment,
+            token,
+          },
+        },
+      },
+    };
+
+    const response = await window.ethereum.request(params);
+    return response;
+  };
+
   const deleteAccount = async () => {
     await client.deleteAccount(accountId as string);
     await syncAccounts();
@@ -203,11 +229,11 @@ const Index = () => {
       action: {
         callback: async () =>
           await injectToken(
-            'https://saturn-custody.dev.metamask-institutional.io/eth',
-            'https://saturn-custody.dev.metamask-institutional.io/oauth/token',
+            'https://saturn-custody.metamask-institutional.io/eth',
+            'https://saturn-custody.metamask-institutional.io/oauth/token',
             'ECA1',
             'Saturn Custody',
-            'saturn-dev',
+            'saturn-prod',
           ),
         label: 'Inject Token',
       },
@@ -215,8 +241,25 @@ const Index = () => {
     },
 
     {
+      name: 'Get connected accounts',
+      description:
+        'Get all accounts matching the connection details from the current origin (using local custodian details)',
+      inputs: [],
+      action: {
+        callback: async () =>
+          getConnectedAccounts(
+            defaultCustodianApiUrl,
+            'ECA3',
+            'local-dev',
+            'abc',
+          ),
+        label: 'Get Connected Accounts',
+      },
+    },
+
+    {
       name: 'Get account',
-      description: 'Get data of the selected account',
+      description: 'Get data of the selected account (dev mode only)',
       inputs: [
         {
           id: 'get-account-account-id',
@@ -238,7 +281,7 @@ const Index = () => {
     },
     {
       name: 'List accounts',
-      description: 'List all accounts managed by the snap',
+      description: 'List all accounts managed by the snap (dev mode only)',
       action: {
         disabled: false,
         callback: async () => {
@@ -254,7 +297,7 @@ const Index = () => {
     },
     {
       name: 'Remove account',
-      description: 'Remove an account',
+      description: 'Remove an account (dev mode only)',
       inputs: [
         {
           id: 'delete-account-account-id',
@@ -276,7 +319,7 @@ const Index = () => {
     },
     {
       name: 'Update account',
-      description: 'Update an account',
+      description: 'Update an account (dev mode only)',
       inputs: [
         {
           id: 'update-account-account-object',

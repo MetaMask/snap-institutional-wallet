@@ -3,6 +3,7 @@ import {
   JsonTx,
   LegacyTransaction,
 } from '@ethereumjs/tx';
+
 import keyring from './keyring';
 
 type EthereumAccount = {

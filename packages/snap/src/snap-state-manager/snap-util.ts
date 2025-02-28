@@ -1,4 +1,4 @@
-import type { Json } from '@metamask/snaps-sdk';
+import type { GetClientStatusResult, Json } from '@metamask/snaps-sdk';
 
 /**
  * Retrieves the current state data.
@@ -37,5 +37,17 @@ export async function setStateData<State>({
       newState: data as unknown as Record<string, Json>,
       encrypted,
     },
+  });
+}
+
+/**
+ * Retrieves the client status (locked/unlocked) in this case from MM.
+ * Used to check if the client is locked or not.
+ *
+ * @returns An object containing the status.
+ */
+export async function getClientStatus(): Promise<GetClientStatusResult> {
+  return await snap.request({
+    method: 'snap_getClientStatus',
   });
 }

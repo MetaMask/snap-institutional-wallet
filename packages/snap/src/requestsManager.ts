@@ -9,11 +9,12 @@ import {
   MAX_SIGNED_MESSAGE_AGE,
 } from './lib/custodian-types/constants';
 import { TransactionHelper } from './lib/helpers/transaction';
-import {
-  type SignedMessageRequest,
-  type TransactionRequest,
-  type CustodialSnapRequest,
-  TransactionDetails,
+import { TransactionDetails } from './lib/structs/CustodialKeyringStructs';
+import type {
+  CustodialSnapRequest,
+  MutableTransactionSearchParameters,
+  SignedMessageRequest,
+  TransactionRequest,
 } from './lib/structs/CustodialKeyringStructs';
 import type { ICustodianApi } from './lib/types';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
@@ -61,6 +62,50 @@ export class RequestManager {
     }
 
     return transactionRequest.chainId;
+  }
+
+  /**
+   * Gets a transaction request that matches the specified parameters.
+   * @param params - The transaction parameters to search for.
+   * @returns The most recently updated transaction request matching the parameters.
+   */
+  async getMutableTransactionParameters(
+    params: MutableTransactionSearchParameters,
+  ): Promise<CustodialSnapRequest<SignedMessageRequest | TransactionRequest>> {
+    const requests = await this.listRequests();
+
+    const transactionRequests = requests.filter((request) => {
+      return Boolean(
+        (request as CustodialSnapRequest<TransactionRequest>).transaction,
+      );
+    }) as CustodialSnapRequest<TransactionRequest>[];
+
+    const matchingRequests = transactionRequests.filter((request) => {
+      // Look in the original request params, not the updated ones
+      const requestParams = request.keyringRequest.request.params;
+      if (!Array.isArray(requestParams) || requestParams.length === 0) {
+        return false;
+      }
+      const txParams = requestParams[0] as EthSignTransactionRequest;
+      return (
+        txParams.from === params.from &&
+        txParams.to === params.to &&
+        txParams.value === params.value &&
+        txParams.data === params.data &&
+        txParams.chainId === params.chainId
+      );
+    });
+
+    // Use the last updated request
+    const matchingRequest = matchingRequests.sort(
+      (a, b) => b.lastUpdated - a.lastUpdated,
+    )[0];
+
+    if (!matchingRequest) {
+      throw new Error('No matching transaction request found');
+    }
+
+    return matchingRequest;
   }
 
   async getRequestParams(id: string): Promise<EthSignTransactionRequest> {
@@ -171,6 +216,7 @@ export class RequestManager {
       !transactionResponse.transactionStatus.success
     ) {
       await this.emitRejectedEvent(requestId);
+      logger.info('Removing failed transaction request', requestId);
       await this.#stateManager.removeRequest(requestId);
       return;
     }
@@ -207,56 +253,18 @@ export class RequestManager {
       }
 
       const updatedTransaction = {
-        ...request,
+        ...this.#updateTransactionRequest(request, transactionResponse),
         fulfilled: true,
         result: signature,
         lastUpdated: Date.now(),
       };
       await this.#stateManager.upsertRequest(updatedTransaction);
       await this.emitApprovedEvent(requestId, signature);
-      await this.#stateManager.removeRequest(requestId);
     } else if (transactionResponse) {
-      // Check for any changes to request.transaction relative the response
-      // Restrict to the status, gasPrice, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce
-      const updatedTransaction: CustodialSnapRequest<TransactionRequest> = {
-        ...request,
-        transaction: {
-          ...request.transaction,
-          transactionStatus: {
-            finished: transactionResponse.transactionStatus.finished ?? false,
-            success: transactionResponse.transactionStatus.success ?? false,
-            displayText:
-              transactionResponse.transactionStatus.displayText ?? '',
-            submitted: transactionResponse.transactionStatus.submitted ?? false,
-            reason: transactionResponse.transactionStatus.reason ?? '',
-            signed: transactionResponse.transactionStatus.signed ?? false,
-          },
-          ...(transactionResponse.gasPrice && {
-            gasPrice: transactionResponse.gasPrice,
-          }),
-          ...(transactionResponse.maxFeePerGas && {
-            maxFeePerGas: transactionResponse.maxFeePerGas,
-          }),
-          ...(transactionResponse.maxPriorityFeePerGas && {
-            maxPriorityFeePerGas: transactionResponse.maxPriorityFeePerGas,
-          }),
-          ...(transactionResponse.gasLimit && {
-            gasLimit: transactionResponse.gasLimit,
-          }),
-          ...(transactionResponse.nonce && {
-            nonce: transactionResponse.nonce,
-          }),
-          ...(transactionResponse.to && { to: transactionResponse.to }),
-          ...(transactionResponse.value && {
-            value: transactionResponse.value,
-          }),
-          ...(transactionResponse.data && { data: transactionResponse.data }),
-          ...(transactionResponse.chainId && {
-            chainId: transactionResponse.chainId,
-          }),
-          ...(transactionResponse.from && { from: transactionResponse.from }),
-        },
-      };
+      const updatedTransaction = this.#updateTransactionRequest(
+        request,
+        transactionResponse,
+      );
       await this.#stateManager.upsertRequest(updatedTransaction);
     }
   }
@@ -352,5 +360,54 @@ export class RequestManager {
         throw error;
       }
     }
+  }
+
+  #updateTransactionRequest(
+    request: CustodialSnapRequest<TransactionRequest>,
+    transactionResponse: TransactionDetails,
+  ): CustodialSnapRequest<TransactionRequest> {
+    const updatedTransaction: CustodialSnapRequest<TransactionRequest> = {
+      ...request,
+      transaction: {
+        ...request.transaction,
+        transactionStatus: {
+          finished: transactionResponse.transactionStatus.finished ?? false,
+          success: transactionResponse.transactionStatus.success ?? false,
+          displayText: transactionResponse.transactionStatus.displayText ?? '',
+          submitted: transactionResponse.transactionStatus.submitted ?? false,
+          reason: transactionResponse.transactionStatus.reason ?? '',
+          signed: transactionResponse.transactionStatus.signed ?? false,
+        },
+        ...(transactionResponse.transactionHash && {
+          transactionHash: transactionResponse.transactionHash,
+        }),
+        ...(transactionResponse.gasPrice && {
+          gasPrice: transactionResponse.gasPrice,
+        }),
+        ...(transactionResponse.maxFeePerGas && {
+          maxFeePerGas: transactionResponse.maxFeePerGas,
+        }),
+        ...(transactionResponse.maxPriorityFeePerGas && {
+          maxPriorityFeePerGas: transactionResponse.maxPriorityFeePerGas,
+        }),
+        ...(transactionResponse.gasLimit && {
+          gasLimit: transactionResponse.gasLimit,
+        }),
+        ...(transactionResponse.nonce && {
+          nonce: transactionResponse.nonce,
+        }),
+        ...(transactionResponse.to && { to: transactionResponse.to }),
+        ...(transactionResponse.value && {
+          value: transactionResponse.value,
+        }),
+        ...(transactionResponse.data && { data: transactionResponse.data }),
+        ...(transactionResponse.chainId && {
+          chainId: transactionResponse.chainId,
+        }),
+        ...(transactionResponse.from && { from: transactionResponse.from }),
+      },
+    };
+
+    return updatedTransaction;
   }
 }

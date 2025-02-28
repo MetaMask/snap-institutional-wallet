@@ -1,3 +1,5 @@
+import { toChecksumAddress } from '@ethereumjs/util';
+
 import type {
   CustodialSnapRequest,
   OnBoardingRpcRequest,
@@ -172,7 +174,9 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
     const state = await this.get();
     return (
       Object.values(state.wallets).find(
-        (wallet) => wallet.account.address.toString() === address.toLowerCase(),
+        (wallet) =>
+          toChecksumAddress(wallet.account.address.toString()) ===
+          toChecksumAddress(address),
       ) ?? null
     );
   }

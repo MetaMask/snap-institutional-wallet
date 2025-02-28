@@ -284,7 +284,12 @@ describe('BitgoCustodianApi', () => {
     it('resolves to null', async () => {
       const result = await bitgoCustodianApi.getTransactionLink('xxx');
 
-      expect(result).toBeNull();
+      expect(result).toMatchObject({
+        action: 'view',
+        id: '',
+        text: 'Complete your transaction in the BitGo App',
+        url: '',
+      });
     });
   });
 

@@ -55,7 +55,7 @@ export const custodianMetadata: (
       'https://dashboard.metamask-institutional.io/custodian-icons/bitgo-icon.svg',
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://app.bitgo-test.com',
-    allowedOnboardingDomains: ['app.bitgo-test.com'],
+    allowedOnboardingDomains: ['app.bitgo-test.com', 'localhost:3000'],
   },
   {
     refreshTokenUrl: null,
@@ -84,7 +84,13 @@ export const custodianMetadata: (
     isManualTokenInputSupported: false,
     apiBaseUrl: 'https://api.mycactus.com/custody/v1/mmi-api',
     onboardingUrl: 'https://www.mycactus.com',
-    allowedOnboardingDomains: ['www.mycactus.com'],
+    allowedOnboardingDomains: [
+      'www.mycactus.com',
+      'www.mycactus.dev',
+      'pre.mycactus.com',
+      'debug.mycactus.dev:1443',
+      'alpha.mycactus.io',
+    ],
   },
 
   {

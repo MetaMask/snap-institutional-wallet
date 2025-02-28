@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "te0cF7V3GhkvtPTPtiZxEDiUf1hnEk1WTSOhewQswWg=",
+    "shasum": "61twpj95F7b92y4usr2OoZeGh/KO9tpG5GgWfQjy+G0=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -19,11 +19,14 @@
   },
   "initialConnections": {
     "localhost:8000": {},
-    "https://localhost:8000": {},
+    "http://localhost:3000": {},
+    "https://localhost:3000": {},
+    "http://localhost:8000": {},
     "https://neptune-custody-ui.metamask-institutional.io": {},
     "https://ui-v2.sit.zodia.io": {},
     "https://ui-v2.qa.zodia.io": {},
     "https://ui-preprod-v2.qa.zodia.io": {},
+    "https://ui-preprod-v2.uat.zodia.io": {},
     "https://v2.custody.zodia.io": {},
     "https://console.fireblocks.io": {},
     "https://local.waterballoons.xyz:4200": {},
@@ -34,7 +37,12 @@
     "https://console.mpcvault.com": {},
     "https://app.bitgo.com": {},
     "https://app.bitgo-test.com": {},
-    "https://apps-portal.safe.global": {}
+    "https://apps-portal.safe.global": {},
+    "https://alpha.mycactus.io": {},
+    "https://pre.mycactus.com": {},
+    "https://www.mycactus.dev": {},
+    "https://debug.mycactus.dev:1443": {},
+    "https://www.mycactus.com": {}
   },
   "initialPermissions": {
     "snap_notify": {},
@@ -52,11 +60,13 @@
         "http://localhost:8000",
         "localhost:3000",
         "https://localhost:3000",
+        "http://localhost:3000",
         "https://neptune-custody-ui.metamask-institutional.io",
         "https://zodia.io",
         "https://ui-v2.sit.zodia.io",
         "https://ui-v2.qa.zodia.io",
         "https://ui-preprod-v2.qa.zodia.io",
+        "https://ui-preprod-v2.uat.zodia.io",
         "https://v2.custody.zodia.io",
         "https://console.fireblocks.io",
         "https://local.waterballoons.xyz:4200",
@@ -67,7 +77,12 @@
         "https://console.mpcvault.com",
         "https://app.bitgo.com",
         "https://app.bitgo-test.com",
-        "https://apps-portal.safe.global"
+        "https://apps-portal.safe.global",
+        "https://alpha.mycactus.io",
+        "https://pre.mycactus.com",
+        "https://www.mycactus.dev",
+        "https://debug.mycactus.dev:1443",
+        "https://www.mycactus.com"
       ]
     },
     "endowment:cronjob": {

@@ -29,6 +29,7 @@ describe('KeyringStateManager', () => {
       custodian: {
         displayName: 'Test Custodian',
         deferPublication: false,
+        importOrigin: 'test-origin',
       },
     },
     methods: [EthMethod.SignTransaction, EthMethod.PersonalSign],
@@ -190,7 +191,9 @@ describe('KeyringStateManager', () => {
       const state = createInitState(3);
       getDataSpy.mockResolvedValue(state);
 
-      const wallet = await instance.getWalletByAddress('0xnonexistent');
+      const wallet = await instance.getWalletByAddress(
+        '0x94b21bdbe1a2d4b09d048ab7d865a7d352da1a51',
+      );
 
       expect(wallet).toBeNull();
     });
