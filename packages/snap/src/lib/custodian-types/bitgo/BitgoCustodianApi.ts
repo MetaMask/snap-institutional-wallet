@@ -11,6 +11,8 @@ import type {
   ICustodianApi,
 } from '../../types';
 import type { IBitgoEthereumAccountCustodianDetails } from './interfaces/IBitgoEthereumAccountCustodianDetails';
+import type { IBitgoTransaction } from './interfaces/IBitgoTransaction';
+import logger from '../../../logger';
 import { mapTransactionStatus } from '../../../util/map-status';
 import type {
   SignedMessageDetails,
@@ -96,10 +98,17 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
       Number(txParams.gasLimit) + BITGO_ADDITIONAL_GAS
     ).toString();
 
-    const result = await this.#client.createTransaction(
-      { walletId, coinId },
-      txParams,
-    );
+    let result: IBitgoTransaction;
+    try {
+      result = await this.#client.createTransaction(
+        { walletId, coinId },
+        txParams,
+      );
+    } catch (error) {
+      logger.error(`Error creating BitGo transaction.`);
+      logger.error(error);
+      throw error;
+    }
 
     return {
       transactionStatus: mapTransactionStatus(result.transactionStatus),
@@ -157,13 +166,23 @@ export class BitgoCustodianApi extends EventEmitter implements ICustodianApi {
   async getTransactionLink(
     _transactionId: string,
   ): Promise<Partial<CustodianDeepLink> | null> {
-    return null;
+    return {
+      text: 'Complete your transaction in the BitGo App',
+      id: '',
+      url: '',
+      action: 'view',
+    };
   }
 
   async getSignedMessageLink(
     _signedMessageId: string,
   ): Promise<Partial<CustodianDeepLink> | null> {
-    return null;
+    return {
+      text: 'Complete your transaction in the BitGo App',
+      id: '',
+      url: '',
+      action: 'view',
+    };
   }
 
   changeRefreshTokenAuthDetails(_authDetails: any): void {

@@ -4982,6 +4982,7 @@ __metadata:
   dependencies:
     "@ethereumjs/common": ^4.4.0
     "@ethereumjs/tx": ^5.4.0
+    "@ethereumjs/util": ^9.1.0
     "@metamask/eth-hd-keyring": ^8.0.0
     "@open-rpc/schema-utils-js": ^2.0.5
     "@open-rpc/server-js": ^1.9.5

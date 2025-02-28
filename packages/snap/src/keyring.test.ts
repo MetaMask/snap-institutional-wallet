@@ -506,8 +506,6 @@ describe('CustodialKeyring', () => {
           return Promise.resolve([mockWallet]);
         });
 
-        console.log('details', details);
-
         const result = await keyring.getConnectedAccounts(details, origin);
         expect(result).toStrictEqual([]);
       });

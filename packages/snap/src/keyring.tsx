@@ -230,6 +230,16 @@ export class CustodialKeyring implements Keyring {
         checksumAddress,
       );
       if (!wallet) {
+        logger.debug(
+          `Wallet does not exist error. Address: ${address}, Checksum address: ${
+            checksumAddress as string
+          }`,
+        );
+        logger.debug(
+          `All wallets: ${JSON.stringify(
+            await this.#stateManager.listWallets(),
+          )}`,
+        );
         throw new Error(`Wallet for account ${address} does not exist`);
       }
       const custodianApi = this.#getCustodianApi(wallet.details);
