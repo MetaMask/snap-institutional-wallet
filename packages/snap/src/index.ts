@@ -43,7 +43,7 @@ import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccoun
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import logger from './logger';
 import { InternalMethod, originPermissions } from './permissions';
-// @audit - this file needs unittests
+import { getClientStatus } from './snap-state-manager/snap-util';
 
 /**
  * Verify if the caller can call the requested method.
@@ -249,6 +249,18 @@ const pollRequests = async (): Promise<void> => {
 };
 
 export const onCronjob: OnCronjobHandler = async ({ request }) => {
+  // Check if the client is locked
+  // If it is, return so as not to try and access the encrypted storage which would cause the user to have to enter their password
+
+  // TODO: In the future, we can have some unencrypted storage that is used to store whether the snap was ever used or not
+  // or even a list of all the accounts and pending requests and then we can optionally unlock to continue polliog
+  // But for now we just keep the client locked with the assumption that the user will unlock it when they want to complete the request
+
+  const clientStatus = await getClientStatus();
+  if (clientStatus.locked) {
+    return;
+  }
+
   switch (
     request.method // @audit-info this is execute every minute * * * * *  acc. to manifest
   ) {
