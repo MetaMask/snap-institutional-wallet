@@ -80,7 +80,7 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
     }
 
     return accounts.filter((account) =>
-      new RegExp(name, 'u').test(account.name),
+      account.name.toLowerCase().includes(name.toLowerCase()),
     );
   }
 

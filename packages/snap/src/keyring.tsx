@@ -376,6 +376,18 @@ export class CustodialKeyring implements Keyring {
     params: Json,
     keyringRequest: KeyringRequest,
   ): Promise<string> {
+    // Add method validation
+    const account = await this.getAccount(keyringRequest.account);
+    if (!account) {
+      throw new Error(`Account '${keyringRequest.account}' not found`);
+    }
+
+    if (!account.methods.includes(method)) {
+      throw new Error(
+        `Method '${method}' not supported for account '${account.address}'`,
+      );
+    }
+
     switch (method) {
       case EthMethod.PersonalSign: {
         const [message, from] = params as [string, string];
