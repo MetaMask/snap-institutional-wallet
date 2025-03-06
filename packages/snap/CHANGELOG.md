@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0]
+### Changed
+- Show account creation errors to the user ([#46](https://github.com/MetaMask/snap-institutional-wallet/pull/46))
+- Explicitly check if a method is suppported for an account ([#45](https://github.com/MetaMask/snap-institutional-wallet/pull/45))
+- Fix potential redos finding ([#44](https://github.com/MetaMask/snap-institutional-wallet/pull/44))
+- Don't poll requests if the client is locked ([#43](https://github.com/MetaMask/snap-institutional-wallet/pull/43))
+- Add waterballoons dev environments ([#39](https://github.com/MetaMask/snap-institutional-wallet/pull/39))
+- Add tests for ECA-3 Custodian type ([#38](https://github.com/MetaMask/snap-institutional-wallet/pull/38))
+- Audit remediation ([#37](https://github.com/MetaMask/snap-institutional-wallet/pull/37))
+- Add tests for keyring.ts ([#36](https://github.com/MetaMask/snap-institutional-wallet/pull/36))
+
 ## [0.3.1]
 ### Changed
 - Fix custodian permissions ([#34](https://github.com/MetaMask/snap-institutional-wallet/pull/34))
@@ -27,7 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.1...v1.0.0
 [0.3.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.10...v0.3.0
 [0.2.10]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.9...v0.2.10
