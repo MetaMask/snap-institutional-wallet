@@ -1,7 +1,7 @@
 {
   "name": "@metamask/institutional-wallet-api",
   "private": true,
-  "version": "0.3.1",
+  "version": "1.0.0",
   "description": "Example custodian API",
   "packageManager": "yarn@3.6.3",
   "dependencies": {
