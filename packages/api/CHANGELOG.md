@@ -9,20 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0]
 
-### Uncategorized
-
-- Develop ([#41](https://github.com/MetaMask/snap-institutional-wallet/pull/41))
-- chore: final pre-audit fixes ([#37](https://github.com/MetaMask/snap-institutional-wallet/pull/37))
-
-## [0.3.1]
-
-## [0.3.0]
-
-## [0.2.10]
-
-## [0.2.9]
-
-## [0.2.8]
+### Changed
+- Audit remediation fixes ([#37](https://github.com/MetaMask/snap-institutional-wallet/pull/37))
 
 ### Changed
 

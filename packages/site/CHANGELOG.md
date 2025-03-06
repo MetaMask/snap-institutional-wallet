@@ -9,13 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0]
 
-### Uncategorized
-
-- Develop ([#41](https://github.com/MetaMask/snap-institutional-wallet/pull/41))
 
 ## [0.3.1]
 
-### Uncategorized
+### Changed
 
 - Fix custodian permissions ([#34](https://github.com/MetaMask/snap-institutional-wallet/pull/34))
 
