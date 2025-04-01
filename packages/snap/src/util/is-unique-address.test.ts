@@ -16,6 +16,7 @@ describe('isUniqueAddress', () => {
             id: '1',
             options: {
               custodian: {
+                environmentName: 'test-custodian',
                 displayName: 'custodian',
                 deferPublication: false,
                 importOrigin: 'test-origin',
