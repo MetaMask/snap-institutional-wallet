@@ -7,22 +7,17 @@ import type { ICustodianApi } from './lib/types/ICustodianApi';
 
 // Mock dependencies
 jest.mock('./lib/custodian-types/custodianMetadata', () => ({
-  custodianMetadata: {
-    BitGo: {
-      production: false,
-      apiBaseUrl: 'https://mock-url.com',
-      apiVersion: 'BitGo',
-      custodianPublishesTransaction: true,
-      iconUrl: 'https://mock-url.com/icon.svg',
-    },
-    ECA3: {
-      production: true,
+  custodianMetadata: [
+    {
       apiBaseUrl: 'https://mock-url.com',
       apiVersion: 'ECA3',
+      production: true,
       custodianPublishesTransaction: false,
       iconUrl: 'https://mock-url.com/icon.svg',
+      displayName: 'Test Custodian',
+      name: 'test-custodian',
     },
-  },
+  ],
 }));
 
 jest.mock('./features/info-message/rendex');
@@ -40,6 +35,12 @@ jest.mock('./lib/types/CustodianType', () => ({
   },
   CustodianApiMap: {
     ECA3: jest.fn(),
+  },
+}));
+
+jest.mock('./config', () => ({
+  config: {
+    dev: false,
   },
 }));
 
@@ -169,8 +170,10 @@ describe('CustodialKeyring', () => {
   });
 
   describe('submitRequest', () => {
+    const mockAccountId = '3ae4b404-8cdb-4c5c-bcd9-ec904f2a9876';
+
     const mockAccount = {
-      id: '1',
+      id: mockAccountId,
       address: '0x123',
       methods: ['personal_sign', 'eth_signTransaction'],
       options: {
@@ -190,9 +193,9 @@ describe('CustodialKeyring', () => {
       mockStateManager.getAccount.mockResolvedValue(null);
 
       const mockRequest = {
-        id: 'request-1',
+        id: '1cf42f0b-2512-4b6b-b5a5-138d9cbfa0e1',
         scope: 'scope-1',
-        account: 'non-existent-account',
+        account: mockAccountId,
         request: {
           method: 'personal_sign',
           params: ['message', '0x123'],
@@ -200,15 +203,15 @@ describe('CustodialKeyring', () => {
       };
 
       await expect(keyring.submitRequest(mockRequest)).rejects.toThrow(
-        "Account 'non-existent-account' not found",
+        `Account '${mockAccountId}' not found`,
       );
     });
 
     it('should throw error when method is not supported by account', async () => {
       const mockRequest = {
-        id: 'request-1',
+        id: '1cf42f0b-2512-4b6b-b5a5-138d9cbfa0e1',
         scope: 'scope-1',
-        account: mockAccount.id,
+        account: mockAccountId,
         request: {
           method: 'eth_signTypedData_v4',
           params: ['message', mockAccount.address],
@@ -222,7 +225,7 @@ describe('CustodialKeyring', () => {
 
     it('should handle personal sign request when method is supported', async () => {
       const mockRequest = {
-        id: 'request-1',
+        id: '1cf42f0b-2512-4b6b-b5a5-138d9cbfa0e1',
         scope: 'scope-1',
         account: mockAccount.id,
         request: {
@@ -545,6 +548,196 @@ describe('CustodialKeyring', () => {
 
         const result = await keyring.getConnectedAccounts(details, origin);
         expect(result).toStrictEqual([]);
+      });
+    });
+  });
+
+  describe('createAccount', () => {
+    const mockAccountDetails = {
+      name: 'Test Account',
+      address: '0x123',
+      details: {
+        token: 'test-token',
+        custodianType: CustodianType.ECA3,
+        custodianEnvironment: 'test',
+        custodianApiUrl: 'https://mock-url.com',
+        refreshTokenUrl: 'https://refresh.example.com',
+        custodianDisplayName: 'Test Custodian',
+      },
+      origin: 'test-origin',
+    };
+
+    beforeEach(() => {
+      // Add this mock to return empty array by default
+      mockStateManager.listWallets.mockResolvedValue([]);
+    });
+
+    it('should create a new account successfully', async () => {
+      const mockCustodianApi = {
+        getSupportedChains: jest.fn().mockResolvedValue(['eip155:1']),
+        on: jest.fn(),
+      };
+
+      jest
+        .spyOn(keyring as any, 'getCustodianApiForAddress')
+        .mockResolvedValue(mockCustodianApi);
+
+      mockStateManager.addWallet.mockResolvedValue(undefined);
+
+      const result = await keyring.createAccount(mockAccountDetails);
+
+      expect(result).toMatchObject({
+        address: '0x123',
+        methods: expect.arrayContaining([
+          'eth_signTransaction',
+          'eth_signTypedData_v3',
+          'eth_signTypedData_v4',
+          'personal_sign',
+        ]),
+        options: {
+          custodian: {
+            displayName: 'Test Custodian',
+            importOrigin: mockAccountDetails.origin,
+          },
+        },
+      });
+
+      expect(mockStateManager.addWallet).toHaveBeenCalledWith(
+        expect.objectContaining({
+          account: expect.objectContaining({
+            address: '0x123',
+          }),
+        }),
+      );
+    });
+
+    it('should throw error if custodianType is not supported', async () => {
+      const invalidDetails = {
+        ...mockAccountDetails,
+        details: {
+          ...mockAccountDetails.details,
+          custodianType: 'UnsupportedType',
+        },
+      };
+
+      await expect(
+        keyring.createAccount(invalidDetails as any),
+      ).rejects.toThrow(/Expected one of/u);
+    });
+
+    it('should create account with correct wallet details', async () => {
+      const mockCustodianApi = {
+        getSupportedChains: jest.fn().mockResolvedValue(['eip155:1']),
+        on: jest.fn(),
+      };
+
+      jest
+        .spyOn(keyring as any, 'getCustodianApiForAddress')
+        .mockResolvedValue(mockCustodianApi);
+
+      mockStateManager.withTransaction.mockImplementation((callback: any) =>
+        callback(),
+      );
+      mockStateManager.addWallet.mockResolvedValue(undefined);
+
+      await keyring.createAccount(mockAccountDetails);
+
+      expect(mockStateManager.addWallet).toHaveBeenCalledWith({
+        account: expect.objectContaining({
+          address: '0x123',
+          methods: expect.arrayContaining([
+            'eth_signTransaction',
+            'personal_sign',
+            'eth_signTypedData_v3',
+            'eth_signTypedData_v4',
+          ]),
+          options: {
+            accountName: 'Test Account',
+            custodian: {
+              environmentName: 'test-custodian',
+              displayName: 'Test Custodian',
+              importOrigin: 'test-origin',
+              deferPublication: false,
+            },
+          },
+          type: 'eip155:eoa',
+        }),
+        details: {
+          token: mockAccountDetails.details.token,
+          custodianApiUrl: mockAccountDetails.details.custodianApiUrl,
+          custodianType: mockAccountDetails.details.custodianType,
+          refreshTokenUrl: mockAccountDetails.details.refreshTokenUrl,
+          custodianEnvironment: mockAccountDetails.details.custodianEnvironment,
+          custodianDisplayName: mockAccountDetails.details.custodianDisplayName,
+        },
+      });
+    });
+
+    it('should throw error if address already exists', async () => {
+      mockStateManager.listWallets.mockResolvedValue([
+        {
+          account: {
+            address: '0x123', // Same address as in mockAccountDetails
+          },
+        },
+      ]);
+
+      await expect(keyring.createAccount(mockAccountDetails)).rejects.toThrow(
+        /Account address already in use/u,
+      );
+    });
+
+    it('should throw if config.dev is false and createAccount is called with a custodial API URL that is not in the custodianMetadata', async () => {
+      const mockCustodianApi = {
+        getSupportedChains: jest.fn().mockResolvedValue(['eip155:1']),
+        on: jest.fn(),
+      };
+
+      jest
+        .spyOn(keyring as any, 'getCustodianApiForAddress')
+        .mockResolvedValue(mockCustodianApi);
+
+      const invalidAccountDetails = {
+        ...mockAccountDetails,
+        details: {
+          ...mockAccountDetails.details,
+          custodianApiUrl: 'https://invalid-url.com', // URL that's not in custodianMetadata
+        },
+      };
+
+      await expect(
+        keyring.createAccount(invalidAccountDetails),
+      ).rejects.toThrow(
+        'No custodian allowlisted for API URL: https://invalid-url.com',
+      );
+    });
+
+    it('should use the custodian info from the onboarding request if config.dev is true', async () => {
+      const mockCustodianApi = {
+        getSupportedChains: jest.fn().mockResolvedValue(['eip155:1']),
+        on: jest.fn(),
+      };
+
+      jest
+        .spyOn(keyring as any, 'getCustodianApiForAddress')
+        .mockResolvedValue(mockCustodianApi);
+
+      const result = await keyring.createAccount({
+        ...mockAccountDetails,
+        details: {
+          ...mockAccountDetails.details,
+          custodianEnvironment: 'test-user-supplied',
+          custodianDisplayName: 'Test Custodian User Supplied',
+        },
+      });
+
+      expect(result).toMatchObject({
+        options: {
+          custodian: {
+            environmentName: 'test-custodian', // i.e do NOT use the user supplied environment name
+            displayName: 'Test Custodian User Supplied', // i.e. DO use the user supplied display name
+          },
+        },
       });
     });
   });

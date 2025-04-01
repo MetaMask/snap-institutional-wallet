@@ -88,6 +88,26 @@ export class CustodialKeyring implements Keyring {
       (item) => item.apiBaseUrl === options.details.custodianApiUrl,
     );
 
+    let custodianEnvironmentName: string;
+    let custodianEnvironmentDisplayName: string;
+
+    // If dev mode is enabled, trust the custodian info from the onboarding request
+
+    if (config.dev) {
+      custodianEnvironmentName = options.details.custodianEnvironment;
+      custodianEnvironmentDisplayName = options.details.custodianDisplayName;
+    } else {
+      // Otherwise, use the custodian info from the custodian metadata
+      // and if it's not found, throw an error
+      if (!custodian) {
+        throw new Error(
+          `No custodian allowlisted for API URL: ${options.details.custodianApiUrl}`,
+        );
+      }
+      custodianEnvironmentName = custodian.name;
+      custodianEnvironmentDisplayName = options.details.custodianDisplayName;
+    }
+
     const { address, name } = options;
 
     const wallets = await this.#stateManager.listWallets();
@@ -111,7 +131,8 @@ export class CustodialKeyring implements Keyring {
         id: uuid(),
         options: {
           custodian: {
-            displayName: options.details.custodianDisplayName,
+            environmentName: custodianEnvironmentName,
+            displayName: custodianEnvironmentDisplayName,
             deferPublication,
             importOrigin: options.origin,
           },
