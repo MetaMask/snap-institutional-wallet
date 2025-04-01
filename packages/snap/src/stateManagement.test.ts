@@ -27,6 +27,7 @@ describe('KeyringStateManager', () => {
     address: `0x${id}`,
     options: {
       custodian: {
+        environmentName: 'test-custodian',
         displayName: 'Test Custodian',
         deferPublication: false,
         importOrigin: 'test-origin',
