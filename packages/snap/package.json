@@ -39,20 +39,10 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch --passWithNoTests"
   },
-  "dependencies": {
+  "devDependencies": {
     "@ethereumjs/common": "^3.1.2",
     "@ethereumjs/tx": "4.1.2",
     "@ethereumjs/util": "9.1.0",
-    "@metamask/eth-sig-util": "7.0.1",
-    "@metamask/keyring-api": "11.0.0",
-    "@metamask/snaps-sdk": "6.12.0",
-    "@metamask/snaps-types": "3.0.0",
-    "@metamask/superstruct": "3.1.0",
-    "@metamask/utils": "10.0.1",
-    "async-mutex": "0.5.0",
-    "uuid": "9.0.0"
-  },
-  "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@lavamoat/allow-scripts": "^2.0.3",
     "@metamask/auto-changelog": "^3.3.0",
@@ -60,14 +50,21 @@
     "@metamask/eslint-config-jest": "^12.1.0",
     "@metamask/eslint-config-nodejs": "^12.1.0",
     "@metamask/eslint-config-typescript": "^12.1.0",
+    "@metamask/eth-sig-util": "7.0.1",
+    "@metamask/keyring-api": "11.0.0",
     "@metamask/snaps-cli": "6.2.1",
     "@metamask/snaps-jest": "^8.7.1",
+    "@metamask/snaps-sdk": "6.12.0",
+    "@metamask/snaps-types": "3.0.0",
+    "@metamask/superstruct": "3.1.0",
+    "@metamask/utils": "10.0.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.6.2",
     "@types/react": "18.2.4",
     "@types/react-dom": "18.2.2",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
+    "async-mutex": "0.5.0",
     "depcheck": "^1.4.6",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.1.0",
@@ -82,8 +79,9 @@
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^29.2.5",
-    "typescript": "^4.7.4"
-  },
+    "typescript": "^4.7.4",
+    "uuid": "9.0.0"
+},
   "packageManager": "yarn@3.2.1",
   "engines": {
     "node": ">=18.0.0"
