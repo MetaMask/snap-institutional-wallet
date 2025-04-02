@@ -17,6 +17,7 @@ import type {
   ILegacyTXParams,
   IMetamaskContractMetadata,
   IRefreshTokenAuthDetails,
+  ITransactionStatus,
 } from '../../types';
 import type { CreateTransactionMetadata } from '../../types/CreateTransactionMetadata';
 import type { MessageTypes, TypedMessage } from '../../types/ITypedMessage';
@@ -143,10 +144,24 @@ export class CactusCustodianApi extends EventEmitter implements ICustodianApi {
     if (!result) {
       return null;
     }
+
+    let transactionStatus: ITransactionStatus;
+    if (result.transactionStatus === 'signed') {
+      transactionStatus = {
+        submitted: false,
+        finished: true,
+        signed: true,
+        success: true,
+        displayText: 'Signed',
+        reason: '',
+      };
+    } else {
+      transactionStatus = mapTransactionStatus(result.transactionStatus);
+    }
     return {
       id: result.custodian_transactionId ?? '',
       signature: result.signature,
-      status: mapTransactionStatus(result.transactionStatus),
+      status: transactionStatus,
       from: address,
     };
   }

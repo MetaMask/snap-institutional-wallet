@@ -2,6 +2,7 @@ export type ICactusSignatureResponse = {
   transactionStatus:
     | 'created'
     | 'approved'
+    | 'signed'
     | 'submitted'
     | 'rejected'
     | 'failed'
