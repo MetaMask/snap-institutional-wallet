@@ -216,6 +216,50 @@ describe('CactusClient', () => {
         'Failed to get signature',
       );
     });
+
+    it('should handle this reference response from the cactus API', async () => {
+      fetchMock.mockResponseOnce(
+        JSON.stringify([
+          {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            chain_id: '11155111',
+            nonce: null,
+            from: '0xa46f26c8249a9be0c13371b331b086eb3bbf0f80',
+            signature:
+              '0x6b85a1980b72de7cb720683d2a6e4fed237ec24f8145aa062762831f6ff30f0124af5b15548ab1f4c729cf813bc0121dbda4dd5ec50a2cc8f84445a19520447f1b',
+            transactionStatus: 'signed',
+            transactionHash: null,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            custodian_transactionId: 'AYN2R2S09QD110110000892',
+            gasPrice: null,
+            maxFeePerGas: null,
+            maxPriorityFeePerGas: null,
+            gasLimit: null,
+          },
+        ]),
+      );
+
+      const result = await cactusClient.getTransactions(4);
+
+      expect(result).toStrictEqual([
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          chain_id: '11155111',
+          nonce: null,
+          from: '0xa46f26c8249a9be0c13371b331b086eb3bbf0f80',
+          signature:
+            '0x6b85a1980b72de7cb720683d2a6e4fed237ec24f8145aa062762831f6ff30f0124af5b15548ab1f4c729cf813bc0121dbda4dd5ec50a2cc8f84445a19520447f1b',
+          transactionStatus: 'signed',
+          transactionHash: null,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          custodian_transactionId: 'AYN2R2S09QD110110000892',
+          gasPrice: null,
+          maxFeePerGas: null,
+          maxPriorityFeePerGas: null,
+          gasLimit: null,
+        },
+      ]);
+    });
   });
 
   describe('CactusClient#getTransactions', () => {
