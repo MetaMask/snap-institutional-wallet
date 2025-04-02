@@ -1,5 +1,4 @@
 # Changelog
-
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -8,26 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [1.1.1]
-
 ### Changed
-
 - Move all dependencies to devdependencies and alphabetise ([#52](https://github.com/MetaMask/snap-institutional-wallet/pull/52))
 
 ## [1.1.0]
-
 ### Changed
-
 - Enforce custodian API URL in production mode ([#49](https://github.com/MetaMask/snap-institutional-wallet/pull/49))
 - Pin dependencies ([#48](https://github.com/MetaMask/snap-institutional-wallet/pull/48))
 
 ### Fixed
-
 - Fix get signed message with cactus ([#50](https://github.com/MetaMask/snap-institutional-wallet/pull/50))
 
 ## [1.0.0]
-
 ### Changed
-
 - Show account creation errors to the user ([#46](https://github.com/MetaMask/snap-institutional-wallet/pull/46))
 - Explicitly check if a method is suppported for an account ([#45](https://github.com/MetaMask/snap-institutional-wallet/pull/45))
 - Fix potential redos finding ([#44](https://github.com/MetaMask/snap-institutional-wallet/pull/44))
@@ -38,34 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add tests for keyring.ts ([#36](https://github.com/MetaMask/snap-institutional-wallet/pull/36))
 
 ## [0.3.1]
-
 ### Changed
-
 - Fix custodian permissions ([#34](https://github.com/MetaMask/snap-institutional-wallet/pull/34))
 
 ## [0.3.0]
-
 ### Changed
-
 - chore: Adjust permissions and refactor checks to support bitgo ([#32](https://github.com/MetaMask/snap-institutional-wallet/pull/32))
 - chore: Audit remediation ([#31](https://github.com/MetaMask/snap-institutional-wallet/pull/31))
 
 ## [0.2.10]
-
 ### Removed
-
 - chore: remove saturn and neptune dev ([#29](https://github.com/MetaMask/snap-institutional-wallet/pull/29))
 
 ## [0.2.9]
-
 ### Changed
-
 - chore: add zodia UI URLs to allowlist ([#27](https://github.com/MetaMask/snap-institutional-wallet/pull/27))
 
 ## [0.2.8]
-
 ### Changed
-
 - Initial release
 
 [Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.1...HEAD
