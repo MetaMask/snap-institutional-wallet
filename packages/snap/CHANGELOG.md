@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.1]
 
-### Uncategorized
+### Changed
 
-- chore: move all dependencies to devdependencies and alphabetise ([#52](https://github.com/MetaMask/snap-institutional-wallet/pull/52))
+- Move all dependencies to devdependencies and alphabetise ([#52](https://github.com/MetaMask/snap-institutional-wallet/pull/52))
 
 ## [1.1.0]
 
