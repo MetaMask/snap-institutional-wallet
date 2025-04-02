@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0]
+### Changed
+- Enforce custodian API URL in production mode ([#49](https://github.com/MetaMask/snap-institutional-wallet/pull/49))
+- Pin dependencies ([#48](https://github.com/MetaMask/snap-institutional-wallet/pull/48))
+
+### Fixed
+- Fix get signed message with cactus ([#50](https://github.com/MetaMask/snap-institutional-wallet/pull/50))
+
 ## [1.0.0]
 ### Changed
 - Show account creation errors to the user ([#46](https://github.com/MetaMask/snap-institutional-wallet/pull/46))
@@ -38,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.1...v1.0.0
 [0.3.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.2.10...v0.3.0
