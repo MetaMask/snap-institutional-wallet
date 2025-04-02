@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0]
 
-### Uncategorized
+### Fixed
 
-- chore: fix get signed message with cactus ([#50](https://github.com/MetaMask/snap-institutional-wallet/pull/50))
-- chore: enforce custodian API URL in production mode ([#49](https://github.com/MetaMask/snap-institutional-wallet/pull/49))
-- chore: pin dependencies ([#48](https://github.com/MetaMask/snap-institutional-wallet/pull/48))
+- Fix get signed message with cactus ([#50](https://github.com/MetaMask/snap-institutional-wallet/pull/50))
+
+### Changed
+
+- Enforce custodian API URL in production mode ([#49](https://github.com/MetaMask/snap-institutional-wallet/pull/49))
+- Pin dependencies ([#48](https://github.com/MetaMask/snap-institutional-wallet/pull/48))
 
 ## [1.0.0]
 
