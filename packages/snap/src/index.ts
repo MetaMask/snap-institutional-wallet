@@ -277,8 +277,9 @@ const pollRequests = async (): Promise<void> => {
 };
 
 /**
- * Sleep if the client is locked or if the snap is not activated
- * @returns true if we should continue, false if we should sleep
+ * Check if the client is locked or if the snap is not activated.
+ *
+ * @returns True if the client is locked or the snap is not activated, false otherwise.
  */
 async function lockedOrInactive() {
   // First check if the client is locked
