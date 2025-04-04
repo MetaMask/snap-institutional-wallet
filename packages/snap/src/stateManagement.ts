@@ -34,6 +34,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
       if (!state) {
         // eslint-disable-next-line no-param-reassign
         state = {
+          activated: false,
           wallets: {},
           walletIds: [],
           requests: {},
@@ -242,5 +243,16 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
 
   protected isRequestExist(state: SnapState, id: string): boolean {
     return Object.prototype.hasOwnProperty.call(state.requests, id);
+  }
+
+  async setActivated(activated: boolean): Promise<void> {
+    await this.update(async (state: SnapState) => {
+      state.activated = activated;
+    });
+  }
+
+  async getActivated(): Promise<boolean> {
+    const state = await this.get();
+    return state.activated;
   }
 }

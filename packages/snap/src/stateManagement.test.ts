@@ -60,6 +60,7 @@ describe('KeyringStateManager', () => {
     }
 
     return {
+      activated: false,
       wallets,
       walletIds,
       requests: {},
@@ -319,6 +320,31 @@ describe('KeyringStateManager', () => {
         expect(state.requests).toStrictEqual({});
         expect(setDataSpy).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('setActivated', () => {
+    it('sets activated to true', async () => {
+      const { instance, getDataSpy, setDataSpy } = createMockStateManager();
+      const state = createInitState(1);
+      getDataSpy.mockResolvedValue(state);
+
+      await instance.setActivated(true);
+
+      expect(state.activated).toBe(true);
+      expect(setDataSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('getActivated', () => {
+    it('returns activated status', async () => {
+      const { instance, getDataSpy } = createMockStateManager();
+      const state = createInitState(1);
+      getDataSpy.mockResolvedValue(state);
+
+      const activated = await instance.getActivated();
+
+      expect(activated).toBe(false);
     });
   });
 });
