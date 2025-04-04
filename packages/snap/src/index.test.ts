@@ -2,17 +2,20 @@ import type { JsonRpcRequest } from '@metamask/keyring-api';
 import { handleKeyringRequest } from '@metamask/keyring-api';
 
 import { onRpcRequest, onKeyringRequest, onCronjob } from '.';
-import { getKeyring, getRequestManager } from './context';
+import { getKeyring, getRequestManager, getStateManager } from './context';
 import { renderErrorMessage } from './features/error-message/render';
 import { renderOnboarding } from './features/onboarding/render';
 import { CustodianType } from './lib/types/CustodianType';
 import { InternalMethod, originPermissions } from './permissions';
 import { getClientStatus } from './snap-state-manager/snap-util';
+import type { KeyringStateManager } from './stateManagement';
+import { getSleepState, setSleepState } from './util/sleep';
 
 // Mock the context module
 jest.mock('./context', () => ({
   getKeyring: jest.fn(),
   getRequestManager: jest.fn(),
+  getStateManager: jest.fn(),
 }));
 
 // Mock the keyring-api module
@@ -44,12 +47,41 @@ const mockRenderOnboarding = renderOnboarding as jest.MockedFunction<
   typeof renderOnboarding
 >;
 
-// Add this mock at the top of the test file with other mocks
 jest.mock('./snap-state-manager/snap-util');
+
+// Mock the sleep state
+jest.mock('./util/sleep', () => ({
+  getSleepState: jest.fn().mockResolvedValue(false),
+  setSleepState: jest.fn(),
+}));
+
+const mockGetSleepState = getSleepState as jest.MockedFunction<
+  typeof getSleepState
+>;
 
 // Add type assertion for the mock
 const mockGetClientStatus = getClientStatus as jest.MockedFunction<
   typeof getClientStatus
+>;
+
+// Mock the state manager
+const mockStateManager = {
+  getActivated: jest.fn<Promise<boolean>, []>().mockResolvedValue(false),
+  setActivated: jest
+    .fn<Promise<void>, [boolean]>()
+    .mockResolvedValue(undefined),
+  get: jest.fn(),
+  listAccounts: jest.fn(),
+  listWallets: jest.fn(),
+  addWallet: jest.fn(),
+  removeWallet: jest.fn(),
+  updateWalletDetails: jest.fn(),
+  clearState: jest.fn(),
+} as unknown as KeyringStateManager;
+
+// Import getStateManager from context and create mock reference
+const mockGetStateManager = getStateManager as jest.MockedFunction<
+  typeof getStateManager
 >;
 
 jest.mock('./features/error-message/render', () => ({
@@ -79,6 +111,7 @@ describe('index', () => {
     jest.clearAllMocks();
     (getKeyring as jest.Mock).mockResolvedValue(mockKeyring);
     (getRequestManager as jest.Mock).mockResolvedValue(mockRequestManager);
+    mockGetStateManager.mockResolvedValue(mockStateManager);
 
     // Set up permissions for example.com
     originPermissions.set(
@@ -94,8 +127,10 @@ describe('index', () => {
       },
     ]);
 
-    // Set default mock return value
+    // Set default mock return values
     mockGetClientStatus.mockResolvedValue({ locked: false });
+    (mockStateManager.getActivated as jest.Mock).mockResolvedValue(false);
+    (mockStateManager.setActivated as jest.Mock).mockResolvedValue(undefined);
   });
 
   describe('onRpcRequest', () => {
@@ -382,60 +417,119 @@ describe('index', () => {
   });
 
   describe('onCronjob', () => {
-    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
-
     beforeEach(() => {
-      setTimeoutSpy.mockImplementation((fn) => {
-        fn();
-        return 0 as any;
-      });
-    });
-
-    afterEach(() => {
       jest.clearAllMocks();
+      // Reset default mock values for each test
+      mockGetClientStatus.mockResolvedValue({ locked: false });
+      mockGetSleepState.mockResolvedValue(false);
     });
 
-    it('should not poll when client is locked', async () => {
-      // Override the mock for this specific test
-      mockGetClientStatus.mockResolvedValueOnce({ locked: true });
+    describe('execute method', () => {
+      it('should not poll when snap is asleep', async () => {
+        // Mock sleep state to be true (asleep)
+        mockGetSleepState.mockResolvedValueOnce(true);
 
-      await onCronjob({
-        request: {
-          method: 'execute',
-          id: 1,
-          jsonrpc: '2.0',
-        },
+        await onCronjob({
+          request: {
+            method: 'execute',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        });
+
+        expect(mockRequestManager.poll).not.toHaveBeenCalled();
+        expect(mockGetClientStatus).not.toHaveBeenCalled(); // Shouldn't even check client status
       });
 
-      expect(mockRequestManager.poll).not.toHaveBeenCalled();
-      expect(setTimeoutSpy).not.toHaveBeenCalled();
+      it('should go to sleep when client is locked', async () => {
+        // Mock sleep state to be false (awake)
+        mockGetSleepState.mockResolvedValueOnce(false);
+        // Mock client to be locked
+        mockGetClientStatus.mockResolvedValueOnce({ locked: true });
+
+        await onCronjob({
+          request: {
+            method: 'execute',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        });
+
+        expect(setSleepState).toHaveBeenCalledWith(true);
+        expect(mockRequestManager.poll).not.toHaveBeenCalled();
+      });
+
+      it('should poll when awake and client is unlocked', async () => {
+        // Mock sleep state to be false (awake)
+        mockGetSleepState.mockResolvedValueOnce(false);
+        // Mock client to be unlocked
+        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
+        // Mock snap to be activated
+        (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
+          true,
+        );
+
+        await onCronjob({
+          request: {
+            method: 'execute',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        });
+
+        expect(mockRequestManager.poll).toHaveBeenCalled();
+        expect(setSleepState).not.toHaveBeenCalled(); // Shouldn't change sleep state
+      });
     });
 
-    it('should poll when client is unlocked', async () => {
-      await onCronjob({
-        request: {
-          method: 'execute',
-          id: 1,
-          jsonrpc: '2.0',
-        },
+    describe('manageSleepState method', () => {
+      it('should set sleep when client is locked', async () => {
+        mockGetClientStatus.mockResolvedValueOnce({ locked: true });
+
+        await onCronjob({
+          request: {
+            method: 'manageSleepState',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        });
+
+        expect(setSleepState).toHaveBeenCalledWith(true);
       });
 
-      expect(mockRequestManager.poll).toHaveBeenCalled();
-      expect(setTimeoutSpy).toHaveBeenCalledTimes(5); // 5 delays between 6 polls
-    });
+      it('should wake up when client is unlocked and snap is activated', async () => {
+        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
+        (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
+          true,
+        );
 
-    it('should handle execute method', async () => {
-      await onCronjob({
-        request: {
-          method: 'execute',
-          id: 1,
-          jsonrpc: '2.0',
-        },
+        await onCronjob({
+          request: {
+            method: 'manageSleepState',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        });
+
+        expect(setSleepState).toHaveBeenCalledWith(false);
       });
 
-      expect(mockRequestManager.poll).toHaveBeenCalled();
-      expect(setTimeoutSpy).toHaveBeenCalledTimes(5); // 5 delays between 6 polls
-      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 10000);
+      it('should sleep when client is unlocked but snap is not activated', async () => {
+        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
+        (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
+          false,
+        );
+
+        await onCronjob({
+          request: {
+            method: 'manageSleepState',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        });
+
+        expect(setSleepState).toHaveBeenCalledWith(true);
+      });
     });
 
     it('should throw error for unsupported method', async () => {
@@ -448,34 +542,6 @@ describe('index', () => {
           },
         }),
       ).rejects.toThrow('Method not found.');
-
-      expect(setTimeoutSpy).not.toHaveBeenCalled();
-    });
-
-    it('should poll multiple times with correct delay', async () => {
-      await onCronjob({
-        request: {
-          method: 'execute',
-          id: 1,
-          jsonrpc: '2.0',
-        },
-      });
-
-      expect(mockRequestManager.poll).toHaveBeenCalledTimes(6);
-      expect(setTimeoutSpy).toHaveBeenCalledTimes(5); // 5 delays between 6 polls
-      expect(setTimeoutSpy).toHaveBeenLastCalledWith(
-        expect.any(Function),
-        10000,
-      );
-
-      // Verify all setTimeout calls were with 10 second delay
-      for (let i = 0; i < 5; i++) {
-        expect(setTimeoutSpy).toHaveBeenNthCalledWith(
-          i + 1,
-          expect.any(Function),
-          10000,
-        );
-      }
     });
   });
 });

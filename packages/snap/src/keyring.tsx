@@ -156,6 +156,7 @@ export class CustodialKeyring implements Keyring {
         account,
         accountNameSuggestion: name ?? 'Custodial Account',
         displayConfirmation: false, // This will only work when the snap is preinstalled
+        displayAccountNameSuggestion: false,
       });
       await this.#stateManager.addWallet({ account, details: options.details });
       return account;

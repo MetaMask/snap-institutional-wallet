@@ -7,6 +7,7 @@ import type {
 } from '../structs/CustodialKeyringStructs';
 
 export type SnapState = {
+  activated: boolean;
   walletIds: string[];
   wallets: Record<string, Wallet>;
   requests: Record<
