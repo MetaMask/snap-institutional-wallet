@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0]
+### Changed
+- Remove old hacky cronjob implementation ([#54](https://github.com/MetaMask/snap-institutional-wallet/pull/54))
+- Implement "deep sleep" mechanism until the snap is used for the first time ([#54](https://github.com/MetaMask/snap-institutional-wallet/pull/54))
+- Set `displayAccountNameSuggestion` to `false` ([#54](https://github.com/MetaMask/snap-institutional-wallet/pull/54))
+
 ## [1.1.1]
 ### Changed
 - Move all dependencies to devdependencies and alphabetise ([#52](https://github.com/MetaMask/snap-institutional-wallet/pull/52))
