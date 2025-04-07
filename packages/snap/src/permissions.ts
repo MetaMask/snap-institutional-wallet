@@ -2,7 +2,6 @@ import { KeyringRpcMethod } from '@metamask/keyring-api';
 
 import config from './config';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
-import logger from './logger';
 
 export enum InternalMethod {
   Onboard = 'authentication.onboard',
