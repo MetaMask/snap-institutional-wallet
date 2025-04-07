@@ -44,9 +44,6 @@ custodianMetadata.forEach((custodian) => {
         new Set([InternalMethod.Onboard, InternalMethod.GetConnectedAccounts]),
       );
       if (domain === 'localhost:3000') {
-        logger.info(
-          `Setting ${InternalMethod.Onboard} permissions for ${domain}`,
-        );
         originPermissions.set(
           'http://localhost:3000',
           new Set([InternalMethod.Onboard]),
