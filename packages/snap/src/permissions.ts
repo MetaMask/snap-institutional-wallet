@@ -76,6 +76,7 @@ const localhostPermissions = new Set([
   InternalMethod.Onboard,
   InternalMethod.ClearAllRequests,
   InternalMethod.GetConnectedAccounts,
+  InternalMethod.GetIsSupported,
 ]);
 
 if (config.dev) {
