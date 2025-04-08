@@ -116,7 +116,11 @@ describe('index', () => {
     // Set up permissions for example.com
     originPermissions.set(
       'https://example.com',
-      new Set([InternalMethod.Onboard, 'keyring_listAccounts']),
+      new Set([
+        InternalMethod.Onboard,
+        'keyring_listAccounts',
+        InternalMethod.GetIsSupported,
+      ]),
     );
 
     // Reset the mock implementation for each test
@@ -376,6 +380,19 @@ describe('index', () => {
           accounts: [],
         }),
       );
+    });
+
+    it('should return true for getIsSupported', async () => {
+      const result = await onRpcRequest({
+        origin: 'https://example.com',
+        request: {
+          method: InternalMethod.GetIsSupported,
+          params: {},
+          id: 1,
+          jsonrpc: '2.0',
+        },
+      });
+      expect(result).toBe(true);
     });
   });
 

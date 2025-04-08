@@ -8,6 +8,7 @@ export enum InternalMethod {
   ClearAllRequests = 'snap.internal.clearAllRequests',
   GetMutableTransactionParameters = 'transactions.getMutableTransactionParameters',
   GetConnectedAccounts = 'authentication.getConnectedAccounts',
+  GetIsSupported = 'authentication.getIsSupported',
 }
 
 const metamaskPermissions = new Set([
@@ -40,7 +41,11 @@ custodianMetadata.forEach((custodian) => {
       originPermissions.set(domain, new Set([InternalMethod.Onboard]));
       originPermissions.set(
         `https://${domain}`,
-        new Set([InternalMethod.Onboard, InternalMethod.GetConnectedAccounts]),
+        new Set([
+          InternalMethod.Onboard,
+          InternalMethod.GetConnectedAccounts,
+          InternalMethod.GetIsSupported,
+        ]),
       );
       if (domain === 'localhost:3000') {
         originPermissions.set(
@@ -67,6 +72,7 @@ const localhostPermissions = new Set([
   InternalMethod.Onboard,
   InternalMethod.ClearAllRequests,
   InternalMethod.GetConnectedAccounts,
+  InternalMethod.GetIsSupported,
 ]);
 
 if (config.dev) {

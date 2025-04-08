@@ -186,6 +186,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   | CreateAccountOptions[]
   | CustodialSnapRequest<SignedMessageRequest | TransactionRequest>
   | CustodialKeyringAccount[]
+  | boolean
 > => {
   logger.debug(
     `RPC request (origin="${origin}"): method="${request.method}"`,
@@ -221,6 +222,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         return await requestManager.clearAllRequests();
       }
       throw new MethodNotFoundError(request.method);
+    }
+
+    case InternalMethod.GetIsSupported: {
+      return true;
     }
 
     case InternalMethod.GetMutableTransactionParameters: {
