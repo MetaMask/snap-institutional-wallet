@@ -2,7 +2,6 @@ import { KeyringRpcMethod } from '@metamask/keyring-api';
 
 import config from './config';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
-import logger from './logger';
 
 export enum InternalMethod {
   Onboard = 'authentication.onboard',
@@ -49,9 +48,6 @@ custodianMetadata.forEach((custodian) => {
         ]),
       );
       if (domain === 'localhost:3000') {
-        logger.info(
-          `Setting ${InternalMethod.Onboard} permissions for ${domain}`,
-        );
         originPermissions.set(
           'http://localhost:3000',
           new Set([InternalMethod.Onboard]),
