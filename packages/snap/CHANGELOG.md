@@ -6,8 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.1]
+## [1.3.0]
+### Added
+- Add dev mode toggle to the homepage ([#59](https://github.com/MetaMask/snap-institutional-wallet/pull/59))- feat(dev-mode-toggle): allow users to toggle developer mode ([#59](https://github.com/MetaMask/snap-institutional-wallet/pull/59))
 
+### Changed
+- chore: show errors in the add token form ([#60](https://github.com/MetaMask/snap-institutional-wallet/pull/60))
+
+
+## [1.2.1]
 ### Changed
 - Add `authentication.getIsSupported` RPC method ([#57](https://github.com/MetaMask/snap-institutional-wallet/pull/57))
 
@@ -64,8 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.1...HEAD
-[1.2.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.2.1...v1.2.1
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.2.1...v1.3.0
+[1.2.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.0.0...v1.1.0
