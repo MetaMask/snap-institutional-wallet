@@ -97,7 +97,7 @@ export const custodianMetadata: (
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
     name: 'gk8-prod',
     displayName: 'GK8 ECA-1',
-    production: true,
+    production: false,
     apiBaseUrl: 'http://localhost:8090',
     apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,
@@ -109,7 +109,7 @@ export const custodianMetadata: (
   {
     refreshTokenUrl: 'http://localhost:8090/oauth/token',
     name: 'gk8-eca3-prod',
-    displayName: 'GK8 ECA-3',
+    displayName: 'GK8',
     production: true,
     apiBaseUrl: 'http://localhost:8090',
     apiVersion: CustodianType.ECA3,

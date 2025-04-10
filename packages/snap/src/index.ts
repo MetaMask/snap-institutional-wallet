@@ -296,9 +296,14 @@ async function lockedOrInactive() {
     return true;
   }
 
+  const stateManager = await getStateManager();
+
+  // As a side effect, lets sync dev mode
+  // TODO: Consider a better place for this
+  await stateManager.syncDevMode();
+
   // Now check if the snap is activated
   // i.e. has ever had an onboarding request
-  const stateManager = await getStateManager();
   const activated = await stateManager.getActivated();
   if (!activated) {
     return true;
@@ -333,6 +338,7 @@ export const onCronjob: OnCronjobHandler = async ({ request }) => {
 
     // This one runs every minute, and maintains the sleep state
   } else if (request.method === 'manageSleepState') {
+    console.log('manageSleepState');
     const shouldSleep = await lockedOrInactive();
     if (shouldSleep) {
       await setSleepState(true);
@@ -382,9 +388,10 @@ export const onUserInput: OnUserInputHandler = async ({
   }
 
   const keyring = await getKeyring();
-
+  const stateManager = await getStateManager();
   const snapContext: SnapContext = {
     keyring,
+    stateManager,
   };
 
   await handler({ id, event, context, snapContext });
@@ -392,8 +399,15 @@ export const onUserInput: OnUserInputHandler = async ({
 
 export const onHomePage: OnHomePageHandler = async () => {
   const keyring = await getKeyring();
-  const context = await getHomePageContext({ keyring });
+  const stateManager = await getStateManager();
+  const context = await getHomePageContext({ keyring, stateManager });
   return { id: await renderHomePage(context) };
+};
+
+export const handleSetDevMode = async (devMode: boolean) => {
+  const stateManager = await getStateManager();
+  await stateManager.setDevMode(devMode);
+  await stateManager.syncDevMode();
 };
 
 export type InstitutionalSnapTransactionRequest =

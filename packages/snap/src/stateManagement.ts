@@ -1,5 +1,6 @@
 import { toChecksumAddress } from '@ethereumjs/util';
 
+import { setDevMode } from './config';
 import type {
   CustodialSnapRequest,
   OnBoardingRpcRequest,
@@ -35,6 +36,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
         // eslint-disable-next-line no-param-reassign
         state = {
           activated: false,
+          devMode: true,
           wallets: {},
           walletIds: [],
           requests: {},
@@ -254,5 +256,23 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
   async getActivated(): Promise<boolean> {
     const state = await this.get();
     return state.activated;
+  }
+
+  async setDevMode(devMode: boolean): Promise<void> {
+    await this.update(async (state: SnapState) => {
+      state.devMode = devMode;
+    });
+  }
+
+  async getDevMode(): Promise<boolean> {
+    const state = await this.get();
+    return state.devMode;
+  }
+
+  // Synchronises `config.devMode` with the state manager's `devMode`
+  async syncDevMode(): Promise<void> {
+    const devMode = await this.getDevMode();
+    setDevMode(devMode);
+    logger.debug('Set dev mode to', devMode); // Notably, this is not logged if devMode is false, which is OK
   }
 }

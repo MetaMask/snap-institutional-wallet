@@ -9,7 +9,7 @@ import { createInterface } from '../../lib/helpers/interface';
  */
 export async function renderHomePage(context: HomePageContext) {
   return await createInterface(
-    <CustodianList accounts={context.accounts} />,
+    <CustodianList accounts={context.accounts} devMode={context.devMode} />,
     context,
   );
 }

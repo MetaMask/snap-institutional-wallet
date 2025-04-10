@@ -8,6 +8,7 @@ import type {
 
 export type SnapState = {
   activated: boolean;
+  devMode: boolean;
   walletIds: string[];
   wallets: Record<string, Wallet>;
   requests: Record<

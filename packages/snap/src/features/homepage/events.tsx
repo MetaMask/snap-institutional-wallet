@@ -1,6 +1,6 @@
 import type { ButtonClickEvent } from '@metamask/snaps-sdk/dist/types/handlers/user-input.cjs';
 
-import { handleOnboarding } from '../..';
+import { handleOnboarding, handleSetDevMode } from '../..';
 import { AddToken } from './components/AddToken';
 import { CustodianList } from './components/CustodianList';
 import { RemoveCustodianToken } from './components/RemoveCustodianToken';
@@ -181,11 +181,39 @@ export async function onConnectTokenClick({
   }
 }
 
+/**
+ * Handles the toggle dev mode checkbox click event.
+ * @param options - The options for the event.
+ * @param options.id - The id of the interface.
+ * @param options.context - The context for the homepage.
+ * @param options.event - The event triggered by the checkbox.
+ * @param options.event.type - The type of input change event.
+ * @param options.event.value - The boolean value indicating if dev mode is enabled.
+ */
+export async function onToggleDevMode({
+  id,
+  context,
+  event,
+}: {
+  id: string;
+  context: HomePageContext;
+  event: { type: 'InputChangeEvent'; value: boolean };
+}) {
+  const devMode = Boolean(event.value);
+  await handleSetDevMode(devMode);
+  await updateInterface(
+    id,
+    <CustodianList accounts={context.accounts} devMode={devMode} />,
+    context,
+  );
+}
+
 export const eventHandles = {
   [HomePageNames.RemoveCustodianToken]: onRemoveCustodianTokenClick,
   [HomePageNames.CancelRemoveToken]: onCancelTokenClick,
   [HomePageNames.RemoveToken]: onRemoveTokenClick,
   [HomePageNames.CancelToken]: onCancelTokenClick,
+  [HomePageNames.ToggleDevMode]: onToggleDevMode,
 };
 
 export const prefixEventHandles = {
