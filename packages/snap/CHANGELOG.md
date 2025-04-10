@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1]
+
+### Changed
+- Add `authentication.getIsSupported` RPC method ([#57](https://github.com/MetaMask/snap-institutional-wallet/pull/57))
+
+### Fixed
+- Remove log in permissions.ts ([#56](https://github.com/MetaMask/snap-institutional-wallet/pull/56))
+
 ## [1.2.0]
 ### Changed
 - Remove old hacky cronjob implementation ([#54](https://github.com/MetaMask/snap-institutional-wallet/pull/54))
@@ -57,6 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release
 
 [Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.1...HEAD
+[1.2.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.2.1...v1.2.1
+[1.2.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.1...v1.0.0
