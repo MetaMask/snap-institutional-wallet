@@ -1,5 +1,6 @@
 import { EthAccountType, EthMethod } from '@metamask/keyring-api';
 
+import { setDevMode } from './config';
 import type {
   CustodialSnapRequest,
   OnBoardingRpcRequest,
@@ -10,6 +11,11 @@ import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccoun
 import { CustodianType } from './lib/types/CustodianType';
 import * as snapUtil from './snap-state-manager/snap-util';
 import { KeyringStateManager } from './stateManagement';
+
+jest.mock('./config', () => ({
+  setDevMode: jest.fn(),
+  dev: false,
+}));
 
 describe('KeyringStateManager', () => {
   const createMockStateManager = () => {
@@ -61,6 +67,7 @@ describe('KeyringStateManager', () => {
 
     return {
       activated: false,
+      devMode: false,
       wallets,
       walletIds,
       requests: {},
@@ -345,6 +352,45 @@ describe('KeyringStateManager', () => {
       const activated = await instance.getActivated();
 
       expect(activated).toBe(false);
+    });
+  });
+
+  describe('setDevMode', () => {
+    it('sets dev mode', async () => {
+      const { instance, getDataSpy, setDataSpy } = createMockStateManager();
+      const state = createInitState(1);
+      getDataSpy.mockResolvedValue(state);
+
+      expect(state.devMode).toBe(false);
+
+      await instance.setDevMode(true);
+
+      expect(state.devMode).toBe(true);
+      expect(setDataSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('getDevMode', () => {
+    it('returns dev mode', async () => {
+      const { instance, getDataSpy } = createMockStateManager();
+      const state = createInitState(1);
+      getDataSpy.mockResolvedValue(state);
+
+      const devMode = await instance.getDevMode();
+
+      expect(devMode).toBe(false);
+    });
+  });
+
+  describe('syncDevMode', () => {
+    it('syncs dev mode', async () => {
+      const { instance, getDataSpy } = createMockStateManager();
+      const state = createInitState(1);
+      getDataSpy.mockResolvedValue(state);
+
+      await instance.syncDevMode();
+
+      expect(setDevMode).toHaveBeenCalled();
     });
   });
 });
