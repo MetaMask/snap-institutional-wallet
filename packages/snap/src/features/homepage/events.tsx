@@ -119,13 +119,16 @@ export async function onRemoveTokenClick({
  * @param options - The options for the event.
  * @param options.id - The id of the interface.
  * @param options.event - The event.
+ * @param options.context - The context for the homepage.
  */
 export async function onConnectTokenClick({
   id,
   event,
+  context,
 }: {
   id: string;
   event: ButtonClickEvent;
+  context: HomePageContext;
 }) {
   const custodianName =
     event.name?.replace(HomePagePrefixes.ConnectToken, '') ?? '';
@@ -150,6 +153,10 @@ export async function onConnectTokenClick({
       custodianApiUrl = selectedCustodian?.apiBaseUrl ?? '';
     }
 
+    if (!token?.length) {
+      throw new Error('Token is required');
+    }
+
     const onboardingRequest: OnBoardingRpcRequest = {
       custodianType: selectedCustodian.apiVersion,
       custodianEnvironment: selectedCustodian.name ?? '',
@@ -163,7 +170,11 @@ export async function onConnectTokenClick({
   } catch (error: unknown) {
     logger.error('Error onboarding', error);
     if (error instanceof Error) {
-      await renderErrorMessage(error.message);
+      await updateInterface(
+        id,
+        <AddToken custodianName={custodianName} error={error.message} />,
+        context,
+      );
     } else {
       await renderErrorMessage('An unknown error occurred');
     }

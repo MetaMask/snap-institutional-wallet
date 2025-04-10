@@ -7,6 +7,7 @@ import {
   Field,
   Input,
   Form,
+  Text,
 } from '@metamask/snaps-sdk/jsx';
 import type { SnapComponent, SnapElement } from '@metamask/snaps-sdk/jsx';
 
@@ -15,10 +16,12 @@ import { HomePageNames, HomePagePrefixes } from '../types';
 
 export type AddTokenProps = {
   custodianName?: string;
+  error?: string;
 };
 
 export const AddToken: SnapComponent<AddTokenProps> = ({
   custodianName,
+  error,
 }: AddTokenProps): SnapElement => {
   if (!custodianName) {
     throw new Error('Custodian name is required');
@@ -41,6 +44,7 @@ export const AddToken: SnapComponent<AddTokenProps> = ({
             <Input name="apiUrl" value={selectedCustodian?.apiBaseUrl} />
           </Field>
         </Form>
+        {error ? <Text>{error}</Text> : null}
       </Box>
       <Footer>
         <Button name={HomePageNames.CancelToken}>Cancel</Button>
