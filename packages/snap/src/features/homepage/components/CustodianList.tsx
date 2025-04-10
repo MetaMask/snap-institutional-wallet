@@ -24,6 +24,8 @@ import type { CustodianMetadata } from '../../../lib/custodian-types/custodianMe
 import { custodianMetadata } from '../../../lib/custodian-types/custodianMetadata';
 import type { CustodialKeyringAccount } from '../../../lib/types/CustodialKeyringAccount';
 import { HomePageNames, HomePagePrefixes } from '../types';
+import { ToggleDevMode } from './ToggleDevMode';
+import config from '../../../config';
 
 const custodianLogos: Record<string, string> = {
   'bitgo-prod': bitgoLogo,
@@ -39,10 +41,12 @@ const custodianLogos: Record<string, string> = {
 
 type CustodianListProps = {
   accounts?: CustodialKeyringAccount[];
+  devMode?: boolean;
 };
 
 export const CustodianList: SnapComponent<CustodianListProps> = ({
   accounts,
+  devMode,
 }): SnapElement => {
   const renderSelect = (custodian: CustodianMetadata) => {
     if (
@@ -70,7 +74,12 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
           solution
         </Text>
         {custodianMetadata
-          .filter((custodian) => custodian.production)
+          .filter((custodian) => {
+            if (config.dev) {
+              return true;
+            }
+            return custodian.production;
+          })
           .map((custodian) => (
             <Section
               key={custodian.name}
@@ -84,6 +93,8 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
               {renderSelect(custodian)}
             </Section>
           ))}
+
+        <ToggleDevMode devMode={devMode ?? false} />
       </Box>
       <Footer>
         <Button

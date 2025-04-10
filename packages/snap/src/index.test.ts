@@ -77,6 +77,7 @@ const mockStateManager = {
   removeWallet: jest.fn(),
   updateWalletDetails: jest.fn(),
   clearState: jest.fn(),
+  syncDevMode: jest.fn(),
 } as unknown as KeyringStateManager;
 
 // Import getStateManager from context and create mock reference
@@ -529,6 +530,24 @@ describe('index', () => {
         });
 
         expect(setSleepState).toHaveBeenCalledWith(false);
+      });
+
+      it('should sync dev mode when client is unlocked and snap is activated', async () => {
+        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
+        (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
+          true,
+        );
+
+        await onCronjob({
+          request: {
+            method: 'manageSleepState',
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        });
+
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        expect(mockStateManager.syncDevMode).toHaveBeenCalled();
       });
 
       it('should sleep when client is unlocked but snap is not activated', async () => {
