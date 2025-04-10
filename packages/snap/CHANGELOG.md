@@ -9,10 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.1]
 
 ### Changed
-
-- Remove log in permissions.ts ([#56](https://github.com/MetaMask/snap-institutional-wallet/pull/56))
 - Add `authentication.getIsSupported` RPC method ([#57](https://github.com/MetaMask/snap-institutional-wallet/pull/57))
 
+### Fixed
+- Remove log in permissions.ts ([#56](https://github.com/MetaMask/snap-institutional-wallet/pull/56))
 
 ## [1.2.0]
 ### Changed
