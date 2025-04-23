@@ -36,7 +36,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
         // eslint-disable-next-line no-param-reassign
         state = {
           activated: false,
-          devMode: true,
+          devMode: false,
           wallets: {},
           walletIds: [],
           requests: {},

@@ -24,7 +24,8 @@ describe('Permissions', () => {
     });
 
     it('should set up MetaMask permissions correctly', async () => {
-      const { originPermissions } = await import('./permissions');
+      const { getOriginPermissions } = await import('./permissions');
+      const originPermissions = getOriginPermissions();
       const metamaskPermissions = originPermissions.get('metamask');
       expect(metamaskPermissions).toBeDefined();
       expect(metamaskPermissions?.has(KeyringRpcMethod.ListAccounts)).toBe(
@@ -47,7 +48,8 @@ describe('Permissions', () => {
     });
 
     it('should set up custodian onboarding permissions correctly', async () => {
-      const { originPermissions } = await import('./permissions');
+      const { getOriginPermissions } = await import('./permissions');
+      const originPermissions = getOriginPermissions();
       const examplePermissions = originPermissions.get('https://example.com');
       const testPermissions = originPermissions.get('https://test.com');
 
@@ -56,7 +58,8 @@ describe('Permissions', () => {
     });
 
     it('should not include localhost permissions when not in dev mode', async () => {
-      const { originPermissions } = await import('./permissions');
+      const { getOriginPermissions } = await import('./permissions');
+      const originPermissions = getOriginPermissions();
       const localhostPermissions = originPermissions.get(
         'http://localhost:8000',
       );
@@ -64,19 +67,20 @@ describe('Permissions', () => {
     });
 
     describe('when in dev mode', () => {
+      const mockConfig = {
+        dev: true,
+      };
+
       beforeEach(() => {
         jest.resetModules();
-        jest.mock('./config', () => ({
-          dev: true,
-        }));
+        jest.mock('./config', () => mockConfig);
       });
 
       it('should include localhost permissions in dev mode', async () => {
-        const { originPermissions: devOriginPermissions } = await import(
-          './permissions'
-        );
+        const { getOriginPermissions } = await import('./permissions');
+        const originPermissions = getOriginPermissions();
 
-        const localhostPermissions = devOriginPermissions.get(
+        const localhostPermissions = originPermissions.get(
           'http://localhost:8000',
         );
         expect(localhostPermissions).toBeDefined();
@@ -90,6 +94,26 @@ describe('Permissions', () => {
         expect(localhostPermissions?.has(InternalMethod.ClearAllRequests)).toBe(
           true,
         );
+      });
+
+      it('should not include localhost permissions when not in dev mode, but when it is changes and we call initPermissions, it should include localhost permissions', async () => {
+        const { hasPermission, initPermissions } = await import(
+          './permissions'
+        );
+        mockConfig.dev = false;
+
+        initPermissions();
+
+        expect(
+          hasPermission('http://localhost:8000', InternalMethod.Onboard),
+        ).toBe(false);
+
+        mockConfig.dev = true;
+        initPermissions();
+
+        expect(
+          hasPermission('http://localhost:8000', InternalMethod.Onboard),
+        ).toBe(true);
       });
     });
   });

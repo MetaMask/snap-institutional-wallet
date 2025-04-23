@@ -138,7 +138,7 @@ export const custodianMetadata: (
     refreshTokenUrl: 'https://safe-mmi.safe.global/api/v1/oauth/token/',
     name: 'safe-prod',
     displayName: 'Safe',
-    production: true,
+    production: false,
     apiBaseUrl: 'https://safe-mmi.safe.global/api',
     apiVersion: CustodianType.ECA1,
     custodianPublishesTransaction: true,

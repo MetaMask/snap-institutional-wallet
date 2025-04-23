@@ -6,10 +6,30 @@ import { getKeyring, getRequestManager, getStateManager } from './context';
 import { renderErrorMessage } from './features/error-message/render';
 import { renderOnboarding } from './features/onboarding/render';
 import { CustodianType } from './lib/types/CustodianType';
-import { InternalMethod, originPermissions } from './permissions';
+import { hasPermission, InternalMethod } from './permissions';
 import { getClientStatus } from './snap-state-manager/snap-util';
 import type { KeyringStateManager } from './stateManagement';
 import { getSleepState, setSleepState } from './util/sleep';
+
+// Mock the permissions module with string literals instead of enum
+jest.mock('./permissions', () => ({
+  ...jest.requireActual('./permissions'), // Keep the actual enum
+  getOriginPermissions: jest
+    .fn()
+    .mockReturnValue(
+      new Map([
+        [
+          'https://example.com',
+          new Set([
+            'authentication.onboard',
+            'keyring_listAccounts',
+            'authentication.getIsSupported',
+          ]),
+        ],
+      ]),
+    ),
+  hasPermission: jest.fn().mockReturnValue(true),
+}));
 
 // Mock the context module
 jest.mock('./context', () => ({
@@ -114,16 +134,6 @@ describe('index', () => {
     (getRequestManager as jest.Mock).mockResolvedValue(mockRequestManager);
     mockGetStateManager.mockResolvedValue(mockStateManager);
 
-    // Set up permissions for example.com
-    originPermissions.set(
-      'https://example.com',
-      new Set([
-        InternalMethod.Onboard,
-        'keyring_listAccounts',
-        InternalMethod.GetIsSupported,
-      ]),
-    );
-
     // Reset the mock implementation for each test
     mockRenderOnboarding.mockImplementation(async () => [
       {
@@ -140,6 +150,9 @@ describe('index', () => {
 
   describe('onRpcRequest', () => {
     it('should throw UnauthorizedError for unauthorized origin', async () => {
+      // Mock hasPermission to return false
+      (hasPermission as jest.Mock).mockImplementationOnce(() => false);
+
       await expect(
         onRpcRequest({
           origin: 'unauthorized-origin',
@@ -156,6 +169,9 @@ describe('index', () => {
     });
 
     it('should throw UnauthorizedError for unsupported method', async () => {
+      // Mock hasPermission to return false
+      (hasPermission as jest.Mock).mockImplementationOnce(() => false);
+
       await expect(
         onRpcRequest({
           origin: 'https://example.com',
@@ -399,6 +415,9 @@ describe('index', () => {
 
   describe('onKeyringRequest', () => {
     it('should throw UnauthorizedError for unauthorized origin', async () => {
+      // Mock hasPermission to return false
+      (hasPermission as jest.Mock).mockImplementationOnce(() => false);
+
       await expect(
         onKeyringRequest({
           origin: 'unauthorized-origin',
