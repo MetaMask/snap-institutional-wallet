@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1]
+### Fixed
+- Fix bugs with dev mode ([#62](https://github.com/MetaMask/snap-institutional-wallet/pull/62))
+
 ## [1.3.0]
 ### Added
 - Add dev mode toggle to the homepage ([#59](https://github.com/MetaMask/snap-institutional-wallet/pull/59))- feat(dev-mode-toggle): allow users to toggle developer mode ([#59](https://github.com/MetaMask/snap-institutional-wallet/pull/59))
