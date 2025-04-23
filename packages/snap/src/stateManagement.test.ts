@@ -9,12 +9,17 @@ import type {
 import type { Wallet, SnapState } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianType } from './lib/types/CustodianType';
+import { initPermissions } from './permissions';
 import * as snapUtil from './snap-state-manager/snap-util';
 import { KeyringStateManager } from './stateManagement';
 
 jest.mock('./config', () => ({
   setDevMode: jest.fn(),
   dev: false,
+}));
+
+jest.mock('./permissions', () => ({
+  initPermissions: jest.fn(),
 }));
 
 describe('KeyringStateManager', () => {
@@ -391,6 +396,7 @@ describe('KeyringStateManager', () => {
       await instance.syncDevMode();
 
       expect(setDevMode).toHaveBeenCalled();
+      expect(initPermissions).toHaveBeenCalled();
     });
   });
 });

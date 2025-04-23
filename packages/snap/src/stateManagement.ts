@@ -10,6 +10,7 @@ import type {
 import type { SnapState, Wallet } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import logger from './logger';
+import { initPermissions } from './permissions';
 import { SnapStateManager } from './snap-state-manager/SnapStateManager';
 
 /**
@@ -36,7 +37,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
         // eslint-disable-next-line no-param-reassign
         state = {
           activated: false,
-          devMode: true,
+          devMode: false,
           wallets: {},
           walletIds: [],
           requests: {},
@@ -273,6 +274,7 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
   async syncDevMode(): Promise<void> {
     const devMode = await this.getDevMode();
     setDevMode(devMode);
+    initPermissions(); // Update permissions when dev mode changes, because they are set when the snap is initialized and they read config.dev
     logger.debug('Set dev mode to', devMode); // Notably, this is not logged if devMode is false, which is OK
   }
 }

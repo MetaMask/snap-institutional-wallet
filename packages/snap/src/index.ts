@@ -43,20 +43,9 @@ import type { SnapContext } from './lib/types/Context';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import logger from './logger';
-import { InternalMethod, originPermissions } from './permissions';
+import { InternalMethod, hasPermission } from './permissions';
 import { getClientStatus } from './snap-state-manager/snap-util';
 import { getSleepState, setSleepState } from './util/sleep';
-
-/**
- * Verify if the caller can call the requested method.
- *
- * @param origin - Caller origin.
- * @param method - Method being called.
- * @returns True if the caller is allowed to call the method, false otherwise.
- */
-function hasPermission(origin: string, method: string): boolean {
-  return originPermissions.get(origin)?.has(method) ?? false;
-}
 
 export const handleGetConnectedAccounts = async (
   request: ConnectionStatusRpcRequest,

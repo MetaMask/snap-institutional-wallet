@@ -24,57 +24,86 @@ const metamaskPermissions = new Set([
 
 const metamask = 'metamask';
 
-export const originPermissions = new Map<string, Set<string>>([]);
+const originPermissions = new Map<string, Set<string>>();
 
-originPermissions.set(metamask, metamaskPermissions);
+/**
+ * Initialize the origin permissions.
+ */
+export function initPermissions() {
+  originPermissions.clear();
 
-custodianMetadata.forEach((custodian) => {
-  if (custodian.allowedOnboardingDomains) {
-    // exclude localhost
+  originPermissions.set(metamask, metamaskPermissions);
 
-    if (!config.dev && !custodian.production) {
-      return;
-    }
+  custodianMetadata.forEach((custodian) => {
+    if (custodian.allowedOnboardingDomains) {
+      // exclude localhost
 
-    custodian.allowedOnboardingDomains.forEach((domain) => {
-      // Due to a quirk of the snap SDK, we need to allow the onboarding domain as a bare domain
-      originPermissions.set(domain, new Set([InternalMethod.Onboard]));
-      originPermissions.set(
-        `https://${domain}`,
-        new Set([
-          InternalMethod.Onboard,
-          InternalMethod.GetConnectedAccounts,
-          InternalMethod.GetIsSupported,
-        ]),
-      );
-      if (domain === 'localhost:3000') {
-        originPermissions.set(
-          'http://localhost:3000',
-          new Set([InternalMethod.Onboard]),
-        );
+      if (!config.dev && !custodian.production) {
+        return;
       }
-    });
+
+      custodian.allowedOnboardingDomains.forEach((domain) => {
+        // Due to a quirk of the snap SDK, we need to allow the onboarding domain as a bare domain
+        originPermissions.set(domain, new Set([InternalMethod.Onboard]));
+        originPermissions.set(
+          `https://${domain}`,
+          new Set([
+            InternalMethod.Onboard,
+            InternalMethod.GetConnectedAccounts,
+            InternalMethod.GetIsSupported,
+          ]),
+        );
+        if (domain === 'localhost:3000') {
+          originPermissions.set(
+            'http://localhost:3000',
+            new Set([InternalMethod.Onboard]),
+          );
+        }
+      });
+    }
+  });
+
+  // Add localhost to the originPermissions
+  const localhostPermissions = new Set([
+    // Keyring methods
+    KeyringRpcMethod.ListAccounts,
+    KeyringRpcMethod.GetAccount,
+    KeyringRpcMethod.CreateAccount,
+    KeyringRpcMethod.FilterAccountChains,
+    KeyringRpcMethod.UpdateAccount,
+    KeyringRpcMethod.DeleteAccount,
+    KeyringRpcMethod.ListRequests,
+    KeyringRpcMethod.GetRequest,
+    // Custom methods
+    InternalMethod.Onboard,
+    InternalMethod.ClearAllRequests,
+    InternalMethod.GetConnectedAccounts,
+    InternalMethod.GetIsSupported,
+  ]);
+
+  if (config.dev) {
+    originPermissions.set('http://localhost:8000', localhostPermissions);
   }
-});
-
-// Add localhost to the originPermissions
-const localhostPermissions = new Set([
-  // Keyring methods
-  KeyringRpcMethod.ListAccounts,
-  KeyringRpcMethod.GetAccount,
-  KeyringRpcMethod.CreateAccount,
-  KeyringRpcMethod.FilterAccountChains,
-  KeyringRpcMethod.UpdateAccount,
-  KeyringRpcMethod.DeleteAccount,
-  KeyringRpcMethod.ListRequests,
-  KeyringRpcMethod.GetRequest,
-  // Custom methods
-  InternalMethod.Onboard,
-  InternalMethod.ClearAllRequests,
-  InternalMethod.GetConnectedAccounts,
-  InternalMethod.GetIsSupported,
-]);
-
-if (config.dev) {
-  originPermissions.set('http://localhost:8000', localhostPermissions);
 }
+
+/**
+ * Get the origin permissions.
+ *
+ * @returns The origin permissions.
+ */
+export function getOriginPermissions(): Map<string, Set<string>> {
+  return originPermissions;
+}
+
+/**
+ * Verify if the caller can call the requested method.
+ *
+ * @param origin - Caller origin.
+ * @param method - Method being called.
+ * @returns True if the caller is allowed to call the method, false otherwise.
+ */
+export function hasPermission(origin: string, method: string): boolean {
+  return originPermissions.get(origin)?.has(method) ?? false;
+}
+
+initPermissions();
