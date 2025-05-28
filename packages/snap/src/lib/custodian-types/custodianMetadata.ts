@@ -7,6 +7,7 @@ export type CustodianMetadata = {
   legacyName?: string;
   displayName: string | null;
   production: boolean | null;
+  hideFromUI?: boolean;
   apiVersion: CustodianType;
   custodianPublishesTransaction: boolean;
   iconUrl: string | null;
@@ -231,6 +232,51 @@ export const custodianMetadata: (
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://console.fireblocks.io/v2/',
     allowedOnboardingDomains: ['console.fireblocks.io'],
+  },
+  {
+    refreshTokenUrl: 'https://mmi.fireblocks.io/v1/auth/access',
+    name: 'fireblocks-sandbox',
+    displayName: 'Fireblocks Sandbox',
+    production: true,
+    hideFromUI: true,
+    apiBaseUrl: 'https://sandbox.fireblocks.io/',
+    apiVersion: CustodianType.ECA1,
+    custodianPublishesTransaction: true,
+    iconUrl:
+      'https://metamask-institutional.io/custodian-icons/fireblocks-icon.svg',
+    isManualTokenInputSupported: false,
+    onboardingUrl: 'https://console.fireblocks.io/v2/',
+    allowedOnboardingDomains: ['sandbox.fireblocks.io'],
+  },
+  {
+    refreshTokenUrl: 'https://eu-console.fireblocks.io/v1/auth/access',
+    name: 'fireblocks-eu',
+    displayName: 'Fireblocks EU',
+    production: true,
+    hideFromUI: true,
+    apiBaseUrl: 'https://eu-console.fireblocks.io/',
+    apiVersion: CustodianType.ECA1,
+    custodianPublishesTransaction: true,
+    iconUrl:
+      'https://metamask-institutional.io/custodian-icons/fireblocks-icon.svg',
+    isManualTokenInputSupported: false,
+    onboardingUrl: 'https://eu-console.fireblocks.io/',
+    allowedOnboardingDomains: ['eu-console.fireblocks.io'],
+  },
+  {
+    refreshTokenUrl: 'https://eu2-console.fireblocks.io/v1/auth/access',
+    name: 'fireblocks-eu2',
+    displayName: 'Fireblocks EU2',
+    production: true,
+    hideFromUI: true,
+    apiBaseUrl: 'https://eu2-console.fireblocks.io/',
+    apiVersion: CustodianType.ECA1,
+    custodianPublishesTransaction: true,
+    iconUrl:
+      'https://metamask-institutional.io/custodian-icons/fireblocks-icon.svg',
+    isManualTokenInputSupported: false,
+    onboardingUrl: 'https://eu2-console.fireblocks.io/',
+    allowedOnboardingDomains: ['eu2-console.fireblocks.io'],
   },
   {
     refreshTokenUrl: 'https://local.waterballoons.xyz:4200/v1/auth/access',
