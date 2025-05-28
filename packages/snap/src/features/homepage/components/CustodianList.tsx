@@ -78,7 +78,7 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
             if (config.dev) {
               return true;
             }
-            return custodian.production;
+            return custodian.production && !custodian.hideFromUI;
           })
           .map((custodian) => (
             <Section

@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "oadOjTS9UGFvy18oEGuP0z2zufbQH4ZGl0ABl4aqtxU=",
+    "shasum": "FiFu62FKy2q19mT6jyHp9AlhGjQ8k4M+eJXWqNLY9BE=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -29,6 +29,9 @@
     "https://ui-preprod-v2.uat.zodia.io": {},
     "https://v2.custody.zodia.io": {},
     "https://console.fireblocks.io": {},
+    "https://eu-console.fireblocks.io": {},
+    "https://eu2-console.fireblocks.io": {},
+    "https://sandbox.fireblocks.io": {},
     "https://local.waterballoons.xyz:4200": {},
     "https://dev4-console.waterballoons.xyz": {},
     "https://dev10-console.waterballoons.xyz": {},
@@ -69,6 +72,9 @@
         "https://ui-preprod-v2.uat.zodia.io",
         "https://v2.custody.zodia.io",
         "https://console.fireblocks.io",
+        "https://eu-console.fireblocks.io",
+        "https://eu2-console.fireblocks.io",
+        "https://sandbox.fireblocks.io",
         "https://local.waterballoons.xyz:4200",
         "https://dev4-console.waterballoons.xyz",
         "https://dev10-console.waterballoons.xyz",
