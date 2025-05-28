@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2]
+### Added
+- chore: enable fireblocks sandboxes in prod mode, but hide ([#64](https://github.com/MetaMask/snap-institutional-wallet/pull/64))
+
 ## [1.3.1]
 ### Fixed
 - Fix bugs with dev mode ([#62](https://github.com/MetaMask/snap-institutional-wallet/pull/62))
@@ -16,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - chore: show errors in the add token form ([#60](https://github.com/MetaMask/snap-institutional-wallet/pull/60))
-
 
 ## [1.2.1]
 ### Changed
@@ -75,7 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.1.1...v1.2.0
