@@ -469,7 +469,7 @@ export class CustodialKeyring implements Keyring {
           from,
           data,
           custodianApi,
-          { version: SignTypedDataVersion.V3 },
+          { version: SignTypedDataVersion.V4 },
         );
         await this.#requestManagerFacade.upsertRequest({
           keyringRequest,
