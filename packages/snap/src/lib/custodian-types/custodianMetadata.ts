@@ -164,20 +164,6 @@ export const custodianMetadata: (
     allowedOnboardingDomains: ['apps-portal.safe.global'],
   },
   {
-    refreshTokenUrl:
-      'https://saturn-custody.metamask-institutional.io/oauth/token',
-    name: 'saturn-prod',
-    displayName: 'Saturn Custody',
-    production: false,
-    apiBaseUrl: 'https://saturn-custody.metamask-institutional.io/eth',
-    apiVersion: CustodianType.ECA1,
-    custodianPublishesTransaction: true,
-    iconUrl: 'https://saturn-custody-ui.metamask-institutional.io/saturn.svg',
-    isManualTokenInputSupported: false,
-    onboardingUrl: 'https://saturn-custody-ui.metamask-institutional.io',
-    allowedOnboardingDomains: ['saturn-custody-ui.metamask-institutional.io'],
-  },
-  {
     refreshTokenUrl: 'https://api.mpcvault.com/mmi/token-refresh',
     name: 'mpcvault-prod',
     displayName: 'MPCVault',
@@ -190,21 +176,6 @@ export const custodianMetadata: (
     isManualTokenInputSupported: false,
     onboardingUrl: 'https://console.mpcvault.com/',
     allowedOnboardingDomains: ['console.mpcvault.com'],
-  },
-  {
-    refreshTokenUrl:
-      'https://neptune-custody.metamask-institutional.io/oauth/token',
-    name: 'neptune-custody-prod',
-    displayName: 'Neptune Custody',
-    production: false,
-    apiBaseUrl: 'https://neptune-custody.metamask-institutional.io/eth',
-    apiVersion: CustodianType.ECA3,
-    custodianPublishesTransaction: false,
-    iconUrl:
-      'https://metamask-institutional.io/custodian-icons/neptune-icon.svg',
-    isManualTokenInputSupported: false,
-    onboardingUrl: 'https://neptune-custody-ui.metamask-institutional.io',
-    allowedOnboardingDomains: ['neptune-custody-ui.metamask-institutional.io'],
   },
   {
     refreshTokenUrl: 'https://api-preprod.uat.zodia.io/oauth/token',
@@ -405,6 +376,19 @@ export const custodianMetadata: (
     displayName: 'Cubist Test',
     production: false,
     apiBaseUrl: 'https://dg5z0qnzb9s65.cloudfront.net/v0/mmi',
+    apiVersion: CustodianType.ECA3,
+    custodianPublishesTransaction: false,
+    iconUrl:
+      'https://assets-global.website-files.com/638a2693daaf8527290065a3/651802cf8d04ec5f1a09ce86_Logo.svg',
+    isManualTokenInputSupported: true,
+    allowedOnboardingDomains: [], // Cubist does not support onboarding via a web page
+  },
+  {
+    refreshTokenUrl: 'https://prod.signer.cubist.dev/v0/oauth/token',
+    name: 'cubist-prod',
+    displayName: 'Cubist',
+    production: true,
+    apiBaseUrl: 'https://prod.signer.cubist.dev/v0/mmi',
     apiVersion: CustodianType.ECA3,
     custodianPublishesTransaction: false,
     iconUrl:
