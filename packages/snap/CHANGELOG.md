@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3]
+### Changed
+- chore: disable old MMI custodians, add cubist prod ([#68](https://github.com/MetaMask/snap-institutional-wallet/pull/68))
+- chore: use typed sign v4 where appropriate ([#66](https://github.com/MetaMask/snap-institutional-wallet/pull/66))
+
 ## [1.3.2]
 ### Added
 - chore: enable fireblocks sandboxes in prod mode, but hide ([#64](https://github.com/MetaMask/snap-institutional-wallet/pull/64))
@@ -78,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.2.1...v1.3.0
