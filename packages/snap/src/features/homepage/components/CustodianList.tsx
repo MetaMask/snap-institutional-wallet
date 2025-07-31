@@ -49,10 +49,7 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
   devMode,
 }): SnapElement => {
   const renderSelect = (custodian: CustodianMetadata) => {
-    if (
-      custodian.name.startsWith('gk8') ||
-      custodian.name.startsWith('neptune')
-    ) {
+    if (custodian.isManualTokenInputSupported) {
       return (
         <Button name={`${HomePagePrefixes.SelectCustodian}${custodian.name}`}>
           Select
