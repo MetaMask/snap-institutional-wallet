@@ -247,7 +247,6 @@ export class CustodialKeyring implements Keyring {
 
   async getCustodianApiForAddress(address: string): Promise<ICustodianApi> {
     const checksumAddress = toChecksumAddress(address);
-
     if (!this.#custodianApi.has(checksumAddress)) {
       const wallet = await this.#stateManager.getWalletByAddress(
         checksumAddress,

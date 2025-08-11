@@ -79,8 +79,6 @@ export const handleOnboarding = async (
     throw new Error(`Custodian type ${request.custodianType} not supported`);
   }
 
-  // In case the refresh token is non-interactively replaced during onboarding
-
   const custodianApi = new CustodianApiClass(
     {
       refreshToken: request.token,
@@ -89,6 +87,8 @@ export const handleOnboarding = async (
     request.custodianApiUrl,
     1000,
   );
+
+  // In case the refresh token is non-interactively replaced during onboarding
 
   custodianApi.on(
     REFRESH_TOKEN_CHANGE_EVENT,
