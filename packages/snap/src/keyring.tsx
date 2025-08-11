@@ -16,7 +16,6 @@ import {
 import { MethodNotFoundError } from '@metamask/snaps-sdk';
 import { assert, string } from '@metamask/superstruct';
 import { type Json } from '@metamask/utils';
-import { EventEmitter } from 'events';
 import { v4 as uuid } from 'uuid';
 
 import config from './config';
@@ -54,7 +53,7 @@ type RequestManagerFacade = {
   >;
 };
 
-export class CustodialKeyring extends EventEmitter implements Keyring {
+export class CustodialKeyring implements Keyring {
   #custodianApi: Map<string, ICustodianApi>;
 
   #requestManagerFacade: RequestManagerFacade;
@@ -65,8 +64,6 @@ export class CustodialKeyring extends EventEmitter implements Keyring {
     stateManager: KeyringStateManager,
     requestManagerFacade: RequestManagerFacade,
   ) {
-    super();
-
     this.#stateManager = stateManager;
     this.#custodianApi = new Map<string, ICustodianApi>();
     this.#requestManagerFacade = requestManagerFacade;
@@ -286,9 +283,6 @@ export class CustodialKeyring extends EventEmitter implements Keyring {
       REFRESH_TOKEN_CHANGE_EVENT,
       (payload: IRefreshTokenChangeEvent) => {
         this.#handleTokenChangedEvent(payload).catch(logger.error);
-
-        // Re-emit the event so that the higher level code can handle it
-        this.emit(REFRESH_TOKEN_CHANGE_EVENT, payload);
       },
     );
     return custodianApi;

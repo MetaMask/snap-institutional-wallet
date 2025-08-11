@@ -272,7 +272,7 @@ describe('CustodialKeyring', () => {
     });
   });
 
-  describe.only('getCustodianApiForAddress', () => {
+  describe('getCustodianApiForAddress', () => {
     it('should normalize address', async () => {
       const address = '0xf7bDe8609231033c69E502C08f85153f8A1548F2';
       const addressUpper = '0xF7BDE8609231033C69E502C08F85153F8A1548F2';
@@ -317,7 +317,7 @@ describe('CustodialKeyring', () => {
       expect(result).toBeDefined();
     });
 
-    it.only('should handle token expiry events and update wallet details', async () => {
+    it('should handle token expiry events and update wallet details', async () => {
       const mockAddress = '0x123';
       const mockWallets = [
         {
