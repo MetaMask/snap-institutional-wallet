@@ -28,6 +28,7 @@ import { renderHomePage } from './features/homepage/render';
 import { eventHandlers as onboardingEvents } from './features/onboarding/events';
 import { renderOnboarding } from './features/onboarding/render';
 import type { OnboardingAccount } from './features/onboarding/types';
+import { REFRESH_TOKEN_CHANGE_EVENT } from './lib/custodian-types/constants';
 import type {
   CreateAccountOptions,
   CustodialSnapRequest,
@@ -42,6 +43,7 @@ import {
 import type { SnapContext } from './lib/types/Context';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
+import type { IRefreshTokenChangeEvent } from './lib/types/IRefreshTokenChangeEvent';
 import logger from './logger';
 import { InternalMethod, hasPermission } from './permissions';
 import { getClientStatus } from './snap-state-manager/snap-util';
@@ -77,6 +79,8 @@ export const handleOnboarding = async (
     throw new Error(`Custodian type ${request.custodianType} not supported`);
   }
 
+  // In case the refresh token is non-interactively replaced during onboarding
+
   const custodianApi = new CustodianApiClass(
     {
       refreshToken: request.token,
@@ -84,6 +88,14 @@ export const handleOnboarding = async (
     },
     request.custodianApiUrl,
     1000,
+  );
+
+  custodianApi.on(
+    REFRESH_TOKEN_CHANGE_EVENT,
+    (event: IRefreshTokenChangeEvent) => {
+      // Update the request authentication details with the new refresh token
+      request.token = event.newRefreshToken;
+    },
   );
 
   let accounts = await custodianApi.getEthereumAccounts();
@@ -327,7 +339,6 @@ export const onCronjob: OnCronjobHandler = async ({ request }) => {
 
     // This one runs every minute, and maintains the sleep state
   } else if (request.method === 'manageSleepState') {
-    console.log('manageSleepState');
     const shouldSleep = await lockedOrInactive();
     if (shouldSleep) {
       await setSleepState(true);

@@ -58,15 +58,8 @@ export class ECA1Client extends EventEmitter {
   }
 
   // This could be from a "top down" refresh token change
-  // which doesn't emit an event
 
   setRefreshToken(refreshToken: string) {
-    const payload: IRefreshTokenChangeEvent = {
-      oldRefreshToken: this.#refreshToken,
-      newRefreshToken: refreshToken,
-      apiUrl: this.#apiBaseUrl,
-    };
-    this.emit(REFRESH_TOKEN_CHANGE_EVENT, payload);
     this.#refreshToken = refreshToken;
   }
 

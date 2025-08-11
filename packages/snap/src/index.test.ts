@@ -49,6 +49,7 @@ jest.mock('./lib/custodian-types/eca3/ECA3CustodianApi', () => {
   return {
     ECA3CustodianApi: jest.fn().mockImplementation(() => ({
       getEthereumAccounts: jest.fn().mockResolvedValue([]),
+      on: jest.fn(),
     })),
   };
 });

@@ -3,7 +3,7 @@ module.exports = {
 
   overrides: [
     {
-      files: ['*.ts'],
+      files: ['*.ts', '*.tsx'],
       extends: ['@metamask/eslint-config-typescript'],
       rules: {
         'import/no-nodejs-modules': [

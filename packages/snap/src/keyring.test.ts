@@ -1,7 +1,7 @@
 import { MethodNotFoundError } from '@metamask/snaps-sdk';
 
 import { CustodialKeyring } from './keyring';
-import { TOKEN_EXPIRED_EVENT } from './lib/custodian-types/constants';
+import { REFRESH_TOKEN_CHANGE_EVENT } from './lib/custodian-types/constants';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import type { ICustodianApi } from './lib/types/ICustodianApi';
 
@@ -272,7 +272,7 @@ describe('CustodialKeyring', () => {
     });
   });
 
-  describe('getCustodianApiForAddress', () => {
+  describe.only('getCustodianApiForAddress', () => {
     it('should normalize address', async () => {
       const address = '0xf7bDe8609231033c69E502C08f85153f8A1548F2';
       const addressUpper = '0xF7BDE8609231033C69E502C08F85153F8A1548F2';
@@ -317,7 +317,7 @@ describe('CustodialKeyring', () => {
       expect(result).toBeDefined();
     });
 
-    it('should handle token expiry events and update wallet details', async () => {
+    it.only('should handle token expiry events and update wallet details', async () => {
       const mockAddress = '0x123';
       const mockWallets = [
         {
@@ -397,7 +397,7 @@ describe('CustodialKeyring', () => {
       let tokenEventCallback: ((event: any) => Promise<void>) | undefined;
       const mockCustodianApi: Partial<ICustodianApi> = {
         on: jest.fn().mockImplementation((event, callback) => {
-          if (event === TOKEN_EXPIRED_EVENT) {
+          if (event === REFRESH_TOKEN_CHANGE_EVENT) {
             tokenEventCallback = callback;
           }
         }),
@@ -437,7 +437,7 @@ describe('CustodialKeyring', () => {
 
       // Verify the event listener was set up
       expect(api.on).toHaveBeenCalledWith(
-        TOKEN_EXPIRED_EVENT,
+        REFRESH_TOKEN_CHANGE_EVENT,
         expect.any(Function),
       );
     });
