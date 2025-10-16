@@ -57,5 +57,8 @@
   "packageManager": "yarn@3.6.3",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "resolutions": {
+    "bn.js": "^5.2.1"
   }
 }

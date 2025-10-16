@@ -24,6 +24,7 @@
     "snap.manifest.json"
   ],
   "scripts": {
+    "analyze": "mm-snap build --analyze",
     "build": "mm-snap build && yarn build-preinstalled-snap",
     "build:clean": "yarn clean && yarn build",
     "build-preinstalled-snap": "node scripts/build-preinstalled-snap.js",
@@ -52,7 +53,7 @@
     "@metamask/eslint-config-typescript": "^12.1.0",
     "@metamask/eth-sig-util": "7.0.1",
     "@metamask/keyring-api": "11.0.0",
-    "@metamask/snaps-cli": "6.2.1",
+    "@metamask/snaps-cli": "8.3.0",
     "@metamask/snaps-jest": "^8.7.1",
     "@metamask/snaps-sdk": "6.12.0",
     "@metamask/snaps-types": "3.0.0",

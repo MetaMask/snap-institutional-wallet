@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "cRYeHNYrfO1kxdqbF+6d3kBYhi4WpKKFMEkH49V5yts=",
+    "shasum": "3UnPLO5x73KEc9QRd6w+tlW6TpnVikJO3batHKZr6tg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -52,10 +52,7 @@
     "endowment:network-access": {},
     "endowment:ethereum-provider": {},
     "endowment:keyring": {
-      "allowedOrigins": [
-        "localhost:8000",
-        "http://localhost:8000"
-      ]
+      "allowedOrigins": ["localhost:8000", "http://localhost:8000"]
     },
     "endowment:rpc": {
       "allowedOrigins": [
@@ -112,5 +109,6 @@
     "snap_dialog": {},
     "endowment:page-home": {}
   },
+  "platformVersion": "6.12.0",
   "manifestVersion": "0.1"
 }
