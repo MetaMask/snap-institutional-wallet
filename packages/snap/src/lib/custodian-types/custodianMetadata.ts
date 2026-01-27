@@ -384,6 +384,19 @@ export const custodianMetadata: (
     allowedOnboardingDomains: ['app-beta.signer.cubist.dev', 'localhost:3000'],
   },
   {
+    refreshTokenUrl: 'https://dg5z0qnzb9s65.cloudfront.net/v0/oauth/token',
+    name: 'cubist-test',
+    displayName: 'Cubist Test',
+    production: false,
+    apiBaseUrl: 'https://dg5z0qnzb9s65.cloudfront.net/v0/mmi',
+    apiVersion: CustodianType.ECA3,
+    custodianPublishesTransaction: false,
+    iconUrl:
+      'https://assets-global.website-files.com/638a2693daaf8527290065a3/651802cf8d04ec5f1a09ce86_Logo.svg',
+    isManualTokenInputSupported: true,
+    allowedOnboardingDomains: [],
+  },
+  {
     refreshTokenUrl: 'https://prod.signer.cubist.dev/v0/oauth/token',
     name: 'cubist-prod',
     displayName: 'Cubist',
