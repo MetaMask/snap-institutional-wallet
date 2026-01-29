@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "Dsn1k+zBbtLrfx6VRvsdkdTXy2Db/YQSF82oIc3FheQ=",
+    "shasum": "d8VCfzrB6UmuSdQMRCqt4kgcmDuFdRHFEG1bzWEPt2M=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -91,7 +91,10 @@
         "https://pre.mycactus.com",
         "https://www.mycactus.dev",
         "https://debug.mycactus.dev:1443",
-        "https://www.mycactus.com"
+        "https://www.mycactus.com",
+        "https://app-gamma.signer.cubist.dev",
+        "https://app-beta.signer.cubist.dev",
+        "https://app.signer.cubist.dev"
       ]
     },
     "endowment:cronjob": {
