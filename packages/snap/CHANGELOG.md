@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -6,65 +7,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0]
+
+### Changed
+
+- Upgrade to keyring API v23 / snaps-sdk 11.2 and require Node 20 ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74), [#76](https://github.com/MetaMask/snap-institutional-wallet/pull/76))
+- Allow MetaMask origins to call `keyring_setSelectedAccounts` ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Re-selecting an already-imported account refreshes its custodian credentials instead of failing ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Persist development mode in unencrypted snap state so permissions work while the client is locked ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+
+### Fixed
+
+- Throw `UnauthorizedError` for denied keyring requests so callers get a JSON-RPC error instead of a snap crash ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Keep homepage interface context in sync when toggling development mode ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+
+### Removed
+
+- Remove BitGo, Cactus, and other legacy MMI custodian integrations and their manifest origins ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+
 ## [1.5.0]
+
 ### Uncategorized
+
 - chore: update snap version
 - 1.5.0
 
 ### Changed
+
 - Update cubist data for onboarding ([#72](https://github.com/MetaMask/snap-institutional-wallet/pull/72))
 
 ## [1.3.4]
+
 ### Fixed
+
 - Handle the case where the refresh token changes during onboarding (e.g. cubist) ([#70](https://github.com/MetaMask/snap-institutional-wallet/pull/70))
 
 ## [1.3.3]
+
 ### Changed
+
 - chore: disable old MMI custodians, add cubist prod ([#68](https://github.com/MetaMask/snap-institutional-wallet/pull/68))
 - chore: use typed sign v4 where appropriate ([#66](https://github.com/MetaMask/snap-institutional-wallet/pull/66))
 
 ## [1.3.2]
+
 ### Added
+
 - chore: enable fireblocks sandboxes in prod mode, but hide ([#64](https://github.com/MetaMask/snap-institutional-wallet/pull/64))
 
 ## [1.3.1]
+
 ### Fixed
+
 - Fix bugs with dev mode ([#62](https://github.com/MetaMask/snap-institutional-wallet/pull/62))
 
 ## [1.3.0]
+
 ### Added
+
 - Add dev mode toggle to the homepage ([#59](https://github.com/MetaMask/snap-institutional-wallet/pull/59))- feat(dev-mode-toggle): allow users to toggle developer mode ([#59](https://github.com/MetaMask/snap-institutional-wallet/pull/59))
 
 ### Changed
+
 - chore: show errors in the add token form ([#60](https://github.com/MetaMask/snap-institutional-wallet/pull/60))
 
 ## [1.2.1]
+
 ### Changed
+
 - Add `authentication.getIsSupported` RPC method ([#57](https://github.com/MetaMask/snap-institutional-wallet/pull/57))
 
 ### Fixed
+
 - Remove log in permissions.ts ([#56](https://github.com/MetaMask/snap-institutional-wallet/pull/56))
 
 ## [1.2.0]
+
 ### Changed
+
 - Remove old hacky cronjob implementation ([#54](https://github.com/MetaMask/snap-institutional-wallet/pull/54))
 - Implement "deep sleep" mechanism until the snap is used for the first time ([#54](https://github.com/MetaMask/snap-institutional-wallet/pull/54))
 - Set `displayAccountNameSuggestion` to `false` ([#54](https://github.com/MetaMask/snap-institutional-wallet/pull/54))
 
 ## [1.1.1]
+
 ### Changed
+
 - Move all dependencies to devdependencies and alphabetise ([#52](https://github.com/MetaMask/snap-institutional-wallet/pull/52))
 
 ## [1.1.0]
+
 ### Changed
+
 - Enforce custodian API URL in production mode ([#49](https://github.com/MetaMask/snap-institutional-wallet/pull/49))
 - Pin dependencies ([#48](https://github.com/MetaMask/snap-institutional-wallet/pull/48))
 
 ### Fixed
+
 - Fix get signed message with cactus ([#50](https://github.com/MetaMask/snap-institutional-wallet/pull/50))
 
 ## [1.0.0]
+
 ### Changed
+
 - Show account creation errors to the user ([#46](https://github.com/MetaMask/snap-institutional-wallet/pull/46))
 - Explicitly check if a method is suppported for an account ([#45](https://github.com/MetaMask/snap-institutional-wallet/pull/45))
 - Fix potential redos finding ([#44](https://github.com/MetaMask/snap-institutional-wallet/pull/44))
@@ -75,27 +120,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add tests for keyring.ts ([#36](https://github.com/MetaMask/snap-institutional-wallet/pull/36))
 
 ## [0.3.1]
+
 ### Changed
+
 - Fix custodian permissions ([#34](https://github.com/MetaMask/snap-institutional-wallet/pull/34))
 
 ## [0.3.0]
+
 ### Changed
+
 - chore: Adjust permissions and refactor checks to support bitgo ([#32](https://github.com/MetaMask/snap-institutional-wallet/pull/32))
 - chore: Audit remediation ([#31](https://github.com/MetaMask/snap-institutional-wallet/pull/31))
 
 ## [0.2.10]
+
 ### Removed
+
 - chore: remove saturn and neptune dev ([#29](https://github.com/MetaMask/snap-institutional-wallet/pull/29))
 
 ## [0.2.9]
+
 ### Changed
+
 - chore: add zodia UI URLs to allowlist ([#27](https://github.com/MetaMask/snap-institutional-wallet/pull/27))
 
 ## [0.2.8]
+
 ### Changed
+
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.5.0...v2.0.0
 [1.5.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.4...v1.5.0
 [1.3.4]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.2...v1.3.3
