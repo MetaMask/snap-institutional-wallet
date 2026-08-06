@@ -3,22 +3,24 @@ import type { MessageTypes, TypedMessage } from '@metamask/eth-sig-util';
 import { SignTypedDataVersion } from '@metamask/eth-sig-util';
 import type {
   Keyring,
+  KeyringEventPayload,
   KeyringRequest,
-  SubmitRequestResponse,
+  KeyringResponse,
 } from '@metamask/keyring-api';
 import {
-  emitSnapKeyringEvent,
   EthAccountType,
   EthMethod,
+  EthScope,
   KeyringEvent,
   KeyringRequestStruct,
 } from '@metamask/keyring-api';
+import { emitSnapKeyringEvent } from '@metamask/keyring-snap-sdk';
 import { MethodNotFoundError } from '@metamask/snaps-sdk';
 import { assert, string } from '@metamask/superstruct';
 import { type Json } from '@metamask/utils';
 import { v4 as uuid } from 'uuid';
 
-import config from './config';
+import { isDevMode } from './dev-mode';
 import { renderInfoMessage } from './features/info-message/rendex';
 import { REFRESH_TOKEN_CHANGE_EVENT } from './lib/custodian-types/constants';
 import { custodianMetadata } from './lib/custodian-types/custodianMetadata';
@@ -33,6 +35,7 @@ import type {
   ConnectionStatusRpcRequest,
 } from './lib/structs/CustodialKeyringStructs';
 import type { CustodianDeepLink, IRefreshTokenChangeEvent } from './lib/types';
+import type { Wallet } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap } from './lib/types/CustodianType';
 import type { EthSignTransactionRequest } from './lib/types/EthSignTransactionRequest';
@@ -41,7 +44,6 @@ import logger from './logger';
 import type { KeyringStateManager } from './stateManagement';
 import { throwError } from './util';
 import { convertHexChainIdToCaip2Decimal } from './util/convert-hex-chain-id-to-caip2-decimal';
-import { isUniqueAddress } from './util/is-unique-address';
 import { runSensitive } from './util/run-sensitive';
 
 type RequestManagerFacade = {
@@ -93,7 +95,7 @@ export class CustodialKeyring implements Keyring {
 
     // If dev mode is enabled, trust the custodian info from the onboarding request
 
-    if (config.dev) {
+    if (await isDevMode()) {
       custodianEnvironmentName = options.details.custodianEnvironment;
       custodianEnvironmentDisplayName = options.details.custodianDisplayName;
     } else {
@@ -110,10 +112,13 @@ export class CustodialKeyring implements Keyring {
 
     const { address, name } = options;
 
-    const wallets = await this.#stateManager.listWallets();
+    // Re-importing an address we already hold is treated as a credential
+    // refresh rather than an error, so an expired custodian token can be
+    // replaced by onboarding the same account again.
+    const existingWallet = await this.#stateManager.getWalletByAddress(address);
 
-    if (!isUniqueAddress(address, wallets)) {
-      throw new Error(`Account address already in use: ${address}`);
+    if (existingWallet) {
+      return this.#refreshCredentials(existingWallet, options);
     }
 
     // Some custodians (mostly ECA-1) still publish transactions
@@ -146,6 +151,7 @@ export class CustodialKeyring implements Keyring {
           EthMethod.SignTypedDataV4,
         ],
         type: EthAccountType.Eoa,
+        scopes: [EthScope.Eoa],
       };
 
       // This event actually *asks* the client to create the account
@@ -163,6 +169,59 @@ export class CustodialKeyring implements Keyring {
     } catch (error) {
       throw new Error((error as Error).message);
     }
+  }
+
+  /**
+   * Replace the stored custodian credentials for an account we already hold.
+   *
+   * Deliberately narrow: only `token` and `refreshTokenUrl` are replaced. The
+   * fields that decide *which* custodian the account talks to
+   * (`custodianType`, `custodianApiUrl`, `custodianEnvironment`) must already
+   * match, and the request must come from the origin that imported the account.
+   * Without those guards, any allowlisted dapp could re-import a known address
+   * and repoint it at a custodian API it controls, which would then receive that
+   * account's signing requests.
+   *
+   * @param wallet - The existing wallet for this address.
+   * @param options - The incoming onboarding request.
+   * @returns The unchanged account.
+   */
+  async #refreshCredentials(
+    wallet: Wallet,
+    options: CreateAccountOptions,
+  ): Promise<CustodialKeyringAccount> {
+    const { account, details } = wallet;
+    const { details: incoming, origin } = options;
+
+    if (account.options.custodian.importOrigin !== origin) {
+      throw new Error(
+        `Account ${account.address} was imported by a different origin`,
+      );
+    }
+
+    if (
+      details.custodianType !== incoming.custodianType ||
+      details.custodianApiUrl !== incoming.custodianApiUrl ||
+      details.custodianEnvironment !== incoming.custodianEnvironment
+    ) {
+      throw new Error(
+        `Account ${account.address} is already connected to a different custodian`,
+      );
+    }
+
+    await this.#stateManager.updateWalletDetails(account.id, {
+      ...details,
+      token: incoming.token,
+      refreshTokenUrl: incoming.refreshTokenUrl,
+    });
+
+    // The cached client holds the old token, so drop it. Keyed by checksummed
+    // address, matching `getCustodianApiForAddress`.
+    this.#custodianApi.delete(toChecksumAddress(account.address));
+
+    logger.info(`Refreshed custodian credentials for ${account.address}`);
+
+    return account;
   }
 
   async filterAccountChains(id: string, chains: string[]): Promise<string[]> {
@@ -197,7 +256,7 @@ export class CustodialKeyring implements Keyring {
 
   // Maintain compatibility with the keyring api, return the request in the original form that we received (i.e. the keyringRequest)
   async listRequests(): Promise<KeyringRequest[]> {
-    if (config.dev) {
+    if (await isDevMode()) {
       const requests = await this.#requestManagerFacade.listRequests();
       return requests.map((request) => request.keyringRequest);
     }
@@ -208,7 +267,7 @@ export class CustodialKeyring implements Keyring {
   async getRequest(id: string): Promise<KeyringRequest> {
     assert(id, string());
 
-    if (config.dev) {
+    if (await isDevMode()) {
       const requests = await this.#requestManagerFacade.listRequests();
       const request = requests.find((req) => req.keyringRequest.id === id);
       if (!request) {
@@ -219,10 +278,10 @@ export class CustodialKeyring implements Keyring {
     throw new Error('Method not implemented.'); // Not in permissions, but required by the keyring api
   }
 
-  async submitRequest(request: KeyringRequest): Promise<SubmitRequestResponse> {
+  async submitRequest(request: KeyringRequest): Promise<KeyringResponse> {
     // These requests may come from dapps, so in production we should use runSensitive
 
-    if (config.dev) {
+    if (await isDevMode()) {
       return this.#asyncSubmitRequest(request);
     }
     // Allow errors to be exposed here, because
@@ -331,7 +390,7 @@ export class CustodialKeyring implements Keyring {
       // Clear cache
 
       // Dereference the custodian api
-      this.#custodianApi.delete(wallet.account.address);
+      this.#custodianApi.delete(toChecksumAddress(wallet.account.address));
 
       // Update state with new details
       await this.#stateManager.updateWalletDetails(
@@ -341,9 +400,7 @@ export class CustodialKeyring implements Keyring {
     }
   }
 
-  async #asyncSubmitRequest(
-    request: KeyringRequest,
-  ): Promise<SubmitRequestResponse> {
+  async #asyncSubmitRequest(request: KeyringRequest): Promise<KeyringResponse> {
     const custodianId = await this.#handleSigningRequest(
       request.request.method,
       request.request.params ?? [],
@@ -532,9 +589,9 @@ export class CustodialKeyring implements Keyring {
     }
   }
 
-  async #emitEvent(
-    event: KeyringEvent,
-    data: Record<string, Json>,
+  async #emitEvent<Event extends KeyringEvent>(
+    event: Event,
+    data: KeyringEventPayload<Event>,
   ): Promise<void> {
     await emitSnapKeyringEvent(snap, event, data);
   }

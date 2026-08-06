@@ -25,7 +25,6 @@ import { custodianMetadata } from '../../../lib/custodian-types/custodianMetadat
 import type { CustodialKeyringAccount } from '../../../lib/types/CustodialKeyringAccount';
 import { HomePageNames, HomePagePrefixes } from '../types';
 import { ToggleDevMode } from './ToggleDevMode';
-import config from '../../../config';
 
 const custodianLogos: Record<string, string> = {
   'bitgo-prod': bitgoLogo,
@@ -41,13 +40,16 @@ const custodianLogos: Record<string, string> = {
 
 type CustodianListProps = {
   accounts?: CustodialKeyringAccount[];
-  devMode?: boolean;
+  // Required: the filter below and the toggle's checked state must agree, and a
+  // missing value silently rendering as "off" is exactly how this drifted from
+  // the persisted setting before.
+  devMode: boolean;
 };
 
 export const CustodianList: SnapComponent<CustodianListProps> = ({
   accounts,
   devMode,
-}): SnapElement => {
+}) => {
   const renderSelect = (custodian: CustodianMetadata) => {
     if (custodian.isManualTokenInputSupported) {
       return (
@@ -62,6 +64,8 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
     return null;
   };
 
+  // `SnapComponent<Props>` declares its return as `SnapElement<Props>`, hence
+  // the parameterised cast below now that `devMode` is a required prop.
   return (
     <Container>
       <Box>
@@ -72,7 +76,7 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
         </Text>
         {custodianMetadata
           .filter((custodian) => {
-            if (config.dev) {
+            if (devMode) {
               return true;
             }
             return custodian.production && !custodian.hideFromUI;
@@ -91,7 +95,7 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
             </Section>
           ))}
 
-        <ToggleDevMode devMode={devMode ?? false} />
+        <ToggleDevMode devMode={devMode} />
       </Box>
       <Footer>
         <Button
@@ -102,5 +106,5 @@ export const CustodianList: SnapComponent<CustodianListProps> = ({
         </Button>
       </Footer>
     </Container>
-  ) as SnapElement;
+  ) as SnapElement<CustodianListProps>;
 };

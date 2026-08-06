@@ -1,6 +1,5 @@
 import { toChecksumAddress } from '@ethereumjs/util';
 
-import { setDevMode } from './config';
 import type {
   CustodialSnapRequest,
   OnBoardingRpcRequest,
@@ -10,7 +9,6 @@ import type {
 import type { SnapState, Wallet } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import logger from './logger';
-import { initPermissions } from './permissions';
 import { SnapStateManager } from './snap-state-manager/SnapStateManager';
 
 /**
@@ -259,22 +257,6 @@ export class KeyringStateManager extends SnapStateManager<SnapState> {
     return state.activated;
   }
 
-  async setDevMode(devMode: boolean): Promise<void> {
-    await this.update(async (state: SnapState) => {
-      state.devMode = devMode;
-    });
-  }
-
-  async getDevMode(): Promise<boolean> {
-    const state = await this.get();
-    return state.devMode;
-  }
-
-  // Synchronises `config.devMode` with the state manager's `devMode`
-  async syncDevMode(): Promise<void> {
-    const devMode = await this.getDevMode();
-    setDevMode(devMode);
-    initPermissions(); // Update permissions when dev mode changes, because they are set when the snap is initialized and they read config.dev
-    logger.debug('Set dev mode to', devMode); // Notably, this is not logged if devMode is false, which is OK
-  }
+  // Dev mode now lives in the unencrypted store, see `../dev-mode`. It is still
+  // present on `SnapState` so the one-time migration can read the old value.
 }

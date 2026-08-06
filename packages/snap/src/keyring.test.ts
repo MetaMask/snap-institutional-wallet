@@ -1,5 +1,6 @@
 import { MethodNotFoundError } from '@metamask/snaps-sdk';
 
+import { isDevMode } from './dev-mode';
 import { CustodialKeyring } from './keyring';
 import { REFRESH_TOKEN_CHANGE_EVENT } from './lib/custodian-types/constants';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
@@ -21,8 +22,8 @@ jest.mock('./lib/custodian-types/custodianMetadata', () => ({
 }));
 
 jest.mock('./features/info-message/rendex');
-jest.mock('@metamask/keyring-api', () => ({
-  ...jest.requireActual('@metamask/keyring-api'),
+jest.mock('@metamask/keyring-snap-sdk', () => ({
+  ...jest.requireActual('@metamask/keyring-snap-sdk'),
   emitSnapKeyringEvent: jest.fn(),
 }));
 
@@ -38,10 +39,8 @@ jest.mock('./lib/types/CustodianType', () => ({
   },
 }));
 
-jest.mock('./config', () => ({
-  config: {
-    dev: false,
-  },
+jest.mock('./dev-mode', () => ({
+  isDevMode: jest.fn().mockResolvedValue(false),
 }));
 
 describe('CustodialKeyring', () => {
@@ -195,6 +194,7 @@ describe('CustodialKeyring', () => {
       const mockRequest = {
         id: '1cf42f0b-2512-4b6b-b5a5-138d9cbfa0e1',
         scope: 'scope-1',
+        origin: 'metamask',
         account: mockAccountId,
         request: {
           method: 'personal_sign',
@@ -211,6 +211,7 @@ describe('CustodialKeyring', () => {
       const mockRequest = {
         id: '1cf42f0b-2512-4b6b-b5a5-138d9cbfa0e1',
         scope: 'scope-1',
+        origin: 'metamask',
         account: mockAccountId,
         request: {
           method: 'eth_signTypedData_v4',
@@ -227,6 +228,7 @@ describe('CustodialKeyring', () => {
       const mockRequest = {
         id: '1cf42f0b-2512-4b6b-b5a5-138d9cbfa0e1',
         scope: 'scope-1',
+        origin: 'metamask',
         account: mockAccount.id,
         request: {
           method: 'personal_sign',
@@ -661,6 +663,7 @@ describe('CustodialKeyring', () => {
             },
           },
           type: 'eip155:eoa',
+          scopes: ['eip155:0'],
         }),
         details: {
           token: mockAccountDetails.details.token,
@@ -673,18 +676,136 @@ describe('CustodialKeyring', () => {
       });
     });
 
-    it('should throw error if address already exists', async () => {
-      mockStateManager.listWallets.mockResolvedValue([
-        {
-          account: {
-            address: '0x123', // Same address as in mockAccountDetails
+    describe('when the address is already imported', () => {
+      // A real address, because the refresh path checksums it to evict the
+      // cached custodian client.
+      const existingAddress = '0x94b21bdbe1a2d4b09d048ab7d865a7d352da1a51';
+
+      const existingWallet = {
+        account: {
+          id: 'existing-account-id',
+          address: existingAddress,
+          options: {
+            custodian: {
+              environmentName: 'test-custodian',
+              displayName: 'Test Custodian',
+              deferPublication: false,
+              importOrigin: 'test-origin',
+            },
           },
         },
-      ]);
+        details: {
+          token: 'old-token',
+          custodianType: CustodianType.ECA3,
+          custodianEnvironment: 'test',
+          custodianApiUrl: 'https://mock-url.com',
+          refreshTokenUrl: 'https://old-refresh.example.com',
+          custodianDisplayName: 'Test Custodian',
+        },
+      };
 
-      await expect(keyring.createAccount(mockAccountDetails)).rejects.toThrow(
-        /Account address already in use/u,
-      );
+      const reimport = {
+        ...mockAccountDetails,
+        address: existingAddress,
+        details: {
+          ...mockAccountDetails.details,
+          token: 'new-token',
+          refreshTokenUrl: 'https://new-refresh.example.com',
+        },
+      };
+
+      beforeEach(() => {
+        mockStateManager.getWalletByAddress.mockResolvedValue(existingWallet);
+        (isDevMode as jest.MockedFunction<typeof isDevMode>).mockResolvedValue(
+          false,
+        );
+      });
+
+      it('should refresh the credentials instead of creating an account', async () => {
+        const result = await keyring.createAccount(reimport);
+
+        expect(mockStateManager.updateWalletDetails).toHaveBeenCalledWith(
+          'existing-account-id',
+          {
+            ...existingWallet.details,
+            token: 'new-token',
+            refreshTokenUrl: 'https://new-refresh.example.com',
+          },
+        );
+        expect(mockStateManager.addWallet).not.toHaveBeenCalled();
+        expect(result).toStrictEqual(existingWallet.account);
+      });
+
+      it('should evict the cached custodian client so the new token is used', async () => {
+        const mockCustodianApi = {
+          getSupportedChains: jest.fn().mockResolvedValue(['eip155:1']),
+          on: jest.fn(),
+        };
+        const mockEca3 = CustodianApiMap.ECA3 as unknown as jest.Mock;
+        mockEca3.mockImplementation(() => mockCustodianApi);
+
+        // Prime the cache, then re-import.
+        await keyring.getCustodianApiForAddress(existingAddress);
+        expect(mockEca3).toHaveBeenCalledTimes(1);
+
+        await keyring.createAccount(reimport);
+        await keyring.getCustodianApiForAddress(existingAddress);
+
+        expect(mockEca3).toHaveBeenCalledTimes(2);
+      });
+
+      // In production the custodian allowlist rejects an unknown API URL before
+      // this guard is reached. In dev mode the allowlist is bypassed, so the
+      // guard is the only thing stopping a re-import from repointing a known
+      // address at a custodian API the caller controls.
+      it('should refuse to repoint the account at a different custodian', async () => {
+        (isDevMode as jest.MockedFunction<typeof isDevMode>).mockResolvedValue(
+          true,
+        );
+
+        await expect(
+          keyring.createAccount({
+            ...reimport,
+            details: {
+              ...reimport.details,
+              custodianApiUrl: 'https://evil.example',
+            },
+          }),
+        ).rejects.toThrow(/already connected to a different custodian/u);
+
+        expect(mockStateManager.updateWalletDetails).not.toHaveBeenCalled();
+      });
+
+      it('should still refuse an unknown custodian API URL in production', async () => {
+        await expect(
+          keyring.createAccount({
+            ...reimport,
+            details: {
+              ...reimport.details,
+              custodianApiUrl: 'https://evil.example',
+            },
+          }),
+        ).rejects.toThrow(/No custodian allowlisted for API URL/u);
+
+        expect(mockStateManager.updateWalletDetails).not.toHaveBeenCalled();
+      });
+
+      it('should refuse a different custodianEnvironment', async () => {
+        await expect(
+          keyring.createAccount({
+            ...reimport,
+            details: { ...reimport.details, custodianEnvironment: 'other' },
+          }),
+        ).rejects.toThrow(/already connected to a different custodian/u);
+      });
+
+      it('should refuse a refresh from a different origin', async () => {
+        await expect(
+          keyring.createAccount({ ...reimport, origin: 'other-origin' }),
+        ).rejects.toThrow(/was imported by a different origin/u);
+
+        expect(mockStateManager.updateWalletDetails).not.toHaveBeenCalled();
+      });
     });
 
     it('should throw if config.dev is false and createAccount is called with a custodial API URL that is not in the custodianMetadata', async () => {

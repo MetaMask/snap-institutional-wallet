@@ -1,32 +1,42 @@
 import { KeyringRpcMethod } from '@metamask/keyring-api';
 
-import { InternalMethod } from './permissions';
+import { isDevMode } from './dev-mode';
+import {
+  InternalMethod,
+  buildOriginPermissions,
+  getOriginPermissions,
+  hasPermission,
+} from './permissions';
+
+jest.mock('./dev-mode', () => ({
+  isDevMode: jest.fn(),
+}));
+
+jest.mock('./lib/custodian-types/custodianMetadata', () => ({
+  custodianMetadata: [
+    {
+      production: true,
+      allowedOnboardingDomains: ['example.com', 'test.com'],
+    },
+    {
+      production: false,
+      allowedOnboardingDomains: ['dev-only.com'],
+    },
+  ],
+}));
+
+const mockIsDevMode = isDevMode as jest.MockedFunction<typeof isDevMode>;
 
 describe('Permissions', () => {
   beforeEach(() => {
-    jest.resetModules();
+    jest.clearAllMocks();
+    mockIsDevMode.mockResolvedValue(false);
   });
 
-  describe('originPermissions', () => {
-    beforeEach(() => {
-      jest.mock('./config', () => ({
-        dev: false,
-      }));
+  describe('buildOriginPermissions', () => {
+    it('should set up MetaMask permissions correctly', () => {
+      const metamaskPermissions = buildOriginPermissions(false).get('metamask');
 
-      jest.mock('./lib/custodian-types/custodianMetadata', () => ({
-        custodianMetadata: [
-          {
-            production: true,
-            allowedOnboardingDomains: ['example.com', 'test.com'],
-          },
-        ],
-      }));
-    });
-
-    it('should set up MetaMask permissions correctly', async () => {
-      const { getOriginPermissions } = await import('./permissions');
-      const originPermissions = getOriginPermissions();
-      const metamaskPermissions = originPermissions.get('metamask');
       expect(metamaskPermissions).toBeDefined();
       expect(metamaskPermissions?.has(KeyringRpcMethod.ListAccounts)).toBe(
         true,
@@ -42,79 +52,99 @@ describe('Permissions', () => {
         true,
       );
       expect(metamaskPermissions?.has(KeyringRpcMethod.GetRequest)).toBe(true);
+      // The client calls this after confirming an account import; if it isn't
+      // allowed through, the snap crashes.
+      expect(
+        metamaskPermissions?.has(KeyringRpcMethod.SetSelectedAccounts),
+      ).toBe(true);
       expect(metamaskPermissions?.has(KeyringRpcMethod.SubmitRequest)).toBe(
         true,
       );
     });
 
-    it('should set up custodian onboarding permissions correctly', async () => {
-      const { getOriginPermissions } = await import('./permissions');
-      const originPermissions = getOriginPermissions();
-      const examplePermissions = originPermissions.get('https://example.com');
-      const testPermissions = originPermissions.get('https://test.com');
+    it('should set up custodian onboarding permissions correctly', () => {
+      const originPermissions = buildOriginPermissions(false);
 
-      expect(examplePermissions?.has(InternalMethod.Onboard)).toBe(true);
-      expect(testPermissions?.has(InternalMethod.Onboard)).toBe(true);
+      expect(
+        originPermissions
+          .get('https://example.com')
+          ?.has(InternalMethod.Onboard),
+      ).toBe(true);
+      expect(
+        originPermissions.get('https://test.com')?.has(InternalMethod.Onboard),
+      ).toBe(true);
     });
 
-    it('should not include localhost permissions when not in dev mode', async () => {
-      const { getOriginPermissions } = await import('./permissions');
-      const originPermissions = getOriginPermissions();
-      const localhostPermissions = originPermissions.get(
+    it('should exclude non-production custodians when not in dev mode', () => {
+      expect(
+        buildOriginPermissions(false).get('https://dev-only.com'),
+      ).toBeUndefined();
+      expect(
+        buildOriginPermissions(true).get('https://dev-only.com'),
+      ).toBeDefined();
+    });
+
+    it('should gate localhost permissions on dev mode', () => {
+      expect(
+        buildOriginPermissions(false).get('http://localhost:8000'),
+      ).toBeUndefined();
+
+      const localhostPermissions = buildOriginPermissions(true).get(
         'http://localhost:8000',
       );
-      expect(localhostPermissions).toBeUndefined();
+      expect(localhostPermissions).toBeDefined();
+      expect(localhostPermissions?.has(KeyringRpcMethod.ListAccounts)).toBe(
+        true,
+      );
+      expect(localhostPermissions?.has(KeyringRpcMethod.CreateAccount)).toBe(
+        true,
+      );
+      expect(localhostPermissions?.has(InternalMethod.Onboard)).toBe(true);
+      expect(localhostPermissions?.has(InternalMethod.ClearAllRequests)).toBe(
+        true,
+      );
+    });
+  });
+
+  describe('hasPermission', () => {
+    it('should read dev mode from state on every call', async () => {
+      // The whole point of making this a function of dev mode: no init step to
+      // forget, so flipping the setting takes effect on the next call.
+      mockIsDevMode.mockResolvedValue(false);
+      expect(
+        await hasPermission('http://localhost:8000', InternalMethod.Onboard),
+      ).toBe(false);
+
+      mockIsDevMode.mockResolvedValue(true);
+      expect(
+        await hasPermission('http://localhost:8000', InternalMethod.Onboard),
+      ).toBe(true);
     });
 
-    describe('when in dev mode', () => {
-      const mockConfig = {
-        dev: true,
-      };
+    it('should deny unknown origins', async () => {
+      expect(
+        await hasPermission('https://evil.example', InternalMethod.Onboard),
+      ).toBe(false);
+    });
 
-      beforeEach(() => {
-        jest.resetModules();
-        jest.mock('./config', () => mockConfig);
-      });
+    it('should deny methods the origin does not have', async () => {
+      expect(
+        await hasPermission('metamask', InternalMethod.ClearAllRequests),
+      ).toBe(false);
+    });
+  });
 
-      it('should include localhost permissions in dev mode', async () => {
-        const { getOriginPermissions } = await import('./permissions');
-        const originPermissions = getOriginPermissions();
+  describe('getOriginPermissions', () => {
+    it('should return the map for the current dev mode setting', async () => {
+      mockIsDevMode.mockResolvedValue(true);
+      expect(
+        (await getOriginPermissions()).get('http://localhost:8000'),
+      ).toBeDefined();
 
-        const localhostPermissions = originPermissions.get(
-          'http://localhost:8000',
-        );
-        expect(localhostPermissions).toBeDefined();
-        expect(localhostPermissions?.has(KeyringRpcMethod.ListAccounts)).toBe(
-          true,
-        );
-        expect(localhostPermissions?.has(KeyringRpcMethod.CreateAccount)).toBe(
-          true,
-        );
-        expect(localhostPermissions?.has(InternalMethod.Onboard)).toBe(true);
-        expect(localhostPermissions?.has(InternalMethod.ClearAllRequests)).toBe(
-          true,
-        );
-      });
-
-      it('should not include localhost permissions when not in dev mode, but when it is changes and we call initPermissions, it should include localhost permissions', async () => {
-        const { hasPermission, initPermissions } = await import(
-          './permissions'
-        );
-        mockConfig.dev = false;
-
-        initPermissions();
-
-        expect(
-          hasPermission('http://localhost:8000', InternalMethod.Onboard),
-        ).toBe(false);
-
-        mockConfig.dev = true;
-        initPermissions();
-
-        expect(
-          hasPermission('http://localhost:8000', InternalMethod.Onboard),
-        ).toBe(true);
-      });
+      mockIsDevMode.mockResolvedValue(false);
+      expect(
+        (await getOriginPermissions()).get('http://localhost:8000'),
+      ).toBeUndefined();
     });
   });
 });

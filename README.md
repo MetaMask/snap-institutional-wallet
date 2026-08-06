@@ -16,7 +16,18 @@ yarn install && yarn start
 
 The institutional snap supports any of the custodians previously supported by MetaMask Institutional. The easiest way to test the snap is to run this repo and use the local companion site to test it with the local dev custodian.
 
-It should also function with Neptune Custody which has a UI located at https://neptune-custody-ui.dev.metamask-institutional.io/
+## Super quick start
+
+1. Clone the repository, run `yarn install` 
+2. Put a mnemonic in the `MNEMONIC` environment variable in packackes/api/.env
+3. and then `yarn start` to start the snap etc
+4. Install MetaMask Flask
+5. Visit http://localhost:8000/ and make the snap dropdown is "Local Development"
+6. Install the snap from the webpage
+7. Go to the snap settings, scroll to the bottom and click "Enable dev custodians"
+8. Back on the back, click "Inject local custodian token" and follow the dialogs
+9. You can now use the test methods like "Sign personal message" and "Create sepolia transaction"
+10. To complete the signatures, use "List custodian API requests" and "Update custodian API request"
 
 ## Cloning
 

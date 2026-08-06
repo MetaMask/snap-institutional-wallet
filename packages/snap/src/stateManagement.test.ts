@@ -1,6 +1,5 @@
-import { EthAccountType, EthMethod } from '@metamask/keyring-api';
+import { EthAccountType, EthMethod, EthScope } from '@metamask/keyring-api';
 
-import { setDevMode } from './config';
 import type {
   CustodialSnapRequest,
   OnBoardingRpcRequest,
@@ -9,18 +8,8 @@ import type {
 import type { Wallet, SnapState } from './lib/types/CustodialKeyring';
 import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianType } from './lib/types/CustodianType';
-import { initPermissions } from './permissions';
 import * as snapUtil from './snap-state-manager/snap-util';
 import { KeyringStateManager } from './stateManagement';
-
-jest.mock('./config', () => ({
-  setDevMode: jest.fn(),
-  dev: false,
-}));
-
-jest.mock('./permissions', () => ({
-  initPermissions: jest.fn(),
-}));
 
 describe('KeyringStateManager', () => {
   const createMockStateManager = () => {
@@ -46,6 +35,7 @@ describe('KeyringStateManager', () => {
     },
     methods: [EthMethod.SignTransaction, EthMethod.PersonalSign],
     type: EthAccountType.Eoa,
+    scopes: [EthScope.Eoa],
   });
 
   const createMockWallet = (id: string): Wallet => ({
@@ -220,6 +210,7 @@ describe('KeyringStateManager', () => {
       keyringRequest: {
         id,
         scope: '',
+        origin: 'metamask',
         account: '76389c2b-2813-4913-9568-caad36b1c2b2',
         request: {
           method: 'personal_sign',
@@ -357,46 +348,6 @@ describe('KeyringStateManager', () => {
       const activated = await instance.getActivated();
 
       expect(activated).toBe(false);
-    });
-  });
-
-  describe('setDevMode', () => {
-    it('sets dev mode', async () => {
-      const { instance, getDataSpy, setDataSpy } = createMockStateManager();
-      const state = createInitState(1);
-      getDataSpy.mockResolvedValue(state);
-
-      expect(state.devMode).toBe(false);
-
-      await instance.setDevMode(true);
-
-      expect(state.devMode).toBe(true);
-      expect(setDataSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('getDevMode', () => {
-    it('returns dev mode', async () => {
-      const { instance, getDataSpy } = createMockStateManager();
-      const state = createInitState(1);
-      getDataSpy.mockResolvedValue(state);
-
-      const devMode = await instance.getDevMode();
-
-      expect(devMode).toBe(false);
-    });
-  });
-
-  describe('syncDevMode', () => {
-    it('syncs dev mode', async () => {
-      const { instance, getDataSpy } = createMockStateManager();
-      const state = createInitState(1);
-      getDataSpy.mockResolvedValue(state);
-
-      await instance.syncDevMode();
-
-      expect(setDevMode).toHaveBeenCalled();
-      expect(initPermissions).toHaveBeenCalled();
     });
   });
 });

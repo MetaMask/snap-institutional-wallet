@@ -1,5 +1,7 @@
-import type { JsonRpcRequest } from '@metamask/keyring-api';
-import { handleKeyringRequest } from '@metamask/keyring-api';
+import { handleKeyringRequest } from '@metamask/keyring-snap-sdk';
+import type { JsonRpcRequest } from '@metamask/keyring-utils';
+import type { GetClientStatusResult } from '@metamask/snaps-sdk';
+import { SnapError } from '@metamask/snaps-sdk';
 
 import { onRpcRequest, onKeyringRequest, onCronjob } from '.';
 import { getKeyring, getRequestManager, getStateManager } from './context';
@@ -38,9 +40,9 @@ jest.mock('./context', () => ({
   getStateManager: jest.fn(),
 }));
 
-// Mock the keyring-api module
-jest.mock('@metamask/keyring-api', () => ({
-  ...jest.requireActual('@metamask/keyring-api'),
+// Mock the keyring snap SDK module
+jest.mock('@metamask/keyring-snap-sdk', () => ({
+  ...jest.requireActual('@metamask/keyring-snap-sdk'),
   handleKeyringRequest: jest.fn(),
 }));
 
@@ -98,7 +100,6 @@ const mockStateManager = {
   removeWallet: jest.fn(),
   updateWalletDetails: jest.fn(),
   clearState: jest.fn(),
-  syncDevMode: jest.fn(),
 } as unknown as KeyringStateManager;
 
 // Import getStateManager from context and create mock reference
@@ -113,6 +114,18 @@ jest.mock('./features/error-message/render', () => ({
 const mockRenderErrorMessage = renderErrorMessage as jest.MockedFunction<
   typeof renderErrorMessage
 >;
+
+// `GetClientStatusResult` gained required fields in @metamask/snaps-sdk v11,
+// so build the full shape from the part each test cares about.
+const clientStatus = (
+  overrides: Partial<GetClientStatusResult>,
+): GetClientStatusResult => ({
+  locked: false,
+  active: true,
+  clientVersion: '0.0.0',
+  platformVersion: '0.0.0',
+  ...overrides,
+});
 
 describe('index', () => {
   const mockKeyring = {
@@ -144,7 +157,7 @@ describe('index', () => {
     ]);
 
     // Set default mock return values
-    mockGetClientStatus.mockResolvedValue({ locked: false });
+    mockGetClientStatus.mockResolvedValue(clientStatus({ locked: false }));
     (mockStateManager.getActivated as jest.Mock).mockResolvedValue(false);
     (mockStateManager.setActivated as jest.Mock).mockResolvedValue(undefined);
   });
@@ -243,7 +256,7 @@ describe('index', () => {
             },
           }),
         ).rejects.toThrow(
-          'Expected one of `"ECA3","ECA1","BitGo","Cactus"`, but received: "UNSUPPORTED"',
+          'Expected one of `"ECA3","ECA1"`, but received: "UNSUPPORTED"',
         );
       });
 
@@ -434,6 +447,25 @@ describe('index', () => {
       );
     });
 
+    // A plain `Error` here crashes the snap instead of being returned to the
+    // caller as a JSON-RPC error, so the error type matters, not just the
+    // message.
+    it('should reject an unauthorized origin with a SnapError subclass', async () => {
+      (hasPermission as jest.Mock).mockImplementationOnce(() => false);
+
+      await expect(
+        onKeyringRequest({
+          origin: 'unauthorized-origin',
+          request: {
+            method: 'keyring_listAccounts',
+            params: {},
+            id: 1,
+            jsonrpc: '2.0',
+          },
+        }),
+      ).rejects.toBeInstanceOf(SnapError);
+    });
+
     it('should handle keyring request successfully', async () => {
       const mockRequest = {
         method: 'keyring_listAccounts',
@@ -458,7 +490,7 @@ describe('index', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       // Reset default mock values for each test
-      mockGetClientStatus.mockResolvedValue({ locked: false });
+      mockGetClientStatus.mockResolvedValue(clientStatus({ locked: false }));
       mockGetSleepState.mockResolvedValue(false);
     });
 
@@ -483,7 +515,9 @@ describe('index', () => {
         // Mock sleep state to be false (awake)
         mockGetSleepState.mockResolvedValueOnce(false);
         // Mock client to be locked
-        mockGetClientStatus.mockResolvedValueOnce({ locked: true });
+        mockGetClientStatus.mockResolvedValueOnce(
+          clientStatus({ locked: true }),
+        );
 
         await onCronjob({
           request: {
@@ -501,7 +535,9 @@ describe('index', () => {
         // Mock sleep state to be false (awake)
         mockGetSleepState.mockResolvedValueOnce(false);
         // Mock client to be unlocked
-        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
+        mockGetClientStatus.mockResolvedValueOnce(
+          clientStatus({ locked: false }),
+        );
         // Mock snap to be activated
         (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
           true,
@@ -522,7 +558,9 @@ describe('index', () => {
 
     describe('manageSleepState method', () => {
       it('should set sleep when client is locked', async () => {
-        mockGetClientStatus.mockResolvedValueOnce({ locked: true });
+        mockGetClientStatus.mockResolvedValueOnce(
+          clientStatus({ locked: true }),
+        );
 
         await onCronjob({
           request: {
@@ -536,7 +574,9 @@ describe('index', () => {
       });
 
       it('should wake up when client is unlocked and snap is activated', async () => {
-        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
+        mockGetClientStatus.mockResolvedValueOnce(
+          clientStatus({ locked: false }),
+        );
         (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
           true,
         );
@@ -552,26 +592,10 @@ describe('index', () => {
         expect(setSleepState).toHaveBeenCalledWith(false);
       });
 
-      it('should sync dev mode when client is unlocked and snap is activated', async () => {
-        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
-        (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
-          true,
-        );
-
-        await onCronjob({
-          request: {
-            method: 'manageSleepState',
-            id: 1,
-            jsonrpc: '2.0',
-          },
-        });
-
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(mockStateManager.syncDevMode).toHaveBeenCalled();
-      });
-
       it('should sleep when client is unlocked but snap is not activated', async () => {
-        mockGetClientStatus.mockResolvedValueOnce({ locked: false });
+        mockGetClientStatus.mockResolvedValueOnce(
+          clientStatus({ locked: false }),
+        );
         (mockStateManager.getActivated as jest.Mock).mockResolvedValueOnce(
           false,
         );

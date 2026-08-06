@@ -1,8 +1,9 @@
-import { emitSnapKeyringEvent, KeyringEvent } from '@metamask/keyring-api';
+import { KeyringEvent } from '@metamask/keyring-api';
+import { emitSnapKeyringEvent } from '@metamask/keyring-snap-sdk';
 import type { Json } from '@metamask/snaps-sdk';
 import { assert } from '@metamask/superstruct';
 
-import config from './config';
+import { isDevMode } from './dev-mode';
 import { renderErrorMessage } from './features/error-message/render';
 import {
   MAX_TRANSACTION_AGE,
@@ -140,7 +141,7 @@ export class RequestManager {
             logger.info(
               `Error polling signed message request ${request.keyringRequest.id}`,
             );
-            if (config.dev) {
+            if (await isDevMode()) {
               logger.error(error);
             }
           }
@@ -155,7 +156,7 @@ export class RequestManager {
             logger.info(
               `Error polling transaction request ${request.keyringRequest.id}`,
             );
-            if (config.dev) {
+            if (await isDevMode()) {
               logger.error(error);
             }
           }
