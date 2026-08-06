@@ -9,9 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0]
 
-### Uncategorized
+### Changed
 
-- chore: upgrade to keyring API v22 ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Upgrade to keyring API v23 / snaps-sdk 11.2 and require Node 20 ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Allow MetaMask origins to call `keyring_setSelectedAccounts` ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Re-selecting an already-imported account refreshes its custodian credentials instead of failing ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Persist development mode in unencrypted snap state so permissions work while the client is locked ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+
+### Fixed
+
+- Throw `UnauthorizedError` for denied keyring requests so callers get a JSON-RPC error instead of a snap crash ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+- Keep homepage interface context in sync when toggling development mode ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+
+### Removed
+
+- Remove BitGo, Cactus, and other legacy MMI custodian integrations and their manifest origins ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
 
 ## [1.5.0]
 
