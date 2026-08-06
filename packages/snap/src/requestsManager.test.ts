@@ -21,6 +21,7 @@ describe('RequestManager', () => {
     keyringRequest: {
       id,
       scope: 'eip155:eoa',
+      origin: 'metamask',
       account: '0x123',
       request: {
         method: 'eth_signTransaction',

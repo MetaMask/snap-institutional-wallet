@@ -1,3 +1,4 @@
+import { isDevMode } from '../../dev-mode';
 import type { SnapContext } from '../../lib/types/Context';
 import type { CustodialKeyringAccount } from '../../lib/types/CustodialKeyringAccount';
 
@@ -16,6 +17,6 @@ export async function getHomePageContext(snapContext: SnapContext) {
   return {
     activity: 'homepage',
     accounts: await snapContext.keyring.listAccounts(),
-    devMode: await snapContext.stateManager.getDevMode(),
+    devMode: await isDevMode(),
   };
 }

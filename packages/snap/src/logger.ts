@@ -4,7 +4,7 @@
  * @namespace logger
  */
 
-import config from './config';
+import { isDevModeSync } from './dev-mode';
 
 const logger = {
   log: (...args: any[]) =>
@@ -15,7 +15,7 @@ const logger = {
       ),
     ),
   info: (...args: any[]) => {
-    if (config.dev) {
+    if (isDevModeSync()) {
       console.info(
         '[Institutional snap]',
         ...args.map((arg) =>
@@ -41,7 +41,7 @@ const logger = {
     console.error(args);
   },
   debug: (...args: any[]) => {
-    if (config.dev) {
+    if (isDevModeSync()) {
       console.debug(
         '[Institutional snap]',
         ...args.map((arg) =>

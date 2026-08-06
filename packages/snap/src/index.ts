@@ -1,23 +1,21 @@
 /* eslint-disable @typescript-eslint/no-throw-literal */
-import type { JsonRpcRequest } from '@metamask/keyring-api';
-import { handleKeyringRequest } from '@metamask/keyring-api';
+import { handleKeyringRequest } from '@metamask/keyring-snap-sdk';
+import type { JsonRpcRequest } from '@metamask/keyring-utils';
 import {
   type UserInputEvent,
   type OnCronjobHandler,
   type OnUserInputHandler,
   type OnHomePageHandler,
+  type OnKeyringRequestHandler,
+  type OnRpcRequestHandler,
   UnauthorizedError,
   MethodNotFoundError,
 } from '@metamask/snaps-sdk';
-import type {
-  Json,
-  OnKeyringRequestHandler,
-  OnRpcRequestHandler,
-} from '@metamask/snaps-types';
 import { assert } from '@metamask/superstruct';
+import type { Json } from '@metamask/utils';
 
-import config from './config';
 import { getKeyring, getRequestManager, getStateManager } from './context';
+import { isDevMode, setDevMode } from './dev-mode';
 import { renderErrorMessage } from './features/error-message/render';
 import { getHomePageContext } from './features/homepage/context';
 import {
@@ -32,7 +30,6 @@ import { REFRESH_TOKEN_CHANGE_EVENT } from './lib/custodian-types/constants';
 import type {
   CreateAccountOptions,
   CustodialSnapRequest,
-  SignedMessageRequest,
   TransactionRequest,
 } from './lib/structs/CustodialKeyringStructs';
 import {
@@ -41,7 +38,6 @@ import {
   ConnectionStatusRpcRequest,
 } from './lib/structs/CustodialKeyringStructs';
 import type { SnapContext } from './lib/types/Context';
-import type { CustodialKeyringAccount } from './lib/types/CustodialKeyringAccount';
 import { CustodianApiMap, CustodianType } from './lib/types/CustodianType';
 import type { IRefreshTokenChangeEvent } from './lib/types/IRefreshTokenChangeEvent';
 import logger from './logger';
@@ -98,16 +94,13 @@ export const handleOnboarding = async (
     },
   );
 
-  let accounts = await custodianApi.getEthereumAccounts();
-
-  // Filter out accounts that already exist in the keyring
-  const existingAccounts = await keyring.listAccounts();
-
-  for (const existingAccount of existingAccounts) {
-    accounts = accounts.filter(
-      (account) => account.address !== existingAccount.address,
-    );
-  }
+  // Already-imported accounts are deliberately left in the list: selecting one
+  // refreshes its custodian credentials (see `CustodialKeyring.createAccount`).
+  // They used to be filtered out here, but with a case-sensitive address
+  // comparison, unlike the checksum-based lookup the keyring does -- so a
+  // custodian returning differently-cased addresses got past the filter and
+  // then failed with "address already in use".
+  const accounts = await custodianApi.getEthereumAccounts();
 
   let result: OnboardingAccount[];
 
@@ -182,20 +175,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 }: {
   origin: string;
   request: JsonRpcRequest;
-}): Promise<
-  | void
-  | CreateAccountOptions[]
-  | CustodialSnapRequest<SignedMessageRequest | TransactionRequest>
-  | CustodialKeyringAccount[]
-  | boolean
-> => {
+}): Promise<Json> => {
   logger.debug(
     `RPC request (origin="${origin}"): method="${request.method}"`,
     JSON.stringify(request, undefined, 2),
   );
 
   // Check if origin is allowed to call method.
-  if (!hasPermission(origin, request.method)) {
+  if (!(await hasPermission(origin, request.method))) {
     // eslint-disable-next-line @typescript-eslint/no-throw-literal
     throw new UnauthorizedError(
       `Origin '${origin}' is not allowed to call '${request.method}'`,
@@ -206,21 +193,30 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   switch (request.method) {
     case InternalMethod.Onboard: {
       assert(request.params, OnBoardingRpcRequest);
-      return await handleOnboarding(request.params, origin);
+      // These payloads are structurally JSON, but their superstruct-derived
+      // types use `optional()` (i.e. `| undefined`), which `Json` disallows.
+      return (await handleOnboarding(
+        request.params,
+        origin,
+      )) as unknown as Json;
     }
 
     // Returns only accounts, not connection details
     // implementation restricts accounts to the origin that imported them
     case InternalMethod.GetConnectedAccounts: {
       assert(request.params, ConnectionStatusRpcRequest);
-      return await handleGetConnectedAccounts(request.params, origin);
+      return (await handleGetConnectedAccounts(
+        request.params,
+        origin,
+      )) as unknown as Json;
     }
 
     case InternalMethod.ClearAllRequests: {
-      if (config.dev) {
+      if (await isDevMode()) {
         // eslint-disable-next-line @typescript-eslint/no-shadow
         const requestManager = await getRequestManager();
-        return await requestManager.clearAllRequests();
+        await requestManager.clearAllRequests();
+        return null;
       }
       throw new MethodNotFoundError(request.method);
     }
@@ -238,7 +234,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       if (!result) {
         throw new Error('Request not found');
       }
-      return result;
+      return result as unknown as Json;
     }
 
     default: {
@@ -262,14 +258,20 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
   // assert(request.params, KeyringRequestStruct);
 
   // Check if origin is allowed to call method.
-  if (!hasPermission(origin, request.method)) {
-    throw new Error(
+  if (!(await hasPermission(origin, request.method))) {
+    // Must be a `SnapError` subclass. A plain `Error` thrown from a handler is
+    // treated as an unhandled error by the execution environment and crashes
+    // the snap, rather than being returned to the caller as a JSON-RPC error.
+    // eslint-disable-next-line @typescript-eslint/no-throw-literal
+    throw new UnauthorizedError(
       `Origin '${origin}' is not allowed to call '${request.method}'`,
     );
   }
 
   const keyring = await getKeyring();
-  return handleKeyringRequest(keyring, request);
+  // `handleKeyringRequest` resolves to `void` for notification-style methods,
+  // but the `onKeyringRequest` handler must resolve to `Json`.
+  return (await handleKeyringRequest(keyring, request)) ?? null;
 };
 
 // Improved polling function
@@ -298,10 +300,6 @@ async function lockedOrInactive() {
   }
 
   const stateManager = await getStateManager();
-
-  // As a side effect, lets sync dev mode
-  // TODO: Consider a better place for this
-  await stateManager.syncDevMode();
 
   // Now check if the snap is activated
   // i.e. has ever had an onboarding request
@@ -405,9 +403,7 @@ export const onHomePage: OnHomePageHandler = async () => {
 };
 
 export const handleSetDevMode = async (devMode: boolean) => {
-  const stateManager = await getStateManager();
-  await stateManager.setDevMode(devMode);
-  await stateManager.syncDevMode();
+  await setDevMode(devMode);
 };
 
 export type InstitutionalSnapTransactionRequest =

@@ -8,7 +8,11 @@ import type {
 
 export type SnapState = {
   activated: boolean;
-  devMode: boolean;
+  /**
+   * @deprecated Dev mode moved to the unencrypted store, see `src/dev-mode.ts`.
+   * Retained only so the one-time migration can read the old value.
+   */
+  devMode?: boolean;
   walletIds: string[];
   wallets: Record<string, Wallet>;
   requests: Record<

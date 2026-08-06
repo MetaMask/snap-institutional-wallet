@@ -58,7 +58,7 @@ export async function onCancelTokenClick({
 }) {
   await updateInterface(
     id,
-    <CustodianList accounts={context.accounts} />,
+    <CustodianList accounts={context.accounts} devMode={context.devMode} />,
     context,
   );
 }
@@ -109,7 +109,7 @@ export async function onRemoveTokenClick({
   }
   await updateInterface(
     id,
-    <CustodianList accounts={context.accounts} />,
+    <CustodianList accounts={context.accounts} devMode={context.devMode} />,
     context,
   );
 }

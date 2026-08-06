@@ -73,12 +73,7 @@ export const SignedMessageStatus = object({
 export type SignedMessageStatus = Infer<typeof SignedMessageStatus>;
 
 export const OnBoardingRpcRequest = object({
-  custodianType: enums([
-    CustodianType.ECA3,
-    CustodianType.ECA1,
-    CustodianType.BitGo,
-    CustodianType.Cactus,
-  ]),
+  custodianType: enums([CustodianType.ECA3, CustodianType.ECA1]),
   custodianEnvironment: string(),
   custodianApiUrl: string(),
   custodianDisplayName: string(),
@@ -89,12 +84,7 @@ export const OnBoardingRpcRequest = object({
 export type OnBoardingRpcRequest = Infer<typeof OnBoardingRpcRequest>;
 
 export const ConnectionStatusRpcRequest = object({
-  custodianType: enums([
-    CustodianType.ECA3,
-    CustodianType.ECA1,
-    CustodianType.BitGo,
-    CustodianType.Cactus,
-  ]),
+  custodianType: enums([CustodianType.ECA3, CustodianType.ECA1]),
   custodianEnvironment: string(),
   custodianApiUrl: string(),
   token: string(),
