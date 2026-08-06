@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1]
 
-### Uncategorized
+### Fixed
 
-- fix: build CI on Node 20 so the release can publish ([#76](https://github.com/MetaMask/snap-institutional-wallet/pull/76))
+- Build releases on Node 20, which the 2.0.0 toolchain requires, so the snap can be published ([#76](https://github.com/MetaMask/snap-institutional-wallet/pull/76))
+- No functional changes since 2.0.0, which was tagged but never published, so this is the first release carrying the changes listed under 2.0.0 below
 
 ## [2.0.0]
 
