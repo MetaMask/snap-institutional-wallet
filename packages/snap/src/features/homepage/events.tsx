@@ -201,10 +201,13 @@ export async function onToggleDevMode({
 }) {
   const devMode = Boolean(event.value);
   await handleSetDevMode(devMode);
+  // The context persisted here is what later events (cancel, remove) receive and
+  // re-render from, so it has to carry the new value rather than the stale one.
+  const updatedContext = { ...context, devMode };
   await updateInterface(
     id,
-    <CustodianList accounts={context.accounts} devMode={devMode} />,
-    context,
+    <CustodianList accounts={updatedContext.accounts} devMode={devMode} />,
+    updatedContext,
   );
 }
 
