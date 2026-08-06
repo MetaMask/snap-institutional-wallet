@@ -1,5 +1,5 @@
 {
-  "version": "1.3.4",
+  "version": "1.5.0",
   "description": "Institutional accounts in MetaMask.",
   "proposedName": "Institutional Wallet",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "S3JmEyicNm8a35iwtT3IMAFFSvpyp9OJObPkLx7BZS8=",
+    "shasum": "US/qwAbl/zYPAjaV3Ne9g3+UBPCmRPyrhETdmDvcDsQ=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -26,7 +26,10 @@
     "https://ui-v2.qa.zodia.io": {},
     "https://ui-preprod-v2.qa.zodia.io": {},
     "https://ui-preprod-v2.uat.zodia.io": {},
-    "https://v2.custody.zodia.io": {}
+    "https://v2.custody.zodia.io": {},
+    "https://app-gamma.signer.cubist.dev": {},
+    "https://app-beta.signer.cubist.dev": {},
+    "https://app.signer.cubist.dev": {}
   },
   "initialPermissions": {
     "snap_notify": {},
@@ -48,7 +51,10 @@
         "https://ui-v2.qa.zodia.io",
         "https://ui-preprod-v2.qa.zodia.io",
         "https://ui-preprod-v2.uat.zodia.io",
-        "https://v2.custody.zodia.io"
+        "https://v2.custody.zodia.io",
+        "https://app-gamma.signer.cubist.dev",
+        "https://app-beta.signer.cubist.dev",
+        "https://app.signer.cubist.dev"
       ]
     },
     "endowment:cronjob": {
