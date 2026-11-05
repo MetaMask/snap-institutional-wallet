@@ -7,7 +7,7 @@
     "url": "git+https://github.com/MetaMask/snap-institutional-wallet.git"
   },
   "source": {
-    "shasum": "ukR3VPpyBm/dX2uasoUj5UQxV/0VzBpG+NtYJrVgS8M=",
+    "shasum": "LMXoQsplTyLZFaL1fTwS71wHP2u9Ae7w2b7h4ygaxLc=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -27,6 +27,8 @@
     "https://ui-preprod-v2.qa.zodia.io": {},
     "https://ui-preprod-v2.uat.zodia.io": {},
     "https://v2.custody.zodia.io": {},
+    "https://console.mpcvault.com": {},
+    "https://console.dev.mpcvault.com": {},
     "https://app-gamma.signer.cubist.dev": {},
     "https://app-beta.signer.cubist.dev": {},
     "https://app.signer.cubist.dev": {}
@@ -52,6 +54,8 @@
         "https://ui-preprod-v2.qa.zodia.io",
         "https://ui-preprod-v2.uat.zodia.io",
         "https://v2.custody.zodia.io",
+        "https://console.mpcvault.com",
+        "https://console.dev.mpcvault.com",
         "https://app-gamma.signer.cubist.dev",
         "https://app-beta.signer.cubist.dev",
         "https://app.signer.cubist.dev"
