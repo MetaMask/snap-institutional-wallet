@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0]
+
+### Fixed
+
+- Restore the MPCVault custodian (production and development) and its manifest origins, which were removed in 2.0.0 ([#81](https://github.com/MetaMask/snap-institutional-wallet/pull/81))
+
+### Security
+
+- Resolve all high and critical dependency vulnerabilities ([#83](https://github.com/MetaMask/snap-institutional-wallet/pull/83))
+
 ## [2.0.0]
 
 ### Changed
@@ -16,14 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Re-selecting an already-imported account refreshes its custodian credentials instead of failing ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
 - Persist development mode in unencrypted snap state so permissions work while the client is locked ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
 
+### Removed
+
+- Remove BitGo, Cactus, and other legacy MMI custodian integrations and their manifest origins ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
+
 ### Fixed
 
 - Throw `UnauthorizedError` for denied keyring requests so callers get a JSON-RPC error instead of a snap crash ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
 - Keep homepage interface context in sync when toggling development mode ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
-
-### Removed
-
-- Remove BitGo, Cactus, and other legacy MMI custodian integrations and their manifest origins ([#74](https://github.com/MetaMask/snap-institutional-wallet/pull/74))
 
 ## [1.5.0]
 
@@ -150,7 +160,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.5.0...v2.0.0
 [1.5.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.4...v1.5.0
 [1.3.4]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.3.3...v1.3.4
