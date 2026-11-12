@@ -70,6 +70,8 @@ jobs:
     name: Publish release
     permissions:
       contents: write
+      # Required so the called publish workflow can mint an OIDC token for npm.
+      id-token: write
     uses: ./.github/workflows/publish-release.yml
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

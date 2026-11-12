@@ -3,6 +3,9 @@ name: Build, Lint, and Test
 on:
   workflow_call:
 
+env:
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
 jobs:
   prepare:
     name: Prepare
@@ -14,6 +17,8 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
+      - name: Enable Corepack
+        run: corepack enable
       - name: Install Yarn dependencies
         run: yarn --immutable
 
@@ -32,6 +37,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
+      - name: Enable Corepack
+        run: corepack enable
       - run: yarn --immutable --immutable-cache
       - run: |
           npm rebuild --verbose sharp
@@ -70,14 +77,16 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
+      - name: Enable Corepack
+        run: corepack enable
       - run: yarn --immutable --immutable-cache
       - run: yarn lint
       # - name: Validate RC changelog
       #   if: ${{ startsWith(github.head_ref, 'release/') }}
-      #   run: yarn workspaces foreach --parallel --topological --verbose run auto-changelog validate --prettier --rc
+      #   run: yarn workspaces foreach --all --exclude . --parallel --topological --verbose run auto-changelog validate --prettier --rc
       # - name: Validate changelog
       #   if: ${{ !startsWith(github.head_ref, 'release/') }}
-      #   run: yarn workspaces foreach --parallel --topological --verbose run auto-changelog validate --prettier
+      #   run: yarn workspaces foreach --all --exclude . --parallel --topological --verbose run auto-changelog validate --prettier
       - name: Require clean working directory
         shell: bash
         run: |
@@ -102,6 +111,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
+      - name: Enable Corepack
+        run: corepack enable
       - name: Restore snap build cache
         uses: actions/cache@v3
         with:

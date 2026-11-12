@@ -1,5 +1,8 @@
 name: Create Release PR
 
+env:
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
 on:
   workflow_dispatch:
     inputs:
@@ -33,6 +36,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
+      - name: Enable Corepack
+        run: corepack enable
       - uses: MetaMask/action-create-release-pr@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,6 +55,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
+      - name: Enable Corepack
+        run: corepack enable
       - name: Update Snap Version
         id: update-release-pr
         shell: bash
