@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0]
 
-### Uncategorized
+### Fixed
 
-- fix: resolve all high and critical dependency vulnerabilities ([#83](https://github.com/MetaMask/snap-institutional-wallet/pull/83))
-- fix: restore MPCVault custodian and origins ([#81](https://github.com/MetaMask/snap-institutional-wallet/pull/81))
+- Restore the MPCVault custodian (production and development) and its manifest origins, which were removed in 2.0.0 ([#81](https://github.com/MetaMask/snap-institutional-wallet/pull/81))
+
+### Security
+
+- Resolve all high and critical dependency vulnerabilities ([#83](https://github.com/MetaMask/snap-institutional-wallet/pull/83))
 
 ## [2.0.0]
 

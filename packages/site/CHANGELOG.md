@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0]
 
-### Uncategorized
+### Security
 
-- fix: resolve all high and critical dependency vulnerabilities ([#83](https://github.com/MetaMask/snap-institutional-wallet/pull/83))
+- Resolve all high and critical dependency vulnerabilities by removing the unused `react-scripts` dependency and upgrading Gatsby to 5.16 ([#83](https://github.com/MetaMask/snap-institutional-wallet/pull/83))
 
 ## [2.0.0]
 
