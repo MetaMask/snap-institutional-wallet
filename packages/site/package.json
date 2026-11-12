@@ -74,5 +74,17 @@
     "raw-loader": "^4.0.2",
     "rimraf": "^4.4.0",
     "typescript": "^4.9.5"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "gatsby#5.16.1": false,
+      "gatsby>@parcel/cache>lmdb#2.5.2": false,
+      "gatsby>@pmmmwh/react-refresh-webpack-plugin>core-js-pure#3.32.2": false,
+      "gatsby>core-js#3.32.2": false,
+      "gatsby>gatsby-cli#5.16.0": false,
+      "gatsby>lmdb#2.5.3": false,
+      "gatsby>lmdb>msgpackr>msgpackr-extract#3.0.2": false,
+      "gatsby>memoizee>es5-ext#0.10.64": false
+    }
   }
 }

@@ -23,6 +23,7 @@
     "packages/*"
   ],
   "scripts": {
+    "allow-scripts": "node ./scripts/allow-scripts.js",
     "build": "yarn workspaces foreach --all --exclude . --parallel --verbose --topological run build",
     "build:dapp": "yarn workspace @metamask/snap-institutional-wallet-site build",
     "build:snap": "yarn workspace @metamask/snap-institutional-wallet-snap build",
@@ -36,6 +37,8 @@
     "test": "yarn workspaces foreach --all --exclude . --parallel --verbose run test"
   },
   "devDependencies": {
+    "@lavamoat/allow-scripts": "^5.1.0",
+    "@lavamoat/preinstall-always-fail": "^2.0.0",
     "@metamask/eslint-config": "^12.2.0",
     "@metamask/eslint-config-jest": "^12.1.0",
     "@metamask/eslint-config-nodejs": "^12.1.0",
@@ -72,5 +75,10 @@
     "tar@^6.1.2": "^7.5.21",
     "tmp@^0.0.33": "^0.2.6",
     "webpack-dev-middleware@^5.3.4": "^7.4.6"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail#2.1.1": false
+    }
   }
 }
