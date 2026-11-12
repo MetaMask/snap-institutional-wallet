@@ -1,8 +1,5 @@
 name: Create Release PR
 
-env:
-  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
-
 on:
   workflow_dispatch:
     inputs:
@@ -24,20 +21,15 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v3
         with:
+          is-high-risk-environment: false
           # This is to guarantee that the most recent tag is fetched.
-          # This can be configured to a more reasonable value by consumers.
           fetch-depth: 0
           # We check out the specified branch, which will be used as the base
           # branch for all git operations and the release PR.
           ref: ${{ github.event.inputs.base-branch }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-      - name: Enable Corepack
-        run: corepack enable
       - uses: MetaMask/action-create-release-pr@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,13 +42,11 @@ jobs:
       contents: write
     needs: create-release-pr
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v3
         with:
-          node-version-file: '.nvmrc'
-      - name: Enable Corepack
-        run: corepack enable
+          is-high-risk-environment: false
+          fetch-depth: 0
       - name: Update Snap Version
         id: update-release-pr
         shell: bash
@@ -65,4 +55,3 @@ jobs:
           ./scripts/update_release_pr.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

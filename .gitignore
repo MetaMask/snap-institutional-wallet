@@ -81,6 +81,7 @@ node_modules/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+!.yarn/yarn-corepack.tgz
 
 # IntelliJ
 .idea/
