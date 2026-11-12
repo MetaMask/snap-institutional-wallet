@@ -23,19 +23,22 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach --parallel --verbose --topological run build",
+    "allow-scripts": "node ./scripts/allow-scripts.js",
+    "build": "yarn workspaces foreach --all --exclude . --parallel --verbose --topological run build",
     "build:dapp": "yarn workspace @metamask/snap-institutional-wallet-site build",
     "build:snap": "yarn workspace @metamask/snap-institutional-wallet-snap build",
-    "lint": "yarn workspaces foreach --parallel --verbose run lint",
-    "lint:deps": "yarn workspaces foreach --parallel --verbose run depcheck",
-    "lint:eslint": "yarn workspaces foreach --parallel --verbose run lint:eslint",
-    "lint:fix": "yarn workspaces foreach --parallel --verbose run lint:fix",
-    "lint:misc": "yarn workspaces foreach --parallel --verbose run lint:misc",
-    "lint:types": "yarn workspaces foreach --parallel --verbose run lint:types",
-    "start": "yarn workspaces foreach --parallel --verbose --interlaced run start",
-    "test": "yarn workspaces foreach --parallel --verbose run test"
+    "lint": "yarn workspaces foreach --all --exclude . --parallel --verbose run lint",
+    "lint:deps": "yarn workspaces foreach --all --exclude . --parallel --verbose run depcheck",
+    "lint:eslint": "yarn workspaces foreach --all --exclude . --parallel --verbose run lint:eslint",
+    "lint:fix": "yarn workspaces foreach --all --exclude . --parallel --verbose run lint:fix",
+    "lint:misc": "yarn workspaces foreach --all --exclude . --parallel --verbose run lint:misc",
+    "lint:types": "yarn workspaces foreach --all --exclude . --parallel --verbose run lint:types",
+    "start": "yarn workspaces foreach --all --exclude . --parallel --verbose --interlaced run start",
+    "test": "yarn workspaces foreach --all --exclude . --parallel --verbose run test"
   },
   "devDependencies": {
+    "@lavamoat/allow-scripts": "^5.1.0",
+    "@lavamoat/preinstall-always-fail": "^2.0.0",
     "@metamask/eslint-config": "^12.2.0",
     "@metamask/eslint-config-jest": "^12.1.0",
     "@metamask/eslint-config-nodejs": "^12.1.0",
@@ -54,7 +57,7 @@
     "prettier": "^2.8.4",
     "typescript": "^4.9.5"
   },
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@4.18.0",
   "engines": {
     "node": "^20 || >=22"
   },
@@ -72,5 +75,10 @@
     "tar@^6.1.2": "^7.5.21",
     "tmp@^0.0.33": "^0.2.6",
     "webpack-dev-middleware@^5.3.4": "^7.4.6"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail#2.1.1": false
+    }
   }
 }
