@@ -16,9 +16,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
       - name: Enable Corepack
         run: corepack enable
+      # Cache lookup runs `yarn`, which is Yarn 1.22 until Corepack is enabled.
+      - name: Cache Yarn dependencies
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
       - name: Install Yarn dependencies
         run: yarn --immutable
 
@@ -36,9 +41,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
       - name: Enable Corepack
         run: corepack enable
+      # Cache lookup runs `yarn`, which is Yarn 1.22 until Corepack is enabled.
+      - name: Cache Yarn dependencies
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
       - run: yarn --immutable --immutable-cache
       - run: |
           npm rebuild --verbose sharp
@@ -76,9 +86,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
       - name: Enable Corepack
         run: corepack enable
+      # Cache lookup runs `yarn`, which is Yarn 1.22 until Corepack is enabled.
+      - name: Cache Yarn dependencies
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
       - run: yarn --immutable --immutable-cache
       - run: yarn lint
       # - name: Validate RC changelog
@@ -110,9 +125,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
       - name: Enable Corepack
         run: corepack enable
+      # Cache lookup runs `yarn`, which is Yarn 1.22 until Corepack is enabled.
+      - name: Cache Yarn dependencies
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
       - name: Restore snap build cache
         uses: actions/cache@v3
         with:
