@@ -23,7 +23,6 @@
     "packages/*"
   ],
   "scripts": {
-    "allow-scripts": "node ./scripts/allow-scripts.js",
     "build": "yarn workspaces foreach --all --exclude . --parallel --verbose --topological run build",
     "build:dapp": "yarn workspace @metamask/snap-institutional-wallet-site build",
     "build:snap": "yarn workspace @metamask/snap-institutional-wallet-snap build",

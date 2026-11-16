@@ -24,6 +24,7 @@
     "snap.manifest.json"
   ],
   "scripts": {
+    "allow-scripts": "yarn workspace @metamask/snap-institutional-wallet run allow-scripts",
     "build": "mm-snap build && yarn build-preinstalled-snap",
     "build:clean": "yarn clean && yarn build",
     "build-preinstalled-snap": "node scripts/build-preinstalled-snap.js",
@@ -91,10 +92,5 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "lavamoat": {
-    "allowScripts": {
-      "@metamask/snaps-cli>@swc/core#1.11.31": false
-    }
   }
 }

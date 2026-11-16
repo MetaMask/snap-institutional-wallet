@@ -19,6 +19,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
+    "allow-scripts": "yarn workspace @metamask/snap-institutional-wallet run allow-scripts",
     "build": "tsc",
     "start": "nodemon src/index.ts --ignore data/"
   },
@@ -26,11 +27,5 @@
     "@types/connect": "^3.4.38",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2"
-  },
-  "lavamoat": {
-    "allowScripts": {
-      "eip-712>@findeth/abi>keccak#3.0.4": false,
-      "ts-node>@swc/core#1.11.31": false
-    }
   }
 }
