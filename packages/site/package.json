@@ -4,6 +4,7 @@
   "private": true,
   "license": "(MIT-0 OR Apache-2.0)",
   "scripts": {
+    "allow-scripts": "yarn workspace @metamask/snap-institutional-wallet run allow-scripts",
     "build": "rimraf .cache && cross-env GATSBY_TELEMETRY_DISABLED=1 gatsby build --prefix-paths",
     "clean": "rimraf public .cache",
     "lint": "yarn lint:eslint && yarn lint:misc && yarn lint:deps && yarn lint:types",

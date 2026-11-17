@@ -72,7 +72,7 @@ node_modules/
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# yarn v3 (w/o zero-install)
+# Yarn (w/o zero-install)
 # See: https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .pnp.*
 .yarn/*
@@ -81,6 +81,7 @@ node_modules/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+!.yarn/yarn-corepack.tgz
 
 # IntelliJ
 .idea/

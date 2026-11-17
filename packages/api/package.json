@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.0.0",
   "description": "Example custodian API",
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@4.18.0",
   "dependencies": {
     "@ethereumjs/common": "^4.4.0",
     "@ethereumjs/tx": "^5.4.0",
@@ -19,6 +19,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
+    "allow-scripts": "yarn workspace @metamask/snap-institutional-wallet run allow-scripts",
     "build": "tsc",
     "start": "nodemon src/index.ts --ignore data/"
   },
