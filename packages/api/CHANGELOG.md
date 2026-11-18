@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0]
+
+### Changed
+
+- Gate dependency install scripts with LavaMoat allow-scripts ([#85](https://github.com/MetaMask/snap-institutional-wallet/pull/85))
+
 ## [2.0.0]
 
 ### Uncategorized
@@ -21,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Audit remediation fixes ([#37](https://github.com/MetaMask/snap-institutional-wallet/pull/37))
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/MetaMask/snap-institutional-wallet/releases/tag/v1.0.0

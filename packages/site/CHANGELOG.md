@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0]
+
+### Security
+
+- Resolve all high and critical dependency vulnerabilities by removing the unused `react-scripts` dependency and upgrading Gatsby to 5.16 ([#83](https://github.com/MetaMask/snap-institutional-wallet/pull/83))
+
 ## [2.0.0]
 
 ### Uncategorized
@@ -34,7 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.1...v1.0.0
 [0.3.1]: https://github.com/MetaMask/snap-institutional-wallet/compare/v0.3.0...v0.3.1
