@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0]
 
-### Uncategorized
+### Changed
 
-- ci: publish npm packages with action-npm-publish v7 ([#85](https://github.com/MetaMask/snap-institutional-wallet/pull/85))
+- Gate dependency install scripts with LavaMoat allow-scripts ([#85](https://github.com/MetaMask/snap-institutional-wallet/pull/85))
 
 ## [2.0.0]
 
